@@ -254,19 +254,22 @@ input[type=range]{width:100%;accent-color:var(--ac);height:3px}
     <div class="lhead">
       <div class="sch">樹人家商 · 高雄市</div>
       <h1>僑生宿舍<em>管理系統</em></h1>
-      <p>OVERSEAS STUDENT DORMITORY SYSTEM v3.0</p>
+      <p>OVERSEAS STUDENT DORMITORY SYSTEM v4.0</p>
     </div>
-    <div class="role-sel">
-      <div class="rc on" data-role="admin" onclick="pickRole(this)"><div class="ri">⚙️</div><div class="rn">管理員</div></div>
-      <div class="rc" data-role="warden" onclick="pickRole(this)"><div class="ri">🏠</div><div class="rn">舍監</div></div>
-      <div class="rc" data-role="inspector" onclick="pickRole(this)"><div class="ri">🔍</div><div class="rn">生輔員</div></div>
-      <div class="rc" data-role="teacher" onclick="pickRole(this)"><div class="ri">📋</div><div class="rn">導師/班代</div></div>
-      <div class="rc" data-role="chief" onclick="pickRole(this)"><div class="ri">👔</div><div class="rn">一級主管</div></div>
+    <div id="gs-url-setup" style="display:none;margin-bottom:14px;padding:12px;background:#fef3c7;border-radius:10px;border:1px solid #fcd34d">
+      <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:6px">⚙️ 首次設定：請輸入 Google Apps Script 網址</div>
+      <input class="li" id="gs-url-input" placeholder="https://script.google.com/macros/s/..." style="margin-bottom:6px">
+      <button class="lbtn" style="padding:8px;font-size:13px" onclick="saveGsUrl()">儲存並繼續</button>
     </div>
-    <div class="lf"><label>帳號</label><input class="li" id="l-u" placeholder="帳號" value="admin01"></div>
-    <div class="lf"><label>密碼</label><input class="li" type="password" id="l-p" placeholder="密碼" value="1234"></div>
-    <button class="lbtn" onclick="doLogin()">登入系統</button>
-    <div class="lhint">示範帳號：任意帳號 ／ 密碼 1234</div>
+    <div id="login-form-area">
+      <div class="lf"><label>帳號</label><input class="li" id="l-u" placeholder="帳號" onkeydown="if(event.key==='Enter')document.getElementById('l-p').focus()"></div>
+      <div class="lf"><label>密碼</label><input class="li" type="password" id="l-p" placeholder="密碼" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="lbtn" id="login-btn" onclick="doLogin()">登入系統</button>
+      <div class="lhint" id="login-hint" style="color:#6b7280">帳號由管理員於試算表設定</div>
+      <div style="margin-top:10px;text-align:center">
+        <button onclick="toggleGsSetup()" style="background:none;border:none;color:#9ca3af;font-size:12px;cursor:pointer;text-decoration:underline">⚙️ 修改試算表網址</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -401,7 +404,7 @@ input[type=range]{width:100%;accent-color:var(--ac);height:3px}
       <div class="ph"><h1>⚙️ 系統管理</h1><p>帳號管理 · 床位管理 · 職務權限設定</p></div>
 
       <div class="card">
-        <div class="ch"><span>帳號管理</span><button class="btn btn-p btn-sm" onclick="openAddUser()">+ 新增帳號</button></div>
+        <div class="ch"><span>帳號管理</span><div style="display:flex;gap:6px"><button class="btn btn-g btn-sm" onclick="syncAccountsFromSheets()">☁️ Sheets同步</button><button class="btn btn-p btn-sm" onclick="openAddUser()">＋ 新增帳號</button></div></div>
         <div id="user-list"></div>
       </div>
 
@@ -689,8 +692,9 @@ function buildResp(obj) {
 <div class="ov" id="ov-adduser" onclick="cov('ov-adduser',event)">
   <div class="modal">
     <div class="mhd"><div class="mtitle">新增帳號</div><button class="mclose" onclick="cov('ov-adduser')">✕</button></div>
-    <div class="fg"><label>帳號名稱</label><input class="fi" id="au-name" placeholder="例：warden02"></div>
+    <div class="fg"><label>帳號（登入用）</label><input class="fi" id="au-name" placeholder="例：warden02"></div>
     <div class="fg"><label>顯示姓名</label><input class="fi" id="au-disp" placeholder="例：陳舍監"></div>
+    <div class="fg"><label>密碼</label><input class="fi" type="password" id="au-pw" placeholder="至少4位數字或英數"></div>
     <div class="fg"><label>角色</label>
       <select class="fs" id="au-role">
         <option value="warden">舍監</option>
@@ -700,7 +704,7 @@ function buildResp(obj) {
         <option value="admin">管理員</option>
       </select>
     </div>
-    <div class="fg"><label>初始密碼</label><input class="fi" id="au-pw" value="1234"></div>
+
     <button class="btn btn-p" onclick="addUser()">建立帳號</button>
   </div>
 </div>
@@ -793,19 +797,86 @@ function pickRole(el){
   el.classList.add('on');
   loginRole=el.dataset.role;
 }
-function doLogin(){
+async function doLogin(){
   const u=document.getElementById('l-u').value.trim();
   const p=document.getElementById('l-p').value;
   if(!u){toast('請輸入帳號');return}
-  if(p!=='1234'){toast('密碼錯誤');return}
-  const acc=accounts.find(a=>a.name===u)||{id:u,name:u,disp:u,role:loginRole};
-  user={...acc,role:loginRole};  // role from selected card
-  LS.set('usr',user);
-  document.getElementById('scr-login').style.display='none';
-  document.getElementById('app').style.display='block';
-  initApp();
+  if(!p){toast('請輸入密碼');return}
+  const btn=document.getElementById('login-btn');
+  btn.disabled=true; btn.textContent='驗證中...';
+  try{
+    // Try Sheets auth first
+    if(gsConfig.url){
+      const res=await fetch(gsConfig.url+'?action=getAccounts',{mode:'cors'});
+      const d=await res.json();
+      if(d.ok&&d.accounts){
+        accounts=d.accounts; LS.set('accounts',accounts);
+      }
+    }
+    // Validate against cached/fetched accounts
+    const acc=accounts.find(a=>a.user===u&&a.pass===p&&a.st!=='停用');
+    if(!acc){
+      toast('❌ 帳號或密碼錯誤，或帳號已停用');
+      btn.disabled=false; btn.textContent='登入';
+      return;
+    }
+    user={id:acc.id,name:acc.user,disp:acc.disp||acc.user,role:acc.role};
+    LS.set('usr',user);
+    document.getElementById('scr-login').style.display='none';
+    document.getElementById('app').style.display='block';
+    initApp();
+  }catch(e){
+    // Sheets unreachable - try local cache only
+    const acc=accounts.find(a=>a.user===u&&a.pass===p&&a.st!=='停用');
+    if(acc){
+      user={id:acc.id,name:acc.user,disp:acc.disp||acc.user,role:acc.role};
+      LS.set('usr',user);
+      document.getElementById('scr-login').style.display='none';
+      document.getElementById('app').style.display='block';
+      initApp();
+      toast('⚠️ 以本機快取登入（試算表暫時無法連線）');
+    }else{
+      toast('❌ 無法連線試算表，且無本機快取帳號');
+      btn.disabled=false; btn.textContent='登入';
+    }
+  }
 }
 function doLogout(){if(!confirm('確定登出？'))return;LS.set('usr',null);location.reload();}
+
+
+// ═══ ACCOUNT SYNC (Sheets as master) ═══
+async function pushAccountsToSheets(){
+  if(!gsConfig.url) return;
+  await fetch(gsConfig.url,{method:'POST',mode:'no-cors',
+    body:JSON.stringify({type:'writeAccounts',data:accounts}),
+    headers:{'Content-Type':'text/plain'}}).catch(()=>{});
+}
+async function syncAccountsFromSheets(){
+  if(!gsConfig.url){toast('⚠️ 請先設定 Google Apps Script URL');return}
+  try{
+    const res=await fetch(gsConfig.url+'?action=getAccounts',{mode:'cors'});
+    const d=await res.json();
+    if(!d.ok){toast('❌ '+d.err);return}
+    accounts=d.accounts||[];
+    LS.set('accounts',accounts);
+    renderUserList();
+    toast('✅ 已從試算表同步 '+accounts.length+' 個帳號');
+  }catch(e){toast('❌ 同步失敗：'+e.message);}
+}
+function toggleGsSetup(){
+  const el=document.getElementById('gs-url-setup');
+  const show=el.style.display==='none';
+  el.style.display=show?'block':'none';
+  if(show) document.getElementById('gs-url-input').value=gsConfig.url||'';
+}
+function saveGsUrl(){
+  const url=document.getElementById('gs-url-input').value.trim();
+  if(!url.includes('script.google.com')){toast('⚠️ 請輸入正確的 Apps Script 網址');return}
+  gsConfig.url=url;
+  LS.set('gsc',gsConfig);
+  document.getElementById('gs-url-setup').style.display='none';
+  toast('✅ 試算表網址已儲存');
+}
 
 // ═══ APP INIT ═══
 function initApp(){
@@ -1111,14 +1182,7 @@ function updLvBadge(){
   const n=leaves.filter(l=>l.status==='待舍監審核'||l.status==='待主管核准').length;
   const b=document.getElementById('lv-badge');b.style.display=n?'block':'none';b.textContent=n;
 }
-function mkLvFilterTabs(){
-  const c=document.getElementById('lv-filter-bts');c.innerHTML='';
-  const filters=[['all','全部'],['待舍監審核','待審核'],['待主管核准','待主管'],['請假中','請假中'],['已返舍','已返舍'],['已駁回','已駁回']];
-  filters.forEach(([v,l])=>{
-    const b=document.createElement('button');b.className='bt'+(lvFilter===v?' on':'');
-    b.textContent=l;b.onclick=()=>{lvFilter=v;mkLvFilterTabs();renderLeaves()};c.appendChild(b);
-  });
-}
+
 function renderLeaves(){
   const list=lvFilter==='all'?leaves:leaves.filter(l=>l.status===lvFilter);
   const c=document.getElementById('leave-list');
@@ -1244,32 +1308,60 @@ function renderDash(){
 // ═══ ADMIN ═══
 function renderUserList(){
   const c=document.getElementById('user-list');c.innerHTML='';
+  if(!accounts.length){c.innerHTML='<div class="empty"><p>尚無帳號資料，請先從試算表同步</p></div>';return}
   accounts.forEach(a=>{
     const rc=RCOLOR[a.role]||'#4d8ef8';
-    c.innerHTML+=`<div class="user-row">
-      <div class="av" style="background:${rc}22;color:${rc}">${(a.disp||a.name)[0]}</div>
-      <div style="flex:1"><div style="font-size:14px;font-weight:700">${a.disp||a.name}</div>
-        <div style="font-size:11px;color:var(--tx3)">${a.name}</div></div>
-      <span class="role-pill rp-${a.role}">${RLABEL[a.role]}</span>
-      ${a.id!=='admin01'?`<button class="btn btn-o btn-sm" onclick="delUser('${a.id}')">移除</button>`:''}
+    const nm=a.disp||a.user||a.name||'';
+    const un=a.user||a.name||'';
+    const st=a.st||'啟用';
+    c.innerHTML+=`<div class="user-row" style="opacity:${st==='停用'?'0.5':'1'}">
+      <div class="av" style="background:${rc}22;color:${rc}">${nm[0]||'?'}</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:700">${nm} <span style="font-size:11px;color:var(--tx3)">(${un})</span></div>
+        <div style="font-size:11px;color:var(--tx3)">${RLABEL[a.role]||a.role} · 密碼：${'●'.repeat(Math.min(a.pass?.length||4,8))} · ${st}</div>
+      </div>
+      <div style="display:flex;gap:4px">
+        ${st==='啟用'?`<button class="btn btn-o btn-sm" onclick="toggleUserSt('${a.id}')">停用</button>`
+          :`<button class="btn btn-g btn-sm" onclick="toggleUserSt('${a.id}')">啟用</button>`}
+        ${a.id!=='admin01'?`<button class="btn btn-r btn-sm" onclick="delUser('${a.id}')">刪除</button>`:''}
+      </div>
     </div>`;
   });
 }
+async function toggleUserSt(id){
+  const a=accounts.find(x=>x.id===id);if(!a)return;
+  a.st=a.st==='停用'?'啟用':'停用';
+  LS.set('accounts',accounts);
+  await pushAccountsToSheets();
+  renderUserList();
+  toast('✅ 帳號狀態已更新並同步');
+}
+
 function openAddUser(){document.getElementById('ov-adduser').classList.add('op')}
-function addUser(){
-  const name=document.getElementById('au-name').value.trim();
+async function addUser(){
+  const user_=document.getElementById('au-name').value.trim();
   const disp=document.getElementById('au-disp').value.trim();
   const role=document.getElementById('au-role').value;
-  const pw=document.getElementById('au-pw').value;
-  if(!name||!disp){toast('請填寫帳號和姓名');return}
-  if(accounts.find(a=>a.name===name)){toast('帳號已存在');return}
-  accounts.push({id:name,name,disp,role,pw});
-  LS.set('accounts',accounts);renderUserList();
-  cov('ov-adduser');toast('✅ 帳號已建立');
+  const pass=document.getElementById('au-pw').value;
+  if(!user_||!disp){toast('請填寫帳號和顯示姓名');return}
+  if(!pass||pass.length<4){toast('密碼至少4位');return}
+  if(accounts.find(a=>a.user===user_)){toast('⚠️ 帳號名稱已存在');return}
+  const newAcc={id:'u'+Date.now(),user:user_,pass,disp,role,st:'啟用'};
+  accounts.push(newAcc);
+  LS.set('accounts',accounts);
+  // Push to Sheets immediately
+  await pushAccountsToSheets();
+  renderUserList();
+  closeOv('ov-adduser');
+  toast('✅ 帳號已建立並同步至試算表');
 }
-function delUser(id){
-  if(!confirm('確定移除此帳號？'))return;
-  accounts=accounts.filter(a=>a.id!==id);LS.set('accounts',accounts);renderUserList();toast('已移除');
+async function delUser(id){
+  if(!confirm('確定刪除此帳號？')) return;
+  accounts=accounts.filter(a=>a.id!==id);
+  LS.set('accounts',accounts);
+  await pushAccountsToSheets();
+  renderUserList();
+  toast('✅ 帳號已刪除並同步至試算表');
 }
 function renderPermMatrix(){
   const c=document.getElementById('perm-matrix');c.innerHTML='';
@@ -1921,6 +2013,18 @@ function loadStudentsOverride() {
   }
   initRoomCfg();
 }
+
+
+// ═══ 頁面啟動 ═══
+(function(){
+  // 如果尚未設定 GS 網址，顯示設定區塊
+  if(!gsConfig.url){
+    const el=document.getElementById('gs-url-setup');
+    if(el) el.style.display='block';
+    const hint=document.getElementById('login-hint');
+    if(hint){hint.textContent='請先設定試算表網址再登入';hint.style.color='#d97706';}
+  }
+})();
 
 </script>
 </body>
