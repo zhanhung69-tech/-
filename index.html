@@ -845,11 +845,13 @@ function doLogout(){if(!confirm('確定登出？'))return;LS.set('usr',null);loc
 
 
 // ═══ ACCOUNT SYNC (Sheets as master) ═══
-async function pushAccountsToSheets(){
-  if(!gsConfig.url) return;
-  await fetch(gsConfig.url,{method:'POST',mode:'no-cors',
-    body:JSON.stringify({type:'writeAccounts',data:accounts}),
-    headers:{'Content-Type':'text/plain'}}).catch(()=>{});
+async async function pushAccountsToSheets(){
+  if(!gsConfig.url){toast('⚠️ 尚未設定試算表網址，帳號僅存本機');return;}
+  try{
+    await fetch(gsConfig.url,{method:'POST',mode:'no-cors',
+      body:JSON.stringify({type:'writeAccounts',data:accounts}),
+      headers:{'Content-Type':'text/plain'}});
+  }catch(e){toast('⚠️ 同步試算表失敗，帳號已存本機');}
 }
 async function syncAccountsFromSheets(){
   if(!gsConfig.url){toast('⚠️ 請先設定 Google Apps Script URL');return}
@@ -931,6 +933,7 @@ function initApp(){
   loadStudentsOverride();
   renderBedMgmt();
   renderUnassigned();
+  renderUserList();
   if(gsConfig.id) document.getElementById('gs-id').value=gsConfig.id;
   // load cached students from Sheets if available
   const cached=LS.get('sheetsStudents',null);
@@ -1101,6 +1104,7 @@ function showStu(s){
   document.getElementById('ov-stu').classList.add('op');
 }
 function cov(id,e){if(!e||e.target.id===id)document.getElementById(id).classList.remove('op')}
+function closeOv(id){const el=document.getElementById(id);if(el)el.classList.remove('op');}
 
 // ═══ LEAVE ═══
 function updateLvStudents(){
@@ -1352,7 +1356,7 @@ async function addUser(){
   // Push to Sheets immediately
   await pushAccountsToSheets();
   renderUserList();
-  closeOv('ov-adduser');
+  cov('ov-adduser');
   toast('✅ 帳號已建立並同步至試算表');
 }
 async function delUser(id){
