@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>樹人家商 · 僑生宿舍管理系統</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0f4fa;--surf:#ffffff;--card:#ffffff;--card2:#f8fafd;
+  --b1:#dde3ef;--b2:#c8d2e6;--b3:#b0bdd4;
+  --ac:#2563eb;--ac2:rgba(37,99,235,.10);
+  --gr:#059669;--gr2:rgba(5,150,105,.10);
+  --am:#d97706;--am2:rgba(217,119,6,.10);
+  --rd:#dc2626;--rd2:rgba(220,38,38,.10);
+  --pk:#db2777;--pk2:rgba(219,39,119,.10);
+  --pu:#7c3aed;--pu2:rgba(124,58,237,.10);
+  --tx:#1e2a3d;--tx2:#4b5a72;--tx3:#8b96b0;
+  --f:'Noto Sans TC',sans-serif;--mono:'JetBrains Mono',monospace;
+  --sh:0 2px 12px rgba(37,99,235,.08),0 1px 3px rgba(0,0,0,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--tx);font-family:var(--f);min-height:100vh}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+input,select,textarea,button{font-family:var(--f)}
+a{color:var(--ac);text-decoration:none}
+
+/* ══ LOGIN ══ */
+#scr-login{position:fixed;inset:0;z-index:2000;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
+.lbox{width:100%;max-width:380px;background:var(--card);border:1px solid var(--b2);border-radius:18px;padding:32px 28px;box-shadow:var(--sh)}
+.lhead{text-align:center;margin-bottom:28px}
+.lhead .sch{font-size:11px;letter-spacing:2px;color:var(--tx3);text-transform:uppercase;margin-bottom:8px}
+.lhead h1{font-size:24px;font-weight:900;letter-spacing:-.5px}
+.lhead h1 em{color:var(--ac);font-style:normal}
+.lhead p{font-size:11px;color:var(--tx3);margin-top:5px;letter-spacing:.5px}
+.role-sel{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:20px}
+.rc{background:var(--surf);border:2px solid var(--b1);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .15s}
+.rc.on{border-color:var(--ac);background:var(--ac2)}
+.rc .ri{font-size:22px;margin-bottom:5px}
+.rc .rn{font-size:11px;font-weight:700;color:var(--tx3);letter-spacing:.3px}
+.rc.on .rn{color:var(--ac)}
+.lf{margin-bottom:12px}
+.lf label{font-size:11px;color:var(--tx2);display:block;margin-bottom:5px}
+.li{width:100%;background:var(--surf);border:1px solid var(--b1);border-radius:8px;padding:11px 14px;color:var(--tx);font-size:14px;outline:none;transition:border .15s}
+.li:focus{border-color:var(--ac)}
+.lbtn{width:100%;background:var(--ac);color:#fff;border:none;border-radius:8px;padding:13px;font-size:14px;font-weight:800;letter-spacing:.5px;cursor:pointer;transition:background .15s;margin-top:6px}
+.lbtn:hover{background:#3a7de8}
+.lhint{font-size:11px;color:var(--tx3);text-align:center;margin-top:10px}
+
+/* ══ APP SHELL ══ */
+#app{display:none}
+.hdr{position:fixed;top:0;left:0;right:0;z-index:300;height:54px;background:rgba(255,255,255,.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--b1);box-shadow:0 1px 8px rgba(37,99,235,.08);display:flex;align-items:center;padding:0 16px;gap:12px}
+.hdr-logo{font-size:14px;font-weight:900;white-space:nowrap}
+.hdr-logo em{color:var(--ac);font-style:normal}
+.hdr-sep{width:1px;height:20px;background:var(--b2);flex-shrink:0}
+.hdr-pg{font-size:13px;color:var(--tx2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-user{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--b1);border-radius:20px;padding:5px 12px 5px 7px;cursor:pointer;transition:border .15s}
+.hdr-user:hover{border-color:var(--b2)}
+.hav{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}
+.hun{font-size:12px;color:var(--tx2)}
+.hrole{font-size:10px;padding:1px 7px;border-radius:8px;font-weight:700;margin-left:2px}
+
+main{padding-top:54px;padding-bottom:70px;min-height:100vh}
+.pg{display:none;max-width:920px;margin:0 auto;padding:16px}
+.pg.on{display:block}
+
+/* bottom nav */
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:300;background:rgba(255,255,255,.98);backdrop-filter:blur(16px);border-top:1px solid var(--b1);box-shadow:0 -2px 12px rgba(37,99,235,.07);display:flex;justify-content:space-around;padding:8px 0 max(8px,env(safe-area-inset-bottom))}
+.ni{display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 10px;border-radius:8px;cursor:pointer;color:var(--tx3);transition:all .15s;position:relative;min-width:55px}
+.ni.on{color:var(--ac)}
+.ni-ic{font-size:19px}
+.ni-lb{font-size:9px;font-weight:700;letter-spacing:.3px}
+.nbadge{position:absolute;top:1px;right:6px;background:var(--rd);color:#fff;font-size:9px;font-weight:800;border-radius:6px;padding:0 4px;min-width:14px;text-align:center;display:none}
+
+/* ══ COMMON ══ */
+.ph{margin-bottom:18px}
+.ph h1{font-size:20px;font-weight:900;letter-spacing:-.3px;margin-bottom:3px}
+.ph p{font-size:12px;color:var(--tx3)}
+.card{background:var(--card);border:1px solid var(--b1);border-radius:14px;padding:16px;margin-bottom:12px}
+.ch{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--tx3);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.ch span{flex:1}
+.sg2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+.sg4{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+@media(min-width:500px){.sg4{grid-template-columns:repeat(4,1fr)}}
+.sc{background:var(--card);border:1px solid var(--b1);border-radius:12px;padding:14px}
+.sl{font-size:10px;color:var(--tx3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px}
+.sv{font-size:26px;font-weight:900;font-family:var(--mono);line-height:1.1}
+.sv.bl{color:var(--ac)}.sv.gr{color:var(--gr)}.sv.am{color:var(--am)}.sv.rd{color:var(--rd)}.sv.pu{color:var(--pu)}
+
+/* building tabs */
+.bts{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.bt{padding:6px 13px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid var(--b1);background:var(--card);color:var(--tx3);cursor:pointer;transition:all .15s}
+.bt.on{border-color:var(--ac);background:var(--ac2);color:var(--ac)}
+.bt.f.on{border-color:var(--pk);background:var(--pk2);color:var(--pk)}
+.bt.m.on{border-color:var(--ac);background:var(--ac2);color:var(--ac)}
+
+/* search */
+.sb{display:flex;gap:8px;margin-bottom:12px;position:sticky;top:54px;z-index:10;background:#f0f4fa;padding:8px 0 4px}
+.si{flex:1;background:var(--card);border:1px solid var(--b1);border-radius:8px;padding:10px 14px;color:var(--tx);font-size:13px;outline:none;transition:border .15s}
+.si:focus{border-color:var(--ac)}
+.si::placeholder{color:var(--tx3)}
+
+/* rooms */
+.rc-card{background:var(--card);border:1px solid var(--b1);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.rc-hd{padding:12px 14px;display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none;-webkit-user-select:none}
+.rc-num{font-family:var(--mono);font-weight:700;font-size:15px}
+.rc-tag{font-size:10px;padding:2px 7px;border-radius:4px;background:#e8edf5;color:var(--tx2)}
+.rc-tag.res{background:var(--am2);color:var(--am)}
+.rc-occ{margin-left:auto;font-family:var(--mono);font-size:13px;font-weight:700}
+.rc-arr{font-size:11px;color:var(--tx3);transition:transform .2s;margin-left:5px}
+.rc-card.op .rc-arr{transform:rotate(180deg)}
+.rc-body{display:none;padding:4px 12px 12px;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px}
+.rc-card.op .rc-body{display:grid}
+.bed{background:#f8fafc;border:1px solid var(--b1);border-radius:8px;padding:9px 10px;position:relative;transition:border-color .15s}
+.bed-lb{font-size:10px;color:var(--tx3);margin-bottom:3px}
+.bed-nm{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bed-sb{font-size:10px;color:var(--tx3);margin-top:2px}
+.bed.empty .bed-nm{color:var(--tx3);font-weight:400;font-style:italic}
+.dot{position:absolute;top:9px;right:9px;width:7px;height:7px;border-radius:50%}
+.d-in{background:var(--gr)}.d-lv{background:var(--am)}.d-ab{background:var(--rd)}.d-em{background:var(--b2)}
+.bsb{width:100%;margin-top:7px;padding:5px 0;border-radius:5px;font-size:11px;font-weight:700;border:1px solid var(--b1);color:var(--tx3);background:transparent;cursor:pointer;transition:all .15s}
+.bsb.s-in{border-color:var(--gr);color:var(--gr);background:var(--gr2)}
+.bsb.s-lv{border-color:var(--am);color:var(--am);background:var(--am2)}
+.bsb.s-ab{border-color:var(--rd);color:var(--rd);background:var(--rd2)}
+.bsb:not([class*="s-"]):hover{border-color:var(--gr);color:var(--gr)}
+
+/* form */
+.fg{margin-bottom:13px}
+.fg label{font-size:11px;color:var(--tx2);display:block;margin-bottom:5px}
+.fi,.fs,.fta{width:100%;background:var(--surf);border:1px solid var(--b1);border-radius:8px;padding:10px 13px;color:var(--tx);font-size:13px;outline:none;transition:border .15s}
+.fi:focus,.fs:focus,.fta:focus{border-color:var(--ac)}
+.fs option{background:var(--surf)}
+.fta{resize:vertical;min-height:68px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{padding:10px 22px;border-radius:8px;font-size:13px;font-weight:800;border:none;cursor:pointer;transition:all .15s;letter-spacing:.2px}
+.btn-p{background:var(--ac);color:#fff}.btn-p:hover{background:#3a7de8}
+.btn-g{background:var(--gr);color:#ffffff}.btn-g:hover{opacity:.9}
+.btn-a{background:var(--am);color:#ffffff}
+.btn-r{background:var(--rd);color:#fff}
+.btn-o{background:transparent;border:1px solid var(--b2);color:var(--tx2)}.btn-o:hover{border-color:var(--b3)}
+.btn-sm{padding:5px 12px;font-size:11px;border-radius:6px}
+
+/* badge */
+.badge{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:700}
+.bg-in{background:var(--gr2);color:var(--gr)}
+.bg-out{background:var(--am2);color:var(--am)}
+.bg-ab{background:var(--rd2);color:var(--rd)}
+.bg-pend{background:var(--pu2);color:var(--pu)}
+.bg-ap{background:var(--gr2);color:var(--gr)}
+.bg-done{background:var(--b1);color:var(--tx3)}
+
+/* student rows */
+.sr{background:var(--card);border:1px solid var(--b1);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:11px;margin-bottom:6px;cursor:pointer;transition:border .15s}
+.sr:hover{border-color:var(--b2)}
+.av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;flex-shrink:0}
+.avf{background:var(--pk2);color:var(--pk)}.avm{background:var(--ac2);color:var(--ac)}
+.si2{flex:1;min-width:0}
+.sn{font-size:14px;font-weight:700}
+.sm{font-size:11px;color:var(--tx3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sr-rm{font-family:var(--mono);font-size:11px;color:var(--ac);text-align:right;line-height:1.7}
+
+/* leave */
+.lv-row{background:var(--card);border:1px solid var(--b1);border-radius:12px;padding:13px 14px;margin-bottom:8px}
+.lv-hd{display:flex;align-items:center;gap:7px;margin-bottom:7px;flex-wrap:wrap}
+.lv-id{font-family:var(--mono);font-size:10px;color:#64748b}
+.lv-type{font-size:10px;padding:2px 8px;border-radius:4px;background:var(--ac2);color:var(--ac);font-weight:700}
+.lv-detail{font-size:12px;color:var(--tx2);margin-bottom:8px;line-height:1.8}
+.chips{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.chip{font-size:10px;padding:3px 9px;border-radius:4px;border:1px solid var(--b2);color:var(--tx2);background:var(--surf)}
+.chip-ok{border-color:var(--gr);color:var(--gr);background:var(--gr2)}
+
+/* score */
+.stbox{background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:2px solid var(--b1);border-radius:12px;padding:18px;text-align:center;margin-bottom:14px}
+.stbig{font-size:54px;font-weight:900;font-family:var(--mono);line-height:1;color:var(--ac)}
+.stgl{font-size:12px;color:var(--tx2);margin-top:5px}
+.sc-items{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+@media(min-width:480px){.sc-items{grid-template-columns:repeat(4,1fr)}}
+.sci{background:#f8fafc;border:1px solid var(--b1);border-radius:8px;padding:10px}
+.sci label{font-size:10px;color:var(--tx3);display:flex;justify-content:space-between;margin-bottom:6px}
+.scv{font-size:20px;font-weight:700;font-family:var(--mono);margin-bottom:5px;color:var(--ac)}
+input[type=range]{width:100%;accent-color:var(--ac);height:3px}
+.srow{background:var(--card);border:1px solid var(--b1);border-radius:8px;padding:10px 13px;display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.srm{font-family:var(--mono);font-size:13px;font-weight:700;min-width:65px}
+.sri{flex:1;font-size:11px;color:var(--tx3)}
+.ss{font-family:var(--mono);font-size:14px;font-weight:800;padding:3px 10px;border-radius:6px}
+.ssA{background:var(--gr2);color:var(--gr)}.ssB{background:var(--ac2);color:var(--ac)}.ssC{background:var(--am2);color:var(--am)}.ssD{background:var(--rd2);color:var(--rd)}
+
+/* dashboard */
+.pb-w{margin-bottom:9px}
+.pb-l{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.pb-l span:last-child{color:var(--tx3);font-family:var(--mono)}
+.pb{height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden}
+.pbf{height:100%;border-radius:3px;transition:width .7s ease}
+.pfg{background:var(--gr)}.pfb{background:var(--ac)}.pfa{background:var(--am)}.pfp{background:var(--pk)}
+
+/* admin */
+.user-row{background:var(--card);border:1px solid var(--b1);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:11px;margin-bottom:6px}
+.role-pill{font-size:10px;padding:2px 9px;border-radius:10px;font-weight:700}
+.rp-admin{background:var(--rd2);color:var(--rd)}
+.rp-warden{background:var(--gr2);color:var(--gr)}
+.rp-inspector{background:var(--pu2);color:var(--pu)}
+.rp-teacher{background:var(--ac2);color:var(--ac)}
+.rp-chief{background:var(--am2);color:var(--am)}
+.perms-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:10px}
+.perm-item{display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid var(--b1);border-radius:7px;padding:8px 10px}
+.perm-item label{font-size:12px;flex:1;cursor:pointer}
+.perm-toggle{width:36px;height:20px;border-radius:10px;background:#d1d5db;border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.perm-toggle.on{background:var(--ac)}
+.perm-toggle::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s}
+.perm-toggle.on::after{transform:translateX(16px)}
+
+/* modal */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:600;align-items:flex-end;justify-content:center}
+.ov.op{display:flex}
+@media(min-width:600px){.ov{align-items:center;padding:20px}}
+.modal{background:var(--card);border:1px solid var(--b2);border-radius:18px 18px 0 0;padding:20px;width:100%;max-width:520px;max-height:88vh;overflow-y:auto}
+@media(min-width:600px){.modal{border-radius:18px}}
+.mhd{display:flex;align-items:center;margin-bottom:16px}
+.mtitle{font-size:16px;font-weight:800;flex:1}
+.mclose{font-size:20px;color:var(--tx3);background:none;border:none;cursor:pointer;padding:4px}
+
+/* toast */
+.toast{position:fixed;bottom:82px;left:50%;transform:translateX(-50%);background:var(--card2);border:1px solid var(--b2);color:var(--tx);padding:10px 20px;border-radius:30px;font-size:12px;font-weight:700;z-index:900;display:none;white-space:nowrap;box-shadow:var(--sh);animation:tin .25s ease}
+@keyframes tin{from{transform:translate(-50%,14px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+
+/* export btn */
+.exp-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.exp-btn{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;background:var(--card);border:1px solid var(--b2);color:var(--tx2);cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s}
+.exp-btn:hover{border-color:var(--ac);color:var(--ac)}
+
+/* nation tag */
+.ntag{font-size:10px;padding:1px 6px;border-radius:4px;font-weight:700}
+.nvn{background:rgba(220,38,38,.10);color:#b91c1c}
+.nid{background:rgba(217,119,6,.10);color:#92400e}
+.nmy{background:rgba(5,150,105,.10);color:#065f46}
+.nkh{background:rgba(37,99,235,.10);color:#1e40af}
+.nmm{background:rgba(124,58,237,.10);color:#5b21b6}
+.nth{background:rgba(217,119,6,.10);color:#78350f}
+.nph{background:rgba(219,39,119,.10);color:#9d174d}
+.nun{background:#e5e7eb;color:#6b7280}
+
+.divider{height:1px;background:var(--b1);margin:12px 0;opacity:0.7}
+.empty{text-align:center;padding:36px 20px;color:var(--tx3)}
+.empty .ei{font-size:32px;margin-bottom:8px}
+.tag-info{font-size:11px;color:#374151;background:#eff6ff;border-radius:6px;padding:8px 12px;margin-bottom:12px;border-left:3px solid var(--ac);line-height:1.6}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="scr-login">
+  <div class="lbox">
+    <div class="lhead">
+      <div class="sch">樹人家商 · 高雄市</div>
+      <h1>僑生宿舍<em>管理系統</em></h1>
+      <p>OVERSEAS STUDENT DORMITORY SYSTEM v3.0</p>
+    </div>
+    <div class="role-sel">
+      <div class="rc on" data-role="admin" onclick="pickRole(this)"><div class="ri">⚙️</div><div class="rn">管理員</div></div>
+      <div class="rc" data-role="warden" onclick="pickRole(this)"><div class="ri">🏠</div><div class="rn">舍監</div></div>
+      <div class="rc" data-role="inspector" onclick="pickRole(this)"><div class="ri">🔍</div><div class="rn">生輔員</div></div>
+      <div class="rc" data-role="teacher" onclick="pickRole(this)"><div class="ri">📋</div><div class="rn">導師/班代</div></div>
+      <div class="rc" data-role="chief" onclick="pickRole(this)"><div class="ri">👔</div><div class="rn">一級主管</div></div>
+    </div>
+    <div class="lf"><label>帳號</label><input class="li" id="l-u" placeholder="帳號" value="admin01"></div>
+    <div class="lf"><label>密碼</label><input class="li" type="password" id="l-p" placeholder="密碼" value="1234"></div>
+    <button class="lbtn" onclick="doLogin()">登入系統</button>
+    <div class="lhint">示範帳號：任意帳號 ／ 密碼 1234</div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <div class="hdr">
+    <div class="hdr-logo">🏫 <em>樹人家商</em></div>
+    <div class="hdr-sep"></div>
+    <div class="hdr-pg" id="hpg">僑生宿舍管理系統</div>
+    <div class="hdr-user" onclick="doLogout()">
+      <div class="hav" id="hav"></div>
+      <div class="hun" id="hun"></div>
+      <div class="hrole" id="hrole"></div>
+    </div>
+  </div>
+
+  <main>
+    <!-- 點名 -->
+    <div class="pg on" id="pg-roll">
+      <div class="ph"><h1>📋 點名作業</h1><p id="roll-time"></p></div>
+      <div class="exp-bar">
+        <button class="exp-btn" onclick="exportRollExcel()">📊 匯出 Excel 點名單</button>
+        <button class="exp-btn" onclick="exportRollCSV()">📄 匯出 CSV</button>
+        <button class="exp-btn" onclick="syncGSheets()">🔄 同步 Google Sheets</button>
+      </div>
+      <div class="sg4" id="roll-stats"></div>
+      <div class="bts" id="roll-bts"></div>
+      <div id="roll-rooms"></div>
+    </div>
+
+    <!-- 僑生 -->
+    <div class="pg" id="pg-stu">
+      <div class="ph">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+    <div><h1>👤 僑生資料</h1><p id="stu-sync-time">共 <span id="stu-total-count">203</span> 位在籍僑生 · 資料來源：三份 Excel 合併匯入</p></div>
+    <button class="exp-btn" onclick="syncStudentsFromSheets()" style="white-space:nowrap">🔄 從 Sheets 更新</button>
+  </div>
+</div>
+      <div class="sb"><input class="si" id="stu-q" placeholder="搜尋姓名、學號、班級、棟別…" oninput="renderStudents()"></div>
+      <div class="bts" id="stu-bts"></div>
+      <div id="stu-list"></div>
+    </div>
+
+    <!-- 請假 -->
+    <div class="pg" id="pg-leave">
+      <div class="ph"><h1>📅 請假管理</h1><p>以班為單位統一申請 · 三關審核</p></div>
+      <div id="leave-apply-area">
+        <div class="card" id="leave-form-card">
+          <div class="ch"><span>新增假單（以班為單位）</span></div>
+          <div class="tag-info">📌 假單由<strong>導師或班代</strong>統一為全班提交，不開放學生個人申請。</div>
+          <div class="frow">
+            <div class="fg" style="margin:0"><label>班級</label>
+              <select class="fs" id="lv-cls" onchange="updateLvStudents()"></select></div>
+            <div class="fg" style="margin:0"><label>申請類別</label>
+              <select class="fs" id="lv-type"><option>晚歸</option><option>外宿</option><option>就醫</option><option>返鄉</option><option>打工</option><option>集體活動</option><option>其他</option></select></div>
+          </div>
+          <div class="fg" style="margin-top:12px"><label>本次請假學生（可多選）</label>
+            <select class="fs" id="lv-stus" multiple size="5" style="height:120px"></select></div>
+          <div class="frow" style="margin-top:4px">
+            <div class="fg" style="margin:0"><label>開始時間</label><input class="fi" type="datetime-local" id="lv-st"></div>
+            <div class="fg" style="margin:0"><label>結束時間</label><input class="fi" type="datetime-local" id="lv-et"></div>
+          </div>
+          <div class="fg" style="margin-top:12px"><label>請假事由</label><textarea class="fta" id="lv-reason" placeholder="說明請假原因…"></textarea></div>
+          <button class="btn btn-p" onclick="submitLeave()">提交假單</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch">
+          <span>假單列表</span>
+          <button class="exp-btn" onclick="exportLeaveExcel()" style="padding:4px 10px;font-size:10px">📊 匯出</button>
+        </div>
+        <div class="bts" id="lv-filter-bts" style="margin-bottom:10px"></div>
+        <div id="leave-list"></div>
+      </div>
+    </div>
+
+    <!-- 內務 -->
+    <div class="pg" id="pg-score">
+      <div class="ph"><h1>🔍 內務評分</h1><p>生輔員環境檢查記錄</p></div>
+      <div id="score-input-area">
+        <div class="card">
+          <div class="ch"><span>填寫今日評分</span></div>
+          <div class="frow" style="margin-bottom:12px">
+            <div class="fg" style="margin:0"><label>棟別</label><select class="fs" id="sc-b" onchange="updateScRooms()"></select></div>
+            <div class="fg" style="margin:0"><label>房號</label><select class="fs" id="sc-r"></select></div>
+          </div>
+          <div class="fg"><label>評分人員</label><input class="fi" id="sc-ins" placeholder="生輔員姓名"></div>
+          <div class="stbox">
+            <div class="sl">總分</div>
+            <div class="stbig" id="sc-tot">100</div>
+            <div class="stgl" id="sc-gl">⭐ 優良（90分以上）</div>
+          </div>
+          <div class="sc-items">
+            <div class="sci"><label>地面整潔<span class="ntag nvn">/20</span></label><div class="scv" id="sv-fl">20</div><input type="range" min="0" max="20" value="20" oninput="usc('fl',this.value)"></div>
+            <div class="sci"><label>書桌整理<span class="ntag nid">/15</span></label><div class="scv" id="sv-dk">15</div><input type="range" min="0" max="15" value="15" oninput="usc('dk',this.value)"></div>
+            <div class="sci"><label>棉被摺疊<span class="ntag nid">/15</span></label><div class="scv" id="sv-bd">15</div><input type="range" min="0" max="15" value="15" oninput="usc('bd',this.value)"></div>
+            <div class="sci"><label>垃圾分類<span class="ntag nid">/15</span></label><div class="scv" id="sv-tr">15</div><input type="range" min="0" max="15" value="15" oninput="usc('tr',this.value)"></div>
+            <div class="sci"><label>衣物擺放<span class="ntag nkh">/10</span></label><div class="scv" id="sv-cl">10</div><input type="range" min="0" max="10" value="10" oninput="usc('cl',this.value)"></div>
+            <div class="sci"><label>浴廁清潔<span class="ntag nid">/15</span></label><div class="scv" id="sv-bt">15</div><input type="range" min="0" max="15" value="15" oninput="usc('bt',this.value)"></div>
+            <div class="sci"><label>公共區域<span class="ntag nmm">/5</span></label><div class="scv" id="sv-cm">5</div><input type="range" min="0" max="5" value="5" oninput="usc('cm',this.value)"></div>
+            <div class="sci"><label>扣分項目<span class="ntag nvn">-20/項</span></label><div class="scv" id="sv-pn">0</div><input type="range" min="0" max="5" value="0" oninput="usc('pn',this.value)"></div>
+          </div>
+          <div class="fg"><label>異常記錄 / 備註</label><input class="fi" id="sc-note" placeholder="如有扣分請說明原因"></div>
+          <button class="btn btn-g" onclick="submitScore()">儲存評分</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch">
+          <span>評分紀錄</span>
+          <button class="exp-btn" onclick="exportScoreExcel()" style="padding:4px 10px;font-size:10px">📊 匯出</button>
+        </div>
+        <div id="score-hist"></div>
+      </div>
+    </div>
+
+    <!-- 統計 -->
+    <div class="pg" id="pg-dash">
+      <div class="ph"><h1>📊 統計儀表板</h1><p id="dash-time"></p></div>
+      <div class="exp-bar">
+        <button class="exp-btn" onclick="exportDashExcel()">📊 匯出完整報表</button>
+        <button class="exp-btn" onclick="syncGSheets()">🔄 同步 Google Sheets</button>
+      </div>
+      <div class="sg4" id="dash-stats"></div>
+      <div class="card"><div class="ch"><span>各棟入住率</span></div><div id="d-blds"></div></div>
+      <div class="card"><div class="ch"><span>國籍分佈</span></div><div id="d-nat"></div></div>
+      <div class="card"><div class="ch"><span>內務評分排名（近期）</span></div><div id="d-scores"></div></div>
+      <div class="card"><div class="ch"><span>請假統計</span></div><div id="d-leave"></div></div>
+    </div>
+
+    <!-- 管理員 -->
+    <div class="pg" id="pg-admin">
+      <div class="ph"><h1>⚙️ 系統管理</h1><p>帳號管理 · 床位管理 · 職務權限設定</p></div>
+
+      <div class="card">
+        <div class="ch"><span>帳號管理</span><button class="btn btn-p btn-sm" onclick="openAddUser()">+ 新增帳號</button></div>
+        <div id="user-list"></div>
+      </div>
+
+      <!-- ══ BED MANAGEMENT ══ -->
+      <div class="card">
+        <div class="ch"><span>🛏️ 床位管理</span>
+          <button class="btn btn-p btn-sm" onclick="openAddRoom()">＋ 新增房間</button>
+        </div>
+        <div class="tag-info">可調整各棟房間可住人數、新增房間、分配學生床位。所有變更即時生效並可同步至 Google Sheets。</div>
+        <div class="bts" id="bed-mgmt-bts">
+          <div class="bt on" onclick="selectBedMgmtBld('F1',this)">F1 女 12F</div>
+          <div class="bt" onclick="selectBedMgmtBld('F2',this)">F2 女 11F</div>
+          <div class="bt" onclick="selectBedMgmtBld('F3',this)">F3 女 10F</div>
+          <div class="bt" onclick="selectBedMgmtBld('M1',this)">M1 男 9F</div>
+          <div class="bt" onclick="selectBedMgmtBld('M2',this)">M2 男 8F</div>
+          <div class="bt" onclick="selectBedMgmtBld('M3',this)">M3 男 6F</div>
+        </div>
+        <div id="bed-mgmt-list" style="margin-bottom:12px"></div>
+        <div>
+          <div class="ch"><span>⏳ 等候分配（<span id="unassigned-count">0</span> 人）</span></div>
+          <div id="unassigned-list"></div>
+        </div>
+      </div>
+
+      <!-- Modal: Add Room -->
+      <div class="ov" id="ov-add-room">
+        <div class="modal">
+          <div class="mhd"><span class="mtitle">➕ 新增房間</span>
+            <button class="mclose" onclick="closeOv('ov-add-room')">✕</button></div>
+          <div class="lf"><label>棟別</label>
+            <select class="fs" id="ar-bld">
+              <option value="F1">F1（女 12樓）</option><option value="F2">F2（女 11樓）</option>
+              <option value="F3">F3（女 10樓）</option><option value="M1">M1（男 9樓）</option>
+              <option value="M2">M2（男 8樓）</option><option value="M3">M3（男 6樓）</option>
+            </select></div>
+          <div class="lf"><label>房號</label><input class="fi" id="ar-room" placeholder="例：1209" maxlength="6"></div>
+          <div class="lf"><label>床位數</label><input class="fi" id="ar-beds" type="number" min="1" max="12" value="6"></div>
+          <div class="lf"><label>用途</label>
+            <select class="fs" id="ar-type"><option value="住宿">住宿</option><option value="舍監">舍監室</option><option value="備用">備用</option></select></div>
+          <button class="btn btn-p" style="width:100%;margin-top:8px" onclick="confirmAddRoom()">確認新增</button>
+        </div>
+      </div>
+
+      <!-- Modal: Assign Bed -->
+      <div class="ov" id="ov-assign-bed">
+        <div class="modal">
+          <div class="mhd"><span class="mtitle" id="assign-bed-title">分配床位</span>
+            <button class="mclose" onclick="closeOv('ov-assign-bed')">✕</button></div>
+          <div class="lf"><label>搜尋學生（姓名 / 學號 / 班級）</label>
+            <input class="fi" id="assign-search" placeholder="輸入姓名或學號" oninput="renderAssignSearch()"></div>
+          <div id="assign-search-list" style="max-height:320px;overflow-y:auto;margin-top:8px"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ch"><span>功能權限矩陣</span></div>
+        <div class="tag-info">⚠️ 調整後立即生效，已登入者下次操作時套用。</div>
+        <div id="perm-matrix"></div>
+      </div>
+
+      <div class="card">
+        <div class="ch"><span>Google Sheets 同步設定</span></div>
+        <div class="fg"><label>Google Apps Script Web App URL</label>
+          <input class="fi" id="gs-url" placeholder="https://script.google.com/macros/s/..."></div>
+        <div class="fg"><label>試算表 ID（選填）</label>
+          <input class="fi" id="gs-id" placeholder="從 Google Sheets 網址複製"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+          <button class="btn btn-p" onclick="saveGSConfig()">💾 儲存設定</button>
+          <button class="btn btn-o" onclick="testGS()">🔌 測試連線</button>
+          <button class="btn btn-o" onclick="fullSyncNow()">🔄 立即全量同步</button>
+          <button class="btn btn-g" onclick="syncStudentsFromSheets()">👤 從 Sheets 更新僑生資料</button>
+          <button class="btn btn-p" onclick="pushStudentsToSheets()">⬆️ 推送僑生資料至 Sheets</button>
+          <button class="btn btn-o" onclick="exportStudentsCSV()">📥 匯出僑生 CSV</button>
+        </div>
+
+        <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:14px;margin-bottom:14px">
+          <div style="font-size:12px;font-weight:800;color:#92400e;margin-bottom:6px">📋 Google Sheets 工作表清單（需全部建立）</div>
+          <div style="font-size:12px;color:#78350f;line-height:2">
+            ① <strong>僑生資料</strong> — 主資料庫（見下方欄位說明）<br>
+            ② <strong>點名紀錄</strong> — 每次點名狀態<br>
+            ③ <strong>請假清單</strong> — 假單審核紀錄<br>
+            ④ <strong>內務評分</strong> — 生輔員評分記錄
+          </div>
+        </div>
+
+        <div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:10px;padding:14px;margin-bottom:14px">
+          <div style="font-size:12px;font-weight:800;color:#1e40af;margin-bottom:6px">📊 「僑生資料」工作表欄位格式（第1列為標題）</div>
+          <div style="font-size:11px;color:#1e3a8a;font-family:monospace;line-height:1.9;background:#dbeafe;border-radius:6px;padding:10px;overflow-x:auto;white-space:nowrap">
+            A:學號 ｜ B:姓名 ｜ C:性別 ｜ D:年級 ｜ E:班級 ｜ F:國籍/地區 ｜ G:聯絡電話 ｜ H:緊急聯絡人 ｜ I:緊急聯絡電話 ｜ J:電子郵件<br>
+            K:棟別 ｜ L:房號 ｜ M:床位 ｜ N:入住日期 ｜ O:住宿狀態 ｜ P:英文姓名 ｜ Q:I僑卡號<br>
+            R:先實習開始 ｜ S:先實習結束 ｜ T:後實習開始 ｜ U:後實習結束 ｜ V:輪調實習廠商
+          </div>
+          <div style="font-size:11px;color:#1e40af;margin-top:8px">
+            ⚙️ <strong>住宿狀態（O欄）</strong>8種選項：
+            <code style="background:#dbeafe;padding:1px 5px;border-radius:3px;margin:1px">入住</code>
+            <code style="background:#dbeafe;padding:1px 5px;border-radius:3px;margin:1px">職場實習</code>
+            <code style="background:#fef3c7;padding:1px 5px;border-radius:3px;margin:1px">請假外宿</code>
+            <code style="background:#fef3c7;padding:1px 5px;border-radius:3px;margin:1px">打工</code>
+            <code style="background:#fef3c7;padding:1px 5px;border-radius:3px;margin:1px">返鄉</code>
+            <code style="background:#fef3c7;padding:1px 5px;border-radius:3px;margin:1px">晚歸</code>
+            <code style="background:#fef3c7;padding:1px 5px;border-radius:3px;margin:1px">病假</code>
+            <code style="background:#f3f4f6;padding:1px 5px;border-radius:3px;margin:1px">其它</code><br>
+            🔄 設定 Apps Script URL 後，點「從 Sheets 更新僑生資料」即可同步最新名單到系統。
+          </div>
+        </div>
+
+        <div style="background:var(--surf);border:1px solid var(--b2);border-radius:12px;padding:16px">
+          <div style="font-size:13px;font-weight:800;margin-bottom:12px;color:var(--ac)">📖 Google Apps Script 部署步驟</div>
+
+          <div style="font-size:12px;line-height:1.9;color:var(--tx2)">
+            <div style="margin-bottom:10px"><span style="background:var(--ac);color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;margin-right:6px">1</span>
+            開啟你的 <strong style="color:var(--tx)">Google Sheets</strong>，建立以下工作表（Sheet）：<br>
+            <span style="font-family:monospace;color:var(--gr);font-size:11px;margin-left:24px">點名紀錄、請假清單、內務評分</span></div>
+
+            <div style="margin-bottom:10px"><span style="background:var(--ac);color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;margin-right:6px">2</span>
+            在試算表選單中點「<strong style="color:var(--tx)">擴充功能 → Apps Script</strong>」</div>
+
+            <div style="margin-bottom:10px"><span style="background:var(--ac);color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;margin-right:6px">3</span>
+            貼上以下程式碼（清除原有內容）：</div>
+          </div>
+
+          <div style="background:#0a0d14;border:1px solid var(--b2);border-radius:8px;padding:12px;font-family:monospace;font-size:11px;color:#7dd3fc;line-height:1.7;overflow-x:auto;margin-bottom:12px;position:relative">
+            <button onclick="copyScript()" style="position:absolute;top:8px;right:8px;background:#334155;border:none;color:#94a3b8;padding:3px 10px;border-radius:5px;font-size:10px;cursor:pointer;font-weight:700">複製</button>
+<pre id="gs-script" style="white-space:pre-wrap;margin:0">function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var type = data.type;
+    var payload = data.data;
+
+    if (type === "leave") {
+      var sh = ss.getSheetByName("請假清單") || ss.insertSheet("請假清單");
+      if (sh.getLastRow() === 0) sh.appendRow(["假單ID","班級","學生名單","假別","開始日","結束日","原因","導師審核","舍監審核","主管核准","返宿日","狀態"]);
+      var rows = sh.getDataRange().getValues();
+      var found = false;
+      for (var i = 1; i &lt; rows.length; i++) {
+        if (rows[i][0] === payload.id) {
+          sh.getRange(i+1,1,1,12).setValues([[payload.id,payload.cls,payload.names,payload.type,payload.start,payload.end,payload.reason,payload.a1,payload.a2,payload.a3,payload.ret,payload.status]]);
+          found = true; break;
+        }
+      }
+      if (!found) sh.appendRow([payload.id,payload.cls,payload.names,payload.type,payload.start,payload.end,payload.reason,payload.a1,payload.a2,payload.a3,payload.ret,payload.status]);
+    }
+
+    if (type === "score") {
+      var sh = ss.getSheetByName("內務評分") || ss.insertSheet("內務評分");
+      if (sh.getLastRow() === 0) sh.appendRow(["日期","棟別","房號","檢查人","地板","桌面","床鋪","垃圾","衣物","浴室","公物","罰則","總分","等級","備註"]);
+      sh.appendRow([payload.date,payload.b,payload.r,payload.ins,payload.fl,payload.dk,payload.bd,payload.tr,payload.cl,payload.bt,payload.cm,payload.pn,payload.tot,payload.gr,payload.note]);
+    }
+
+    if (type === "roll") {
+      var sh = ss.getSheetByName("點名紀錄") || ss.insertSheet("點名紀錄");
+      if (sh.getLastRow() === 0) sh.appendRow(["點名時間","棟別","房號","床位","姓名","狀態","班級"]);
+      sh.appendRow([new Date().toLocaleString("zh-TW"),payload.building,payload.room,payload.bed,payload.name,payload.status,payload.cls]);
+    }
+
+    if (type === "writeStudents") {
+      var sh = ss.getSheetByName("僑生資料") || ss.insertSheet("僑生資料");
+      sh.clearContents();
+      sh.appendRow(["學號","姓名","性別","年級","班級","國籍/地區","聯絡電話","緊急聯絡人","緊急聯絡電話","電子郵件","棟別","房號","床位","入住日期","住宿狀態","英文姓名","I僑卡號","先實習開始","先實習結束","後實習開始","後實習結束","輪調實習廠商"]);
+      var rows2d = payload.map(function(s){ return [s.id,s.name,s.g,s.grade,s.cls,s.nation,s.phone,s.emgName,s.emgPhone,s.email,s.b,s.r,s.bed,s.inDate,s.st,s.eng,s.iCard,s.internStart1||"",s.internEnd1||"",s.internStart2||"",s.internEnd2||"",s.internCo||""]; });
+      if (rows2d.length) sh.getRange(2, 1, rows2d.length, 22).setValues(rows2d);
+    }
+
+    return buildResp({ok:true});
+  } catch(err) {
+    return buildResp({ok:false, err:err.message});
+  }
+}
+
+function doGet(e) {
+  var param = e && e.parameter ? e.parameter : {};
+
+  if (param.action === "getStudents") {
+    try {
+      var ss = SpreadsheetApp.getActiveSpreadsheet();
+      var sh = ss.getSheetByName("僑生資料");
+      if (!sh) return buildResp({ok:false, err:"找不到「僑生資料」工作表"});
+      var rows = sh.getDataRange().getValues();
+      var students = [];
+      for (var i = 1; i &lt; rows.length; i++) {
+        var r = rows[i];
+        if (!r[0]) continue;
+        students.push({id:String(r[0]||""),name:String(r[1]||""),g:String(r[2]||""),grade:String(r[3]||"1"),cls:String(r[4]||""),nation:String(r[5]||""),phone:String(r[6]||""),emgName:String(r[7]||""),emgPhone:String(r[8]||""),email:String(r[9]||""),b:String(r[10]||""),r:String(r[11]||""),bed:String(r[12]||""),inDate:String(r[13]||""),st:String(r[14]||"入住"),eng:String(r[15]||""),iCard:String(r[16]||""),internStart1:String(r[17]||""),internEnd1:String(r[18]||""),internStart2:String(r[19]||""),internEnd2:String(r[20]||""),internCo:String(r[21]||"")});
+      }
+      return buildResp({ok:true, students:students});
+    } catch(err) {
+      return buildResp({ok:false, err:err.message});
+    }
+  }
+
+  return buildResp({ok:true, msg:"Connected", time:new Date().toLocaleString("zh-TW")});
+}
+
+function buildResp(obj) {
+  var out = ContentService.createTextOutput(JSON.stringify(obj));
+  out.setMimeType(ContentService.MimeType.JSON);
+  return out;
+}</pre>
+          </div>
+
+          <div style="font-size:12px;line-height:1.9;color:var(--tx2)">
+            <div style="margin-bottom:10px"><span style="background:var(--ac);color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;margin-right:6px">4</span>
+            按 <strong style="color:var(--tx)">部署 → 新增部署</strong>，類型選「<strong style="color:var(--tx)">網路應用程式</strong>」</div>
+
+            <div style="margin-bottom:10px"><span style="background:var(--ac);color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;margin-right:6px">5</span>
+            執行身分：<strong style="color:var(--am)">我</strong>　　誰可以存取：<strong style="color:var(--rd)">所有人（含匿名）</strong>，按「部署」 → 第一次會要求授權，請允許</div>
+
+            <div style="margin-bottom:10px"><span style="background:var(--gr);color:#090c12;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;margin-right:6px">6</span>
+            複製「網路應用程式 URL」，貼到上方欄位，按「💾 儲存設定」，再按「🔌 測試連線」確認 ✅</div>
+
+            <div style="margin-bottom:6px"><span style="background:#7c3aed;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;margin-right:6px">7</span>
+            <strong style="color:var(--tx)">修改程式碼後</strong>需重新部署：「部署 → 管理部署」→「✏️ 編輯」→「版本：新版本」→「部署」並<strong style="color:var(--rd)"> 更新 URL</strong></div>
+          </div>
+
+          <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:12px;margin-top:8px">
+            <div style="font-size:12px;font-weight:800;color:#991b1b;margin-bottom:6px">⚠️ 常見連線失敗原因</div>
+            <div style="font-size:11px;color:#7f1d1d;line-height:1.9">
+              ❶ 「誰可以存取」<strong>未設為「所有人」</strong> → 重新部署，選「所有人（含匿名）」<br>
+              ❷ <strong>部署後沒更新 URL</strong>（舊版本失效）→ 複製最新的 Web App URL<br>
+              ❸ Apps Script <strong>未授權執行</strong> → 點部署後出現的授權視窗並允許<br>
+              ❹ <strong>程式碼有修改但未重新部署</strong> → 每次改程式都要建立新版本部署
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <nav class="bnav" id="bnav">
+    <div class="ni on" id="ni-roll" onclick="goPg('roll','📋 點名作業',this)"><div class="ni-ic">📋</div><div class="ni-lb">點名</div></div>
+    <div class="ni" id="ni-stu" onclick="goPg('stu','👤 僑生資料',this)"><div class="ni-ic">👤</div><div class="ni-lb">僑生</div></div>
+    <div class="ni" id="ni-leave" onclick="goPg('leave','📅 請假管理',this)" style="position:relative"><div class="ni-ic">📅</div><div class="ni-lb">請假</div><div class="nbadge" id="lv-badge">0</div></div>
+    <div class="ni" id="ni-score" onclick="goPg('score','🔍 內務評分',this)"><div class="ni-ic">🔍</div><div class="ni-lb">內務</div></div>
+    <div class="ni" id="ni-dash" onclick="goPg('dash','📊 統計儀表板',this)"><div class="ni-ic">📊</div><div class="ni-lb">統計</div></div>
+    <div class="ni" id="ni-admin" onclick="goPg('admin','⚙️ 系統管理',this)" style="display:none"><div class="ni-ic">⚙️</div><div class="ni-lb">管理</div></div>
+  </nav>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- 學生詳情 modal -->
+<div class="ov" id="ov-stu" onclick="cov('ov-stu',event)">
+  <div class="modal"><div class="mhd"><div class="mtitle" id="ms-t">學生詳情</div><button class="mclose" onclick="cov('ov-stu')">✕</button></div><div id="ms-b"></div></div>
+</div>
+
+<!-- 新增帳號 modal -->
+<div class="ov" id="ov-adduser" onclick="cov('ov-adduser',event)">
+  <div class="modal">
+    <div class="mhd"><div class="mtitle">新增帳號</div><button class="mclose" onclick="cov('ov-adduser')">✕</button></div>
+    <div class="fg"><label>帳號名稱</label><input class="fi" id="au-name" placeholder="例：warden02"></div>
+    <div class="fg"><label>顯示姓名</label><input class="fi" id="au-disp" placeholder="例：陳舍監"></div>
+    <div class="fg"><label>角色</label>
+      <select class="fs" id="au-role">
+        <option value="warden">舍監</option>
+        <option value="inspector">生輔員</option>
+        <option value="teacher">導師/班代</option>
+        <option value="chief">一級主管</option>
+        <option value="admin">管理員</option>
+      </select>
+    </div>
+    <div class="fg"><label>初始密碼</label><input class="fi" id="au-pw" value="1234"></div>
+    <button class="btn btn-p" onclick="addUser()">建立帳號</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// EMBEDDED DATA (from Excel)
+// ═══════════════════════════════════════════
+const ROOMS=[{"b":"F1","fl":12,"r":"1201","t":"6人房","beds":6,"s":"正常"},{"b":"F1","fl":12,"r":"1202","t":"1人房","beds":1,"s":"保留"},{"b":"F1","fl":12,"r":"1203","t":"6人房","beds":6,"s":"正常"},{"b":"F1","fl":12,"r":"1204","t":"6人房","beds":6,"s":"正常"},{"b":"F1","fl":12,"r":"1205","t":"6人房","beds":6,"s":"正常"},{"b":"F1","fl":12,"r":"1206","t":"4人房","beds":4,"s":"保留"},{"b":"F1","fl":12,"r":"1207","t":"6人房","beds":6,"s":"正常"},{"b":"F1","fl":12,"r":"1208","t":"4人房","beds":4,"s":"保留"},{"b":"F2","fl":11,"r":"1101","t":"6人房","beds":6,"s":"保留"},{"b":"F2","fl":11,"r":"1102","t":"6人房","beds":6,"s":"正常"},{"b":"F2","fl":11,"r":"1103","t":"4人房","beds":4,"s":"正常"},{"b":"F2","fl":11,"r":"1104","t":"4人房","beds":4,"s":"正常"},{"b":"F2","fl":11,"r":"1105","t":"6人房","beds":6,"s":"正常"},{"b":"F2","fl":11,"r":"1106","t":"6人房","beds":6,"s":"正常"},{"b":"F2","fl":11,"r":"1107","t":"6人房","beds":6,"s":"正常"},{"b":"F2","fl":11,"r":"1108","t":"6人房","beds":6,"s":"保留"},{"b":"F3","fl":10,"r":"1001","t":"6人房","beds":6,"s":"正常"},{"b":"F3","fl":10,"r":"1002","t":"6人房","beds":6,"s":"正常"},{"b":"F3","fl":10,"r":"1003","t":"6人房","beds":6,"s":"正常"},{"b":"F3","fl":10,"r":"1004","t":"6人房","beds":6,"s":"正常"},{"b":"F3","fl":10,"r":"1005","t":"6人房","beds":6,"s":"正常"},{"b":"F3","fl":10,"r":"1006","t":"6人房","beds":6,"s":"正常"},{"b":"M1","fl":9,"r":"901","t":"4人房","beds":4,"s":"保留"},{"b":"M1","fl":9,"r":"902","t":"6人房","beds":6,"s":"正常"},{"b":"M1","fl":9,"r":"903","t":"6人房","beds":6,"s":"正常"},{"b":"M1","fl":9,"r":"904","t":"6人房","beds":6,"s":"正常"},{"b":"M1","fl":9,"r":"905","t":"6人房","beds":6,"s":"正常"},{"b":"M1","fl":9,"r":"906","t":"6人房","beds":6,"s":"正常"},{"b":"M1","fl":9,"r":"907","t":"6人房","beds":6,"s":"正常"},{"b":"M2","fl":8,"r":"801","t":"4人房","beds":4,"s":"保留"},{"b":"M2","fl":8,"r":"802","t":"4人房","beds":4,"s":"保留"},{"b":"M2","fl":8,"r":"803","t":"6人房","beds":6,"s":"正常"},{"b":"M2","fl":8,"r":"804","t":"6人房","beds":6,"s":"正常"},{"b":"M2","fl":8,"r":"805","t":"6人房","beds":6,"s":"正常"},{"b":"M2","fl":8,"r":"806","t":"6人房","beds":6,"s":"正常"},{"b":"M2","fl":8,"r":"807","t":"6人房","beds":6,"s":"正常"},{"b":"M2","fl":8,"r":"808","t":"6人房","beds":6,"s":"正常"},{"b":"M3","fl":6,"r":"601","t":"4人房","beds":4,"s":"保留"},{"b":"M3","fl":6,"r":"602","t":"6人房","beds":6,"s":"正常"},{"b":"M3","fl":6,"r":"603","t":"6人房","beds":6,"s":"正常"},{"b":"M3","fl":6,"r":"604","t":"6人房","beds":6,"s":"正常"},{"b":"M3","fl":6,"r":"605","t":"6人房","beds":6,"s":"正常"},{"b":"M3","fl":6,"r":"606","t":"6人房","beds":6,"s":"正常"},{"b":"M3","fl":6,"r":"607","t":"6人房","beds":6,"s":"正常"}];
+const STUDENTS=[{"id": "413079", "cls": "觀一孝", "name": "楊文龍", "g": "男", "grade": "1", "nation": "越南", "phone": "0903296624", "eng": "GIENG VAN LONG", "iCard": "VN4101031798", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "906", "bed": "8床", "inDate": "", "st": "職場實習", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北萬豪酒店"}, {"id": "413047", "cls": "觀一孝", "name": "李巧玲", "g": "女", "grade": "1", "nation": "緬甸", "phone": "0976473819", "eng": "EASTER NU RA", "iCard": "MM5101031486", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1006", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "寒舍艾美酒店"}, {"id": "413049", "cls": "觀一孝", "name": "林美麗", "g": "女", "grade": "1", "nation": "印尼", "phone": "0954040560", "eng": "MERRY CHRISTINE", "iCard": "ID5101031535", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1205", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "413050", "cls": "觀一孝", "name": "金德來", "g": "男", "grade": "1", "nation": "柬埔寨", "phone": "0976402951", "eng": "NOM KIMPHEAKDEY", "iCard": "KH4100952186", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "605", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "413051", "cls": "觀一孝", "name": "段家福", "g": "男", "grade": "1", "nation": "緬甸", "phone": "0967114048", "eng": "MYO LAT AUNG", "iCard": "MM4101000245", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "907", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "413052", "cls": "觀一孝", "name": "苗明美", "g": "女", "grade": "1", "nation": "緬甸", "phone": "0976147490", "eng": "EI EI PHYO", "iCard": "MM5101054298", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1006", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "413053", "cls": "觀一孝", "name": "韋氏玉媚", "g": "女", "grade": "1", "nation": "越南", "phone": "0916594221", "eng": "VI THI NGOC MI", "iCard": "VN5101031696", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "新竹國賓大飯店"}, {"id": "413055", "cls": "觀一孝", "name": "張修仁", "g": "男", "grade": "1", "nation": "柬埔寨", "phone": "0916142434", "eng": "SUOS VANNARAK", "iCard": "KH4100952228", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "605", "bed": "6床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北萬豪酒店"}, {"id": "413056", "cls": "觀一孝", "name": "張海媚", "g": "女", "grade": "1", "nation": "越南", "phone": "0981706104", "eng": "CHIENG HAI MY", "iCard": "VN5101031514", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "新竹國賓大飯店"}, {"id": "413059", "cls": "觀一孝", "name": "溫素玲", "g": "女", "grade": "1", "nation": "印尼", "phone": "0926177461", "eng": "NATASYA BUN", "iCard": "ID5101031550", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北圓山大飯店"}, {"id": "413060", "cls": "觀一孝", "name": "黃家燕", "g": "女", "grade": "1", "nation": "越南", "phone": "0900050245", "eng": "VONG GIA YEN", "iCard": "VN5100938420", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "413062", "cls": "觀一孝", "name": "楊琳琳", "g": "女", "grade": "1", "nation": "緬甸", "phone": "0916294240", "eng": "HTOI SAN LU", "iCard": "MM5101010118", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北圓山大飯店"}, {"id": "413063", "cls": "觀一孝", "name": "廖光杰", "g": "男", "grade": "1", "nation": "緬甸", "phone": "0955088984", "eng": "AUNG KHANT KYAW", "iCard": "MM4101031505", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "907", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北萬豪酒店"}, {"id": "413064", "cls": "觀一孝", "name": "蘇峻輝", "g": "男", "grade": "1", "nation": "越南", "phone": "0984051622", "eng": "TO TUAN HUY", "iCard": "VN4100941930", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "907", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北萬豪酒店"}, {"id": "413065", "cls": "觀一仁", "name": "文小婷", "g": "女", "grade": "1", "nation": "印尼", "phone": "0981594044", "eng": "VALENCIA YULIAN", "iCard": "ID5101054230", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1204", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北圓山大飯店"}, {"id": "413066", "cls": "觀一仁", "name": "文弘毅", "g": "男", "grade": "1", "nation": "印尼", "phone": "0981934646", "eng": "SEBASTIAN YULIAN", "iCard": "ID4101054241", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "604", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北萬豪酒店"}, {"id": "413067", "cls": "觀一仁", "name": "王美珍", "g": "女", "grade": "1", "nation": "越南", "phone": "0916545263", "eng": "VONG MY TRAN", "iCard": "VN5100924818", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1003", "bed": "6床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "新竹國賓大飯店"}, {"id": "413068", "cls": "觀一仁", "name": "王達拉", "g": "男", "grade": "1", "nation": "柬埔寨", "phone": "0900544238", "eng": "OEM DARA", "iCard": "KH4100957920", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "605", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": ""}, {"id": "413069", "cls": "觀一仁", "name": "林花妮", "g": "女", "grade": "1", "nation": "印尼", "phone": "0981324914", "eng": "VANIE", "iCard": "ID5101054321", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1204", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "寒舍艾美酒店"}, {"id": "413071", "cls": "觀一仁", "name": "張修信", "g": "男", "grade": "1", "nation": "柬埔寨", "phone": "0916212984", "eng": "LEY VANNET", "iCard": "KH4100952202", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "605", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "413072", "cls": "觀一仁", "name": "郭永濤", "g": "男", "grade": "1", "nation": "印尼", "phone": "0976369450", "eng": "JEASEN ARIANTO", "iCard": "ID4101054258", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "605", "bed": "1床", "inDate": "", "st": "職場實習", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北萬豪酒店"}, {"id": "413073", "cls": "觀一仁", "name": "陳以岑", "g": "女", "grade": "1", "nation": "印尼", "phone": "0981527247", "eng": "ANGELICA", "iCard": "ID5101054263", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1204", "bed": "6床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "413074", "cls": "觀一仁", "name": "陳欣倩", "g": "男", "grade": "1", "nation": "印尼", "phone": "0976305347", "eng": "REYNALDY HARIANSYAH", "iCard": "ID4101031561", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "605", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北萬豪酒店"}, {"id": "413075", "cls": "觀一仁", "name": "小菲", "g": "女", "grade": "1", "nation": "越南", "phone": "0916633754", "eng": "TIFANI TRIJAYANI", "iCard": "ID5101054271", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1205", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "413076", "cls": "觀一仁", "name": "彭信理", "g": "女", "grade": "1", "nation": "印尼", "phone": "0913534549", "eng": "SINDI MARSELINA PANGESTU", "iCard": "ID5101054313", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1205", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "寒舍艾美酒店"}, {"id": "413078", "cls": "觀一仁", "name": "黃美微", "g": "女", "grade": "1", "nation": "印尼", "phone": "0938042711", "eng": "VELICIA", "iCard": "ID5101054289", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1205", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "寒舍艾美酒店"}, {"id": "413080", "cls": "觀一仁", "name": "溪氏紅艷", "g": "女", "grade": "1", "nation": "越南", "phone": "0981448952", "eng": "KHE THI HONG DIEM", "iCard": "VN5101031472", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "新竹國賓大飯店"}, {"id": "413081", "cls": "觀一仁", "name": "鄧紹燊", "g": "男", "grade": "1", "nation": "越南", "phone": "0916549076", "eng": "DANG THIEU TAN", "iCard": "VN4100938514", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "907", "bed": "1床", "inDate": "", "st": "職場實習", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "413082", "cls": "觀一仁", "name": "鄭平花", "g": "女", "grade": "1", "nation": "印尼", "phone": "0976155654", "eng": "DEVONA APHING", "iCard": "ID5101054305", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1205", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "413083", "cls": "觀一仁", "name": "穆美玟", "g": "女", "grade": "1", "nation": "緬甸", "phone": "0930059043", "eng": "HTA MU MAY WAN", "iCard": "MM5101062143", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1005", "bed": "5床", "inDate": "", "st": "職場實習", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "寒舍艾美酒店"}, {"id": "414257", "cls": "餐一和", "name": "寸心亞", "g": "女", "grade": "1", "nation": "緬甸", "phone": "0916511524", "eng": "LAMAI HTOI JA", "iCard": "MM5100993058", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1004", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "寒舍艾美酒店"}, {"id": "414258", "cls": "餐一和", "name": "王佳莉", "g": "女", "grade": "1", "nation": "泰國", "phone": "0916724537", "eng": "MISS SAENGCHAN AOEISANG", "iCard": "TH5101031602", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北圓山大飯店"}, {"id": "414259", "cls": "餐一和", "name": "朱氏艷", "g": "女", "grade": "1", "nation": "越南", "phone": "0981041528", "eng": "CHU THI DIEM", "iCard": "VN5101031613", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1002", "bed": "1床", "inDate": "", "st": "職場實習", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "414260", "cls": "餐一和", "name": "何富麗", "g": "女", "grade": "1", "nation": "泰國", "phone": "0915394227", "eng": "PREEYAPHAT PHONGPHAWAN", "iCard": "TH5101031578", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北圓山大飯店"}, {"id": "414261", "cls": "餐一和", "name": "李洋", "g": "男", "grade": "1", "nation": "緬甸", "phone": "0916457537", "eng": "LA AUNG", "iCard": "MM4100991303", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北圓山大飯店"}, {"id": "414262", "cls": "餐一和", "name": "阮輝直", "g": "男", "grade": "1", "nation": "越南", "phone": "0916928244", "eng": "NGUYEN HUY TRUC", "iCard": "VN4100942565", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "明水三井餐廳有限公司-明水三井"}, {"id": "414263", "cls": "餐一和", "name": "周建倫", "g": "男", "grade": "1", "nation": "越南", "phone": "0976443565", "eng": "CHAU KIEN LUAN", "iCard": "VN4100942433", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "明水三井餐廳有限公司-明水三井"}, {"id": "414264", "cls": "餐一和", "name": "孟馨雅", "g": "女", "grade": "1", "nation": "緬甸", "phone": "0954114161", "eng": "AYE MAI", "iCard": "MM5101000234", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1004", "bed": "6床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "寒舍艾美酒店"}, {"id": "414265", "cls": "餐一和", "name": "姜詳慧", "g": "女", "grade": "1", "nation": "緬甸", "phone": "0915564408", "eng": "JA SENG ING", "iCard": "MM5100993207", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1005", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "鮮沛股份有限公司"}, {"id": "414266", "cls": "餐一和", "name": "段兆奇", "g": "男", "grade": "1", "nation": "緬甸", "phone": "0981025435", "eng": "NYI NYI NAING", "iCard": "MM4101029913", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "新竹國賓大飯店"}, {"id": "414267", "cls": "餐一和", "name": "唐嘉惠", "g": "女", "grade": "1", "nation": "泰國", "phone": "0981564914", "eng": "MISS PHONWADI SAENTHANG", "iCard": "TH5101031339", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北圓山大飯店"}, {"id": "414268", "cls": "餐一和", "name": "孫美燕", "g": "女", "grade": "1", "nation": "越南", "phone": "0967342740", "eng": "SIN MY DIN", "iCard": "VN5100907938", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1002", "bed": "2床", "inDate": "", "st": "職場實習", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "鮮沛股份有限公司"}, {"id": "414269", "cls": "餐一和", "name": "張國源", "g": "男", "grade": "1", "nation": "越南", "phone": "0916642282", "eng": "TRUONG QUOC NGUYEN", "iCard": "VN4100943605", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "明水三井餐廳有限公司-明水三井"}, {"id": "414270", "cls": "餐一和", "name": "許玉如萍", "g": "女", "grade": "1", "nation": "越南", "phone": "0989515744", "eng": "HY NGOC NHU BINH", "iCard": "VN510134815", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1002", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北萬豪酒店"}, {"id": "414271", "cls": "餐一和", "name": "陳均強", "g": "男", "grade": "1", "nation": "越南", "phone": "0916540701", "eng": "SAN QUAN CUONG", "iCard": "VN4100948828", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "明水三井餐廳有限公司-明水三井"}, {"id": "414272", "cls": "餐一和", "name": "陳金瑞", "g": "女", "grade": "1", "nation": "越南", "phone": "0976334671", "eng": "TRAN KIM THUY", "iCard": "VN5100908043", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1002", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "414273", "cls": "餐一和", "name": "陳家敏", "g": "女", "grade": "1", "nation": "越南", "phone": "0976476446", "eng": "TRAN GIA MAN", "iCard": "VN5100890340", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1002", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "414274", "cls": "餐一和", "name": "陳嘉怡", "g": "女", "grade": "1", "nation": "緬甸", "phone": "0916915134", "eng": "BAWK SENG", "iCard": "MM5100998610", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1005", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "寒舍艾美酒店"}, {"id": "414275", "cls": "餐一和", "name": "曾美萍", "g": "女", "grade": "1", "nation": "越南", "phone": "0915401244", "eng": "CHANG MY BINH", "iCard": "VN5100948882", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1001", "bed": "3床", "inDate": "", "st": "職場實習", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "寒舍艾美酒店"}, {"id": "414276", "cls": "餐一和", "name": "黃金俊", "g": "男", "grade": "1", "nation": "越南", "phone": "0916617145", "eng": "VONG KIM TUAN", "iCard": "VN4100910869", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "明水三井餐廳有限公司-明水三井"}, {"id": "414277", "cls": "餐一和", "name": "黃金蓮", "g": "女", "grade": "1", "nation": "越南", "phone": "0900455833", "eng": "VONG KIM LIEN", "iCard": "VN5100913084", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1003", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "414278", "cls": "餐一和", "name": "黃銀鳳", "g": "女", "grade": "1", "nation": "泰國", "phone": "0916780641", "eng": "RUNGTHIWA KHOROMKLANG", "iCard": "TH5101031594", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北圓山大飯店"}, {"id": "414279", "cls": "餐一和", "name": "楊氏嬌莊", "g": "女", "grade": "1", "nation": "越南", "phone": "0967203734", "eng": "DUONG THI KIEU TRANG", "iCard": "VN5100943933", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1003", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "寒舍艾美酒店"}, {"id": "414280", "cls": "餐一和", "name": "楊淑如", "g": "女", "grade": "1", "nation": "越南", "phone": "0930427691", "eng": "DUONG QUE BINH", "iCard": "VN5101031811", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1003", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "414281", "cls": "餐一和", "name": "楊新宏", "g": "男", "grade": "1", "nation": "緬甸", "phone": "0927419279", "eng": "HTOO MYAT KYAW", "iCard": "MM4101029387", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "新竹國賓大飯店"}, {"id": "414282", "cls": "餐一和", "name": "楊慧嵐", "g": "女", "grade": "1", "nation": "越南", "phone": "0984028350", "eng": "DUONG TUE LAM", "iCard": "VN5100942489", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1003", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "414283", "cls": "餐一和", "name": "廖常發", "g": "男", "grade": "1", "nation": "緬甸", "phone": "0931238845", "eng": "MYO THEIN TUN", "iCard": "MM4101029319", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北圓山大飯店"}, {"id": "414284", "cls": "餐一和", "name": "廖艷麗", "g": "女", "grade": "1", "nation": "緬甸", "phone": "0968004484", "eng": "NGWE THAZIN", "iCard": "MM5101029902", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1005", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北萬豪酒店"}, {"id": "414285", "cls": "餐一和", "name": "鄧才德", "g": "男", "grade": "1", "nation": "越南", "phone": "0976481466", "eng": "TANG TAI DUC", "iCard": "VN4101031822", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "906", "bed": "3床", "inDate": "", "st": "職場實習", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": ""}, {"id": "414287", "cls": "餐一和", "name": "鍾義善興", "g": "男", "grade": "1", "nation": "越南", "phone": "0976412108", "eng": "CHUNG NGHIA THIEN HUNG", "iCard": "VN4100943837", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "906", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "鮮沛股份有限公司"}, {"id": "414288", "cls": "餐一和", "name": "嚴國堅", "g": "男", "grade": "1", "nation": "越南", "phone": "0954151662", "eng": "HO QUOC KIEN", "iCard": "VN4100942128", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "906", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北萬豪酒店"}, {"id": "414289", "cls": "餐一和", "name": "蘇玉成", "g": "男", "grade": "1", "nation": "越南", "phone": "0916657243", "eng": "SU NGOC THANH", "iCard": "VN4100948653", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "906", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "鮮沛股份有限公司"}, {"id": "414290", "cls": "餐一平", "name": "孔閃美", "g": "女", "grade": "1", "nation": "緬甸", "phone": "0916586245", "eng": "KHAW HTAR MAR", "iCard": "MM5101062127", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1004", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "414291", "cls": "餐一平", "name": "朱氏垂雲", "g": "女", "grade": "1", "nation": "越南", "phone": "0981494157", "eng": "CHU THI THUY VAN", "iCard": "VN5100942570", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1106", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "鮮沛股份有限公司"}, {"id": "414292", "cls": "餐一平", "name": "呂氏芳微", "g": "女", "grade": "1", "nation": "越南", "phone": "0926400695", "eng": "LU THI PHUONG VY", "iCard": "VN5101031621", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1106", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "鮮沛股份有限公司"}, {"id": "414293", "cls": "餐一平", "name": "李文翠", "g": "女", "grade": "1", "nation": "泰國", "phone": "0976024044", "eng": "PHLOIFA SAELEE", "iCard": "TH5101031586", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1205", "bed": "6床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "414294", "cls": "餐一平", "name": "李代英", "g": "男", "grade": "1", "nation": "越南", "phone": "0967340649", "eng": "LY DOI ANH", "iCard": "VN4101031632", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "903", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北圓山大飯店"}, {"id": "414295", "cls": "餐一平", "name": "李代寶", "g": "男", "grade": "1", "nation": "越南", "phone": "0976374942", "eng": "LY DOI BAO", "iCard": "VN4101031640", "emgName": "", "emgPhone": "", "email": "", "b": "M2", "r": "805", "bed": "4床", "inDate": "", "st": "職場實習", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "新竹國賓大飯店"}, {"id": "414296", "cls": "餐一平", "name": "李麗珍", "g": "女", "grade": "1", "nation": "越南", "phone": "0976429274", "eng": "LY LE CHAN", "iCard": "VN5101031654", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "寒舍艾美酒店"}, {"id": "414297", "cls": "餐一平", "name": "阮芳瓊", "g": "女", "grade": "1", "nation": "越南", "phone": "0913534872", "eng": "NGUYEN PHUONG QUYNH", "iCard": "VN5101031670", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1106", "bed": "6床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北圓山大飯店"}, {"id": "414298", "cls": "餐一平", "name": "林正勇", "g": "男", "grade": "1", "nation": "越南", "phone": "0976413484", "eng": "LAM CHINH DUNG", "iCard": "VN4100943019", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "906", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "新竹國賓大飯店"}, {"id": "414299", "cls": "餐一平", "name": "林嘉欣", "g": "女", "grade": "1", "nation": "越南", "phone": "0976450480", "eng": "LAM GIA HAN", "iCard": "VN5101031688", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1107", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北萬豪酒店"}, {"id": "414300", "cls": "餐一平", "name": "胡愛玲", "g": "女", "grade": "1", "nation": "越南", "phone": "0968173747", "eng": "HO AI LINH", "iCard": "VN5100969730", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1107", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "414301", "cls": "餐一平", "name": "胡麗鴛", "g": "女", "grade": "1", "nation": "越南", "phone": "0917814373", "eng": "HO LE UYEN", "iCard": "VN5100922424", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1107", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北萬豪酒店"}, {"id": "414303", "cls": "餐一平", "name": "張金雪", "g": "女", "grade": "1", "nation": "越南", "phone": "0976150624", "eng": "TRUONG KIM TUYET", "iCard": "VN5100942554", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1107", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "414304", "cls": "餐一平", "name": "張國輝", "g": "男", "grade": "1", "nation": "越南", "phone": "0916680740", "eng": "TRUONG QUOC HUY", "iCard": "VN4101031723", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "904", "bed": "6床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "新竹國賓大飯店"}, {"id": "414305", "cls": "餐一平", "name": "許永發", "g": "男", "grade": "1", "nation": "越南", "phone": "0966813694", "eng": "HY VINH PHAT", "iCard": "VN4101031467", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "904", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "明水三井餐廳有限公司-明水三井"}, {"id": "414306", "cls": "餐一平", "name": "陳氏瓊如", "g": "女", "grade": "1", "nation": "越南", "phone": "0916641319", "eng": "TRAN THI QUYNH NHU", "iCard": "VN5101031860", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1002", "bed": "6床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北萬豪酒店"}, {"id": "414307", "cls": "餐一平", "name": "陳欣欣", "g": "女", "grade": "1", "nation": "印尼", "phone": "0976374860", "eng": "STEVANY", "iCard": "ID5101031543", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1204", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "鮮沛股份有限公司"}, {"id": "414309", "cls": "餐一平", "name": "陸邦華", "g": "男", "grade": "1", "nation": "越南", "phone": "0968094798", "eng": "LOC PONG VA", "iCard": "VN4100948471", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北圓山大飯店"}, {"id": "414310", "cls": "餐一平", "name": "陸邦豪", "g": "男", "grade": "1", "nation": "越南", "phone": "0926175467", "eng": "LOC BANG HAO", "iCard": "VN4100943027", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "904", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "明水三井餐廳有限公司-明水三井"}, {"id": "414311", "cls": "餐一平", "name": "陸美珍", "g": "女", "grade": "1", "nation": "越南", "phone": "0981384142", "eng": "LOC MY CHANH", "iCard": "VN5100948817", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1001", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北圓山大飯店"}, {"id": "414312", "cls": "餐一平", "name": "陸澤興", "g": "男", "grade": "1", "nation": "越南", "phone": "0917982417", "eng": "LUC DAT HUNG", "iCard": "VN4100942144", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "905", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "寒舍艾美酒店"}, {"id": "414313", "cls": "餐一平", "name": "曾米莎", "g": "女", "grade": "1", "nation": "越南", "phone": "0917853447", "eng": "CHANG MI SA", "iCard": "VN5101031753", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1107", "bed": "6床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "寒舍艾美酒店"}, {"id": "414314", "cls": "餐一平", "name": "黃金燕", "g": "女", "grade": "1", "nation": "越南", "phone": "0981774524", "eng": "HOANG KIM YEN", "iCard": "VN5101043147", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1105", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "414315", "cls": "餐一平", "name": "黃飛龍", "g": "男", "grade": "1", "nation": "越南", "phone": "0960794532", "eng": "HOANG PHI LONG", "iCard": "VN4101031780", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "905", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "寒舍艾美酒店"}, {"id": "414316", "cls": "餐一平", "name": "楊發", "g": "男", "grade": "1", "nation": "越南", "phone": "0981041323", "eng": "DUONG PHAT BAO", "iCard": "VN4100941708", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北圓山大飯店"}, {"id": "414317", "cls": "餐一平", "name": "溫李娥", "g": "女", "grade": "1", "nation": "越南", "phone": "0976599164", "eng": "VAN LY NGA", "iCard": "VN5100907961", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1001", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "414318", "cls": "餐一平", "name": "裴方柯", "g": "男", "grade": "1", "nation": "越南", "phone": "0900518724", "eng": "BUI PHUONG KHA", "iCard": "VN4100942532", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北圓山大飯店"}, {"id": "414319", "cls": "餐一平", "name": "趙氏金雲", "g": "女", "grade": "1", "nation": "越南", "phone": "0981493534", "eng": "CHIU THI KIM VAN", "iCard": "VN5100935582", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1001", "bed": "6床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "414320", "cls": "餐一平", "name": "禤保詩", "g": "女", "grade": "1", "nation": "越南", "phone": "0917849457", "eng": "HIN BAO THY", "iCard": "VN5100943529", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1001", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北晶華酒店"}, {"id": "414321", "cls": "餐一平", "name": "賴玉明", "g": "男", "grade": "1", "nation": "越南", "phone": "0976335845", "eng": "LAI NGOC MINH", "iCard": "VN4101062132", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "905", "bed": "6床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "明水三井餐廳有限公司-明水三井"}, {"id": "414322", "cls": "餐一平", "name": "鍾德發", "g": "男", "grade": "1", "nation": "越南", "phone": "0916759642", "eng": "CHONG DUC PHAT", "iCard": "VN4101031459", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "906", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "新竹國賓大飯店"}, {"id": "414323", "cls": "餐一平", "name": "蘇玉香", "g": "女", "grade": "1", "nation": "越南", "phone": "0960846694", "eng": "SU NGOC HUONG", "iCard": "VN5100910502", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1107", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台北萬豪酒店"}, {"id": "414286", "cls": "餐一平", "name": "鄭玉蘭", "g": "女", "grade": "1", "nation": "越南", "phone": "0984193349", "eng": "CHENH NGOC LAN", "iCard": "VN5101031837", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1003", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "鮮沛股份有限公司"}, {"id": "418047", "cls": "資訊一孝", "name": "王玉玲", "g": "女", "grade": "1", "nation": "越南", "phone": "0976565442", "eng": "HUYNH NGOC LINH", "iCard": "VN5100910700", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1104", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "418048", "cls": "資訊一孝", "name": "古俊達", "g": "男", "grade": "1", "nation": "越南", "phone": "0976363840", "eng": "CO TUAN DAT", "iCard": "VN4100942896", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "903", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "崧豐股份有限公司"}, {"id": "418049", "cls": "資訊一孝", "name": "石岢霓", "g": "女", "grade": "1", "nation": "馬來西亞", "phone": "0900081815", "eng": "SHEK KE NI", "iCard": "MY5101031280", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "418050", "cls": "資訊一孝", "name": "朱德明", "g": "男", "grade": "1", "nation": "越南", "phone": "0981374409", "eng": "CHI DUC MINH", "iCard": "VN4100943290", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "604", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "418051", "cls": "資訊一孝", "name": "江明日", "g": "女", "grade": "1", "nation": "越南", "phone": "0900409457", "eng": "CONG MINH NHAT", "iCard": "VN5101062105", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1104", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "418053", "cls": "資訊一孝", "name": "吳俊賢", "g": "男", "grade": "1", "nation": "柬埔寨", "phone": "0968167409", "eng": "OU BUNSIM", "iCard": "KH4100952236", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "604", "bed": "3床", "inDate": "", "st": "職場實習", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "418054", "cls": "資訊一孝", "name": "李小花", "g": "女", "grade": "1", "nation": "越南", "phone": "0981418040", "eng": "LY TIEU HOA", "iCard": "VN5101062089", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1104", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "崧豐股份有限公司"}, {"id": "418055", "cls": "資訊一孝", "name": "李玉金", "g": "女", "grade": "1", "nation": "越南", "phone": "0917971241", "eng": "LY NGOC KIM", "iCard": "VN5100907276", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1104", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "418056", "cls": "資訊一孝", "name": "李青山", "g": "男", "grade": "1", "nation": "越南", "phone": "0976484772", "eng": "LY THANH SON", "iCard": "VN4100937342", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台灣三洋電機股份有限公司"}, {"id": "418057", "cls": "資訊一孝", "name": "阮馮善海", "g": "男", "grade": "1", "nation": "越南", "phone": "0981367420", "eng": "NGUYEN PHUNG THIEN HAI", "iCard": "VN4101062090", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "903", "bed": "3床", "inDate": "", "st": "職場實習", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "崧豐股份有限公司"}, {"id": "418058", "cls": "資訊一孝", "name": "金源仁", "g": "男", "grade": "1", "nation": "緬甸", "phone": "0968074278", "eng": "BENJAMIN LAT NAWNG", "iCard": "MM4100998654", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "418059", "cls": "資訊一孝", "name": "洪天金", "g": "男", "grade": "1", "nation": "越南", "phone": "0968156411", "eng": "HONG THIN CAM", "iCard": "VN4100938431", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "903", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "418060", "cls": "資訊一孝", "name": "奚永成", "g": "男", "grade": "1", "nation": "越南", "phone": "0926225574", "eng": "CAY VINH THANH", "iCard": "VN4100958348", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台灣三洋電機股份有限公司"}, {"id": "418062", "cls": "資訊一孝", "name": "馬如清", "g": "女", "grade": "1", "nation": "緬甸", "phone": "0955209864", "eng": "MYAT NOE KHIN", "iCard": "MM5101010035", "emgName": "", "emgPhone": "", "email": "", "b": "F3", "r": "1004", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "418063", "cls": "資訊一孝", "name": "梁李德", "g": "男", "grade": "1", "nation": "越南", "phone": "0981449007", "eng": "LUONG LY DUC", "iCard": "VN4101031962", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "603", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "418064", "cls": "資訊一孝", "name": "許永豐", "g": "男", "grade": "1", "nation": "越南", "phone": "0976439153", "eng": "HY VUNG PHUNG", "iCard": "VN4100922302", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台灣三洋電機股份有限公司"}, {"id": "418066", "cls": "資訊一孝", "name": "彭君安", "g": "男", "grade": "1", "nation": "緬甸", "phone": "0916889147", "eng": "PETER AUNG", "iCard": "MM4100991329", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "603", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "418067", "cls": "資訊一孝", "name": "黃日發", "g": "男", "grade": "1", "nation": "越南", "phone": "0900402714", "eng": "VONG NHAT PHAT", "iCard": "VN4100937474", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台灣三洋電機股份有限公司"}, {"id": "418068", "cls": "資訊一孝", "name": "黃志權", "g": "男", "grade": "1", "nation": "越南", "phone": "0916837048", "eng": "VONG CHI QUYEN", "iCard": "VN4101031772", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "418069", "cls": "資訊一孝", "name": "黃金燕", "g": "女", "grade": "1", "nation": "越南", "phone": "0981774524", "eng": "HOANG KIM YEN", "iCard": "VN5101043147", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1105", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "418070", "cls": "資訊一孝", "name": "黃發", "g": "男", "grade": "1", "nation": "越南", "phone": "0900584590", "eng": "HOANG PHAT", "iCard": "VN4100916056", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "607", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "418071", "cls": "資訊一孝", "name": "黃碧霞", "g": "女", "grade": "1", "nation": "越南", "phone": "0903559480", "eng": "VONG BICH HA", "iCard": "VN5100908605", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1105", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "418072", "cls": "資訊一孝", "name": "楊玉秋", "g": "女", "grade": "1", "nation": "越南", "phone": "0967140245", "eng": "DUONG NGOC THU", "iCard": "VN5100942349", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1105", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "崧豐股份有限公司"}, {"id": "418073", "cls": "資訊一孝", "name": "範氏月兒", "g": "女", "grade": "1", "nation": "越南", "phone": "0916854533", "eng": "PHAM THI NGUYET NHI", "iCard": "VN5100924909", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "418075", "cls": "資訊一孝", "name": "鄧氏艷香", "g": "女", "grade": "1", "nation": "越南", "phone": "0960843547", "eng": "DANG THI DIEM HUONG", "iCard": "VN5101046389", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1105", "bed": "6床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "418076", "cls": "資訊一孝", "name": "謝氏映紅", "g": "女", "grade": "1", "nation": "越南", "phone": "0916224746", "eng": "TA THI ANH HONG", "iCard": "VN5100908415", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1106", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "418077", "cls": "資訊一孝", "name": "顏美玲", "g": "女", "grade": "1", "nation": "越南", "phone": "0916624737", "eng": "NGAN MY LINH", "iCard": "VN5101062113", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1106", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "418078", "cls": "資訊一仁", "name": "朱佛圓", "g": "女", "grade": "1", "nation": "印尼", "phone": "0984120780", "eng": "SECHILIA", "iCard": "ID5101031527", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1204", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "418079", "cls": "資訊一仁", "name": "何國強", "g": "男", "grade": "1", "nation": "越南", "phone": "0938454109", "eng": "HO QUOC CUONG", "iCard": "VN4101031426", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "606", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台灣三洋電機股份有限公司"}, {"id": "418080", "cls": "資訊一仁", "name": "李建興", "g": "男", "grade": "1", "nation": "印尼", "phone": "0976414558", "eng": "LEONARDO", "iCard": "ID4101031843", "emgName": "", "emgPhone": "", "email": "", "b": "M2", "r": "804", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "418081", "cls": "資訊一仁", "name": "李華傑", "g": "男", "grade": "1", "nation": "越南", "phone": "0976471429", "eng": "LY VA KIT", "iCard": "VN4101031418", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "606", "bed": "3床", "inDate": "", "st": "職場實習", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "418082", "cls": "資訊一仁", "name": "杜氏玉梅", "g": "女", "grade": "1", "nation": "越南", "phone": "0981457554", "eng": "DO THI NGOC MAI", "iCard": "VN5101031407", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1102", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "418083", "cls": "資訊一仁", "name": "杜重義", "g": "男", "grade": "1", "nation": "越南", "phone": "0916755047", "eng": "DO TRONG NGHIA", "iCard": "VN4101031665", "emgName": "", "emgPhone": "", "email": "", "b": "M2", "r": "805", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "418084", "cls": "資訊一仁", "name": "阮文北", "g": "男", "grade": "1", "nation": "越南", "phone": "0916908440", "eng": "NGUYEN VAN BAC", "iCard": "VN4101031384", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台灣三洋電機股份有限公司"}, {"id": "418085", "cls": "資訊一仁", "name": "阮玉媚", "g": "女", "grade": "1", "nation": "越南", "phone": "0916448404", "eng": "NGUYEN NGOC MY", "iCard": "VN5101066437", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1102", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "418086", "cls": "資訊一仁", "name": "周天輝", "g": "男", "grade": "1", "nation": "越南", "phone": "0900447073", "eng": "CHU THIEN HUY", "iCard": "VN4100910281", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "606", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台灣三洋電機股份有限公司"}, {"id": "418087", "cls": "資訊一仁", "name": "林氏錦霞", "g": "女", "grade": "1", "nation": "越南", "phone": "0984178447", "eng": "LAM THI CAM HA", "iCard": "VN5100894169", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1102", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "418088", "cls": "資訊一仁", "name": "胡長美香", "g": "女", "grade": "1", "nation": "越南", "phone": "0976439484", "eng": "HO TRUONG MY HUONG", "iCard": "VN5101031373", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1102", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "崧豐股份有限公司"}, {"id": "418089", "cls": "資訊一仁", "name": "范慶登", "g": "男", "grade": "1", "nation": "越南", "phone": "0926360430", "eng": "PHAM KHANH DANG", "iCard": "VN4100948307", "emgName": "", "emgPhone": "", "email": "", "b": "M2", "r": "805", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "418091", "cls": "資訊一仁", "name": "馬若安", "g": "女", "grade": "1", "nation": "菲律賓", "phone": "0916743476", "eng": "RAE ANN MAMALO", "iCard": "PH5100978126", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1203", "bed": "6床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "418092", "cls": "資訊一仁", "name": "張洪金", "g": "男", "grade": "1", "nation": "越南", "phone": "0984197011", "eng": "CHUONG HONG KIM", "iCard": "VN4101031715", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "607", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "418093", "cls": "資訊一仁", "name": "張仲", "g": "男", "grade": "1", "nation": "越南", "phone": "0976334476", "eng": "CHENH THIET TRONG", "iCard": "VN4101031731", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "607", "bed": "7床", "inDate": "", "st": "職場實習", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "台灣三洋電機股份有限公司"}, {"id": "418094", "cls": "資訊一仁", "name": "梅志保", "g": "男", "grade": "1", "nation": "越南", "phone": "0981967454", "eng": "MAI CHI BAO", "iCard": "VN4101031343", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "606", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "418095", "cls": "資訊一仁", "name": "許天樂", "g": "男", "grade": "1", "nation": "越南", "phone": "0916452973", "eng": "HUA THIEN LAC", "iCard": "VN4100942425", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "907", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "崧豐股份有限公司"}, {"id": "418096", "cls": "資訊一仁", "name": "曾氏天娥", "g": "女", "grade": "1", "nation": "越南", "phone": "0938678634", "eng": "CHANG THI THIEN NGA", "iCard": "VN5100908399", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1102", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "418097", "cls": "資訊一仁", "name": "馮李娟", "g": "女", "grade": "1", "nation": "越南", "phone": "0926497978", "eng": "PHONG LY QUYEN", "iCard": "VN5100937646", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "418098", "cls": "資訊一仁", "name": "黃玉芽靈", "g": "女", "grade": "1", "nation": "越南", "phone": "0989304453", "eng": "HUYNH NGOC NHA LINH", "iCard": "VN5101031324", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1103", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "崧豐股份有限公司"}, {"id": "418099", "cls": "資訊一仁", "name": "黃玉榮", "g": "男", "grade": "1", "nation": "越南", "phone": "0981475336", "eng": "VONG NGOC VINH", "iCard": "VN4101031350", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "418100", "cls": "資訊一仁", "name": "黃國聲", "g": "男", "grade": "1", "nation": "印尼", "phone": "0936708487", "eng": "DION ALDORA", "iCard": "ID4101054217", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "604", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "418101", "cls": "資訊一仁", "name": "楊一峰", "g": "男", "grade": "1", "nation": "越南", "phone": "0976044671", "eng": "GIENG NHAT PHONG", "iCard": "VN4101031442", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "903", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "418102", "cls": "資訊一仁", "name": "楊玉燕", "g": "女", "grade": "1", "nation": "越南", "phone": "0967299941", "eng": "DUONG NGOC YEN", "iCard": "VN5101031803", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1103", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "418103", "cls": "資訊一仁", "name": "楊慧愛", "g": "女", "grade": "1", "nation": "印尼", "phone": "0900106241", "eng": "CLARA YANG", "iCard": "ID5101054222", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1204", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "418104", "cls": "資訊一仁", "name": "溫珍鳳", "g": "女", "grade": "1", "nation": "越南", "phone": "0976547584", "eng": "VAN CHANH PHUNG", "iCard": "VN5100922374", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1103", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "418105", "cls": "資訊一仁", "name": "葉宇棠", "g": "男", "grade": "1", "nation": "越南", "phone": "0917938419", "eng": "DZIP DI THONG", "iCard": "VN4101031392", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "902", "bed": "6床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "崧豐股份有限公司"}, {"id": "418106", "cls": "資訊一仁", "name": "潘黃青銀", "g": "女", "grade": "1", "nation": "越南", "phone": "0981419405", "eng": "PHAN HOANG THANH NGAN", "iCard": "VN5101031431", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1103", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "418107", "cls": "資訊一仁", "name": "謝進峰", "g": "男", "grade": "1", "nation": "越南", "phone": "0916583453", "eng": "TA TAN PHONG", "iCard": "VN4100908277", "emgName": "", "emgPhone": "", "email": "", "b": "M2", "r": "805", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "418108", "cls": "資訊一仁", "name": "嚴玉玲", "g": "女", "grade": "1", "nation": "越南", "phone": "0981562244", "eng": "NGHIEM NGOC LINH", "iCard": "VN5101031365", "emgName": "", "emgPhone": "", "email": "", "b": "F2", "r": "1104", "bed": "1床", "inDate": "", "st": "職場實習", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "418109", "cls": "資訊一仁", "name": "唐維龍", "g": "男", "grade": "1", "nation": "越南", "phone": "0981448623", "eng": "THONG DUY LONG", "iCard": "VN4100943597", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "904", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": ""}, {"id": "318047", "cls": "資訊二孝", "name": "范瑞桄", "g": "男", "grade": "2", "nation": "印尼", "phone": "0903721741", "eng": "MANZO FAN", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "318048", "cls": "資訊二孝", "name": "王義勇", "g": "男", "grade": "2", "nation": "印尼", "phone": "0916514246", "eng": "CHRISTIAN", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "318049", "cls": "資訊二孝", "name": "黃詩芸", "g": "女", "grade": "2", "nation": "越南", "phone": "0916254451", "eng": "EVELYN CLAUDYA WIJAYA", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1201", "bed": "6床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "318050", "cls": "資訊二孝", "name": "賴詠宏", "g": "男", "grade": "2", "nation": "印尼", "phone": "0916758324", "eng": "KHENNY JUVIALDO", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "318051", "cls": "資訊二孝", "name": "陳美惠", "g": "女", "grade": "2", "nation": "印尼", "phone": "0916855408", "eng": "JOSCLYN PRISSILIA CHEN", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "318052", "cls": "資訊二孝", "name": "蔡小飛", "g": "男", "grade": "2", "nation": "印尼", "phone": "0903558234", "eng": "ADIEL CHAIFEI", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M2", "r": "804", "bed": "6床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "318053", "cls": "資訊二孝", "name": "魏實志", "g": "男", "grade": "2", "nation": "印尼", "phone": "0981926024", "eng": "DENI RAWAN", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "318054", "cls": "資訊二孝", "name": "王財和", "g": "男", "grade": "2", "nation": "印尼", "phone": "0981042231", "eng": "MICHAEL LIM", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "318055", "cls": "資訊二孝", "name": "陳翔", "g": "男", "grade": "2", "nation": "印尼", "phone": "0900460154", "eng": "JEVON FELIXCENT", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "318056", "cls": "資訊二孝", "name": "蔡禮", "g": "女", "grade": "2", "nation": "越南", "phone": "0981283344", "eng": "VIVIEN SUVINI", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "318057", "cls": "資訊二孝", "name": "林安宏", "g": "男", "grade": "2", "nation": "印尼", "phone": "0960911403", "eng": "JERRY", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "604", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "318058", "cls": "資訊二孝", "name": "黃梅花", "g": "女", "grade": "2", "nation": "印尼", "phone": "0936457403", "eng": "MEI HUA", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1203", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "318059", "cls": "資訊二孝", "name": "溫凱文", "g": "男", "grade": "2", "nation": "印尼", "phone": "0989726184", "eng": "KEVIN", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "318060", "cls": "資訊二孝", "name": "王志堅", "g": "男", "grade": "2", "nation": "印尼", "phone": "0900374745", "eng": "HERRI CHANDRA", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "602", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "318061", "cls": "資訊二孝", "name": "曾月", "g": "女", "grade": "2", "nation": "越南", "phone": "0989913254", "eng": "VIVI JULITA", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "318062", "cls": "資訊二孝", "name": "武添", "g": "男", "grade": "2", "nation": "越南", "phone": "0903463820", "eng": "WILLYANTO", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "318063", "cls": "資訊二孝", "name": "廖恩杉", "g": "男", "grade": "2", "nation": "印尼", "phone": "0989677643", "eng": "KAENFO LIAWONE", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "604", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "318064", "cls": "資訊二孝", "name": "黃建成", "g": "男", "grade": "2", "nation": "越南", "phone": "0903684024", "eng": "VONG KIEN THANH", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "904", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "318065", "cls": "資訊二孝", "name": "潘文桂", "g": "男", "grade": "2", "nation": "越南", "phone": "0916479733", "eng": "PHUN VAN QUY", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "902", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "318066", "cls": "資訊二孝", "name": "劉真安", "g": "男", "grade": "2", "nation": "越南", "phone": "0900192544", "eng": "LAU CHIN AN", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "902", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "318068", "cls": "資訊二孝", "name": "刀仙婷", "g": "女", "grade": "2", "nation": "緬甸", "phone": "0981454951", "eng": "CHO CHO THANT", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1203", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "崧豐股份有限公司"}, {"id": "318070", "cls": "資訊二孝", "name": "李美安", "g": "女", "grade": "2", "nation": "越南", "phone": "0981067644", "eng": "LY MY YEN", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1207", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "318071", "cls": "資訊二孝", "name": "黃全雄", "g": "男", "grade": "2", "nation": "越南", "phone": "0967057814", "eng": "VONG XIN HUNG", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "", "r": "", "bed": "", "inDate": "", "st": "等候分配", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "318072", "cls": "資訊二孝", "name": "黎玉燕", "g": "女", "grade": "2", "nation": "越南", "phone": "0981546698", "eng": "LE NGOC YEN", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1207", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "318073", "cls": "資訊二孝", "name": "黃佩逢", "g": "女", "grade": "2", "nation": "越南", "phone": "0989457004", "eng": "VONG BOI PHUNG", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1207", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "318074", "cls": "資訊二仁", "name": "余增德", "g": "男", "grade": "2", "nation": "印尼", "phone": "0900534083", "eng": "PETER JICEN", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M2", "r": "803", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "318075", "cls": "資訊二仁", "name": "唐穫昌", "g": "男", "grade": "2", "nation": "印尼", "phone": "0900570848", "eng": "MAX JOVAN TJIPTO", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M2", "r": "803", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "318076", "cls": "資訊二仁", "name": "陳偉運", "g": "男", "grade": "2", "nation": "印尼", "phone": "0916465897", "eng": "BUI JUN", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "602", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "318077", "cls": "資訊二仁", "name": "陳偉存", "g": "男", "grade": "2", "nation": "印尼", "phone": "0900042375", "eng": "RIZKY", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "602", "bed": "6床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "318078", "cls": "資訊二仁", "name": "沈志平", "g": "男", "grade": "2", "nation": "印尼", "phone": "0938481497", "eng": "FERY SIM FIFE", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M2", "r": "803", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "318079", "cls": "資訊二仁", "name": "陳美茹", "g": "女", "grade": "2", "nation": "印尼", "phone": "0976412921", "eng": "MESSY SOVIAN PERMATA SARI", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1201", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "318080", "cls": "資訊二仁", "name": "葉清源", "g": "男", "grade": "2", "nation": "印尼", "phone": "0903280914", "eng": "RICKI RENDI", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "602", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "318081", "cls": "資訊二仁", "name": "劉素風", "g": "男", "grade": "2", "nation": "印尼", "phone": "0916549065", "eng": "LIU SHU FUNG", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M2", "r": "803", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "318082", "cls": "資訊二仁", "name": "吳多尼", "g": "男", "grade": "2", "nation": "印尼", "phone": "0916924931", "eng": "TONY", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M2", "r": "804", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "318083", "cls": "資訊二仁", "name": "陳圍經", "g": "男", "grade": "2", "nation": "印尼", "phone": "0900419918", "eng": "NIXON SUPIAN LENTONIUS", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "602", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "318084", "cls": "資訊二仁", "name": "劉永鵬", "g": "男", "grade": "2", "nation": "印尼", "phone": "0916454590", "eng": "GLEN GALENO", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M2", "r": "803", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "318085", "cls": "資訊二仁", "name": "葉永源", "g": "男", "grade": "2", "nation": "印尼", "phone": "0976579714", "eng": "KELVIN GUNAWAN", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M3", "r": "603", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "318086", "cls": "資訊二仁", "name": "吳家森", "g": "男", "grade": "2", "nation": "印尼", "phone": "0989460894", "eng": "KENZIE GOH", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M2", "r": "804", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "318087", "cls": "資訊二仁", "name": "古家有", "g": "男", "grade": "2", "nation": "印尼", "phone": "0966998459", "eng": "WILLIAM CORNELIUS", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M2", "r": "804", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "318088", "cls": "資訊二仁", "name": "謝國輝", "g": "男", "grade": "2", "nation": "越南", "phone": "0981916984", "eng": "TA QUOC QUY", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "902", "bed": "1床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "318090", "cls": "資訊二仁", "name": "郭李紅錦", "g": "女", "grade": "2", "nation": "越南", "phone": "0926116594", "eng": "QUACH LY HONG CAM", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1207", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "318091", "cls": "資訊二仁", "name": "羅麗珍", "g": "女", "grade": "2", "nation": "越南", "phone": "0917493479", "eng": "LO LE TRAN", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1207", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "318092", "cls": "資訊二仁", "name": "李善", "g": "女", "grade": "2", "nation": "越南", "phone": "0931376814", "eng": "LY THIEN DUYEN", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1207", "bed": "6床", "inDate": "", "st": "職場實習", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "318093", "cls": "資訊二仁", "name": "詹賢女", "g": "女", "grade": "2", "nation": "印尼", "phone": "0967015844", "eng": "CHARITY VIENA", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1201", "bed": "2床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "318094", "cls": "資訊二仁", "name": "何建成", "g": "男", "grade": "2", "nation": "印尼", "phone": "0984039427", "eng": "HANSEN", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M2", "r": "804", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "318095", "cls": "資訊二仁", "name": "曾曉翠", "g": "女", "grade": "2", "nation": "印尼", "phone": "0976983841", "eng": "CINDI KRADIA", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1201", "bed": "3床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "恩捷電子股份有限公司"}, {"id": "318096", "cls": "資訊二仁", "name": "葉映雯", "g": "女", "grade": "2", "nation": "印尼", "phone": "0981936154", "eng": "MARIA SONATA", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1201", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "318097", "cls": "資訊二仁", "name": "魏曉靈", "g": "女", "grade": "2", "nation": "印尼", "phone": "0954103645", "eng": "CHELSE", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1201", "bed": "5床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "信昌電子陶瓷股份有限公司-楊梅廠"}, {"id": "318099", "cls": "資訊二仁", "name": "朱梅英", "g": "女", "grade": "2", "nation": "越南(北越)", "phone": "0900376944", "eng": "CHU MAI ANH", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "F1", "r": "1203", "bed": "4床", "inDate": "", "st": "入住", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}, {"id": "318100", "cls": "資訊二仁", "name": "冼陞傑", "g": "男", "grade": "2", "nation": "越南", "phone": "970709", "eng": "SLEN THANG KIET", "iCard": "", "emgName": "", "emgPhone": "", "email": "", "b": "M1", "r": "902", "bed": "2床", "inDate": "", "st": "職場實習", "internStart1": "", "internEnd1": "", "internStart2": "", "internEnd2": "", "internCo": "精泉科技股份有限公司"}];
+
+// Ensure backward-compat: add missing fields to embedded students
+STUDENTS.forEach(s=>{
+  if(!s.emgName)s.emgName='';
+  if(!s.emgPhone)s.emgPhone='';
+  if(!s.email)s.email='';
+  if(!s.inDate)s.inDate='';
+  if(!s.iCard)s.iCard='';
+  if(!s.internStart1)s.internStart1='';
+  if(!s.internEnd1)s.internEnd1='';
+  if(!s.internStart2)s.internStart2='';
+  if(!s.internEnd2)s.internEnd2='';
+  if(!s.internCo)s.internCo='';
+});
+const BLDS=['F1','F2','F3','M1','M2','M3'];
+const isFem=b=>b[0]==='F';
+const NTAG={'越南':'nvn','印尼':'nid','馬來西亞':'nmy','柬埔寨':'nkh','緬甸':'nmm','泰國':'nth','菲律賓':'nph'};
+const RLABEL={'admin':'管理員','warden':'舍監','inspector':'生輔員','teacher':'導師/班代','chief':'一級主管'};
+const RCOLOR={'admin':'#f04f5b','warden':'#2dd4a0','inspector':'#a78bfa','teacher':'#4d8ef8','chief':'#f59e0b'};
+
+// ── PERMISSIONS per role ──
+// keys: roll(點名), leave_apply(申請假單), leave_approve_w(舍監審核), leave_approve_t(導師審核), leave_approve_c(主管審核), score(評分), admin(管理)
+const DEFAULT_PERMS={
+  admin:{roll:true,leave_apply:true,leave_approve_w:true,leave_approve_t:true,leave_approve_c:true,score:true,admin:true},
+  warden:{roll:true,leave_apply:false,leave_approve_w:true,leave_approve_t:false,leave_approve_c:false,score:false,admin:false},
+  inspector:{roll:false,leave_apply:false,leave_approve_w:false,leave_approve_t:false,leave_approve_c:false,score:true,admin:false},
+  teacher:{roll:false,leave_apply:true,leave_approve_w:false,leave_approve_t:true,leave_approve_c:false,score:false,admin:false},
+  chief:{roll:false,leave_apply:false,leave_approve_w:false,leave_approve_t:false,leave_approve_c:true,score:false,admin:false},
+};
+const PERM_LABELS={roll:'點名作業',leave_apply:'申請假單',leave_approve_w:'舍監審核假單',leave_approve_t:'導師審核假單',leave_approve_c:'主管核准假單',score:'內務評分',admin:'系統管理'};
+
+// ── LS ──
+const LS={
+  get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+};
+
+// ── STATE ──
+let user=null;
+let rollBld=LS.get('rb','F1');
+let stuBld=LS.get('sb','ALL');
+let rollSt=LS.get('rst',{});
+let leaves=LS.get('leaves',initLeaves());
+let scores=LS.get('scores',initScores());
+let scVals={fl:20,dk:15,bd:15,tr:15,cl:10,bt:15,cm:5,pn:0};
+let accounts=LS.get('accounts',initAccounts());
+let perms=LS.get('perms',JSON.parse(JSON.stringify(DEFAULT_PERMS)));
+let gsConfig=LS.get('gsc',{url:'',id:''});
+let lvFilter='all';
+
+function initAccounts(){return[
+  {id:'admin01',name:'admin01',disp:'系統管理員',role:'admin',pw:'1234'},
+  {id:'warden01',name:'warden01',disp:'王舍監',role:'warden',pw:'1234'},
+  {id:'warden02',name:'warden02',disp:'陳舍監',role:'warden',pw:'1234'},
+  {id:'ins01',name:'ins01',disp:'李生輔員',role:'inspector',pw:'1234'},
+  {id:'teacher01',name:'teacher01',disp:'張導師',role:'teacher',pw:'1234'},
+  {id:'chief01',name:'chief01',disp:'林主任',role:'chief',pw:'1234'},
+];}
+
+function initLeaves(){return[
+  {id:'L001',cls:'資訊一仁',stuIds:['418079','418086'],names:'何國強、周天輝',type:'晚歸',start:'2026-03-07T22:00',end:'2026-03-07T23:30',reason:'系上聯誼活動',a1:'已申請 03/07 張導師',a2:'核准 03/07 王舍監',a3:'核准 03/07 林主任',ret:'2026-03-07 23:20',status:'已返舍',by:'張導師'},
+  {id:'L002',cls:'餐一和',stuIds:['414265','414264','414268'],names:'姜詳慧、孟馨雅、孫美燕',type:'返鄉',start:'2026-03-08T06:00',end:'2026-03-10T20:00',reason:'緬甸傳統節日返家',a1:'已申請 03/06 張導師',a2:'核准 03/06 王舍監',a3:'—',ret:'—',status:'待主管核准',by:'張導師'},
+  {id:'L003',cls:'觀一仁',stuIds:['413076','413065'],names:'彭信理、文小婷',type:'就醫',start:'2026-03-08T09:00',end:'2026-03-08T14:00',reason:'健康檢查',a1:'已申請 03/08 李導師',a2:'—',a3:'—',ret:'—',status:'待舍監審核',by:'李導師'},
+  {id:'L004',cls:'資訊二仁',stuIds:['318092'],names:'李善',type:'外宿',start:'2026-03-09T20:00',end:'2026-03-10T08:00',reason:'參加校外活動',a1:'已申請 03/08 王導師',a2:'核准 03/08 陳舍監',a3:'核准 03/08 林主任',ret:'—',status:'請假中',by:'王導師'},
+];}
+
+function initScores(){return[
+  {date:'2026-03-07',b:'F1',r:'1201',ins:'李生輔員',fl:20,dk:15,bd:15,tr:13,cl:10,bt:14,cm:5,pn:0,tot:92,gr:'A',note:''},
+  {date:'2026-03-07',b:'F1',r:'1203',ins:'李生輔員',fl:18,dk:13,bd:14,tr:15,cl:9,bt:14,cm:5,pn:0,tot:88,gr:'B',note:''},
+  {date:'2026-03-07',b:'M3',r:'606',ins:'王生輔員',fl:16,dk:12,bd:15,tr:12,cl:8,bt:13,cm:4,pn:0,tot:80,gr:'B',note:''},
+  {date:'2026-03-07',b:'F2',r:'1102',ins:'李生輔員',fl:14,dk:10,bd:12,tr:10,cl:7,bt:10,cm:3,pn:1,tot:46,gr:'D',note:'垃圾桶未分類，扣1項'},
+  {date:'2026-03-06',b:'M1',r:'903',ins:'王生輔員',fl:19,dk:15,bd:15,tr:14,cl:10,bt:15,cm:5,pn:0,tot:93,gr:'A',note:''},
+];}
+
+// ═══ LOGIN ═══
+let loginRole='admin';
+function pickRole(el){
+  document.querySelectorAll('.rc').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  loginRole=el.dataset.role;
+}
+function doLogin(){
+  const u=document.getElementById('l-u').value.trim();
+  const p=document.getElementById('l-p').value;
+  if(!u){toast('請輸入帳號');return}
+  if(p!=='1234'){toast('密碼錯誤');return}
+  const acc=accounts.find(a=>a.name===u)||{id:u,name:u,disp:u,role:loginRole};
+  user={...acc,role:loginRole};  // role from selected card
+  LS.set('usr',user);
+  document.getElementById('scr-login').style.display='none';
+  document.getElementById('app').style.display='block';
+  initApp();
+}
+function doLogout(){if(!confirm('確定登出？'))return;LS.set('usr',null);location.reload();}
+
+// ═══ APP INIT ═══
+function initApp(){
+  // header
+  const rc=RCOLOR[user.role]||'#4d8ef8';
+  const av=document.getElementById('hav');
+  av.textContent=(user.disp||user.name)[0];
+  av.style.background=rc+'22';av.style.color=rc;
+  document.getElementById('hun').textContent=user.disp||user.name;
+  const rp=document.getElementById('hrole');
+  rp.textContent=RLABEL[user.role];rp.style.background=rc+'22';rp.style.color=rc;
+
+  // show admin tab
+  if(canDo('admin')) document.getElementById('ni-admin').style.display='flex';
+
+  // building tabs
+  mkBTabs('roll-bts',rollBld,b=>{rollBld=b;LS.set('rb',b);renderRooms()},true);
+  mkBTabs('stu-bts',stuBld,b=>{stuBld=b;LS.set('sb',b);renderStudents()},false);
+
+  // score buildings
+  const sb=document.getElementById('sc-b');
+  sb.innerHTML='';
+  BLDS.forEach(b=>{const o=new Option(b+(isFem(b)?' 女宿':' 男宿'),b);sb.add(o)});
+  if(user.role==='warden'||user.role==='inspector'){
+    // pre-fill inspector
+    document.getElementById('sc-ins').value=user.disp||user.name;
+  }
+  updateScRooms();
+
+  // leave classes
+  const clses=[...new Set(STUDENTS.map(s=>s.cls))].sort();
+  const cs=document.getElementById('lv-cls');
+  cs.innerHTML='';
+  clses.forEach(c=>{cs.add(new Option(c,c))});
+  updateLvStudents();
+
+  // permissions
+  applyPerms();
+
+  // render all
+  document.getElementById('roll-time').textContent='列印時間：'+new Date().toLocaleString('zh-TW');
+  document.getElementById('dash-time').textContent='更新時間：'+new Date().toLocaleString('zh-TW');
+
+  renderRooms(); renderStudents(); renderLeaves(); renderScoreHist(); renderDash();
+  renderUserList(); renderPermMatrix();
+  updLvBadge(); mkLvFilterTabs();
+
+  if(gsConfig.url) document.getElementById('gs-url').value=gsConfig.url;
+  loadStudentsOverride();
+  renderBedMgmt();
+  renderUnassigned();
+  if(gsConfig.id) document.getElementById('gs-id').value=gsConfig.id;
+  // load cached students from Sheets if available
+  const cached=LS.get('sheetsStudents',null);
+  if(cached&&cached.length){
+    STUDENTS.length=0;cached.forEach(s=>STUDENTS.push(s));
+    const t=LS.get('sheetsStudentsAt','');
+    const el=document.getElementById('stu-sync-time');
+    if(el&&t)el.textContent='最後同步：'+t;
+  }
+}
+
+function canDo(perm){ return (perms[user.role]||{})[perm]||false; }
+
+function applyPerms(){
+  // leave apply form
+  document.getElementById('leave-apply-area').style.display=canDo('leave_apply')?'block':'none';
+  // score input
+  document.getElementById('score-input-area').style.display=canDo('score')?'block':'none';
+}
+
+// ═══ PAGE NAV ═══
+function goPg(id,title,el){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('pg-'+id).classList.add('on');
+  el.classList.add('on');
+  document.getElementById('hpg').textContent=title;
+}
+
+// ═══ BUILDING TABS ═══
+function mkBTabs(cid,active,cb,noAll){
+  const c=document.getElementById(cid);c.innerHTML='';
+  if(!noAll){
+    const b=document.createElement('button');b.className='bt'+(active==='ALL'?' on':'');
+    b.textContent='全部';b.onclick=()=>{cb('ALL');syncBTabs(c,'ALL')};c.appendChild(b);
+  }
+  BLDS.forEach(bl=>{
+    const b=document.createElement('button');
+    b.className='bt '+(isFem(bl)?'f':'m')+(active===bl?' on':'');
+    b.textContent=bl+(isFem(bl)?'女':'男');
+    b.onclick=()=>{cb(bl);syncBTabs(c,bl)};c.appendChild(b);
+  });
+}
+function syncBTabs(c,active){
+  c.querySelectorAll('.bt').forEach(b=>{
+    const txt=b.textContent;
+    const isAll=txt==='全部';
+    const bld=txt.replace(/[女男]/,'');
+    b.classList.toggle('on',isAll?active==='ALL':bld===active);
+  });
+}
+
+// ═══ ROLL CALL ═══
+function rollRooms(){return ROOMS.filter(r=>r.b===rollBld&&r.s==='正常')}
+function stuInRoom(rm){return STUDENTS.filter(s=>s.b===rm.b&&s.r===rm.r).sort((a,b)=>parseInt(a.bed)-parseInt(b.bed))}
+function getRSt(b,r,bed){return rollSt[b+'-'+r+'-'+bed]||'in'}
+
+function renderRooms(){
+  const rooms=rollRooms();
+  let tot=0,inC=0,lvC=0,abC=0;
+  rooms.forEach(rm=>stuInRoom(rm).forEach(s=>{
+    tot++;const st=getRSt(s.b,s.r,s.bed);
+    if(st==='in')inC++;else if(st==='lv')lvC++;else abC++;
+  }));
+  document.getElementById('roll-stats').innerHTML=`
+    <div class="sc"><div class="sl">本棟人數</div><div class="sv bl">${tot}</div></div>
+    <div class="sc"><div class="sl">確認在宿</div><div class="sv gr">${inC}</div></div>
+    <div class="sc"><div class="sl">請假中</div><div class="sv am">${lvC}</div></div>
+    <div class="sc"><div class="sl">未到/異常</div><div class="sv rd">${abC}</div></div>`;
+  const c=document.getElementById('roll-rooms');c.innerHTML='';
+  const canEdit=canDo('roll');
+  rooms.forEach(rm=>{
+    const stus=stuInRoom(rm);
+    const occ=stus.length;
+    const ocC=occ===rm.beds?'gr':occ>0?'am':'tx3';
+    const div=document.createElement('div');div.className='rc-card';
+    div.innerHTML=`<div class="rc-hd" onclick="togRoom(this)">
+      <span class="rc-num">${rm.r}</span><span class="rc-tag">${rm.t}</span>
+      <span class="rc-occ" style="margin-left:auto;color:var(--${ocC})">${occ}/${rm.beds}</span>
+      <span class="rc-arr">▼</span></div>
+    <div class="rc-body">${Array.from({length:rm.beds},(_,i)=>{
+      const lbl=(i+1)+'床';const s=stus.find(x=>x.bed===lbl);
+      if(!s)return`<div class="bed empty"><div class="bed-lb">${lbl}</div><div class="bed-nm">空床</div><div class="dot d-em"></div></div>`;
+      const st=getRSt(s.b,s.r,s.bed);
+      const dc=st==='in'?'d-in':st==='lv'?'d-lv':'d-ab';
+      const lbl2=st==='in'?'✓ 在宿':st==='lv'?'⏸ 請假':'✗ 未到';
+      return`<div class="bed"><div class="bed-lb">${lbl}</div><div class="dot ${dc}"></div>
+        <div class="bed-nm">${s.name}</div><div class="bed-sb">${s.cls}</div>
+        ${canEdit?`<button class="bsb s-${st}" onclick="cycSt('${s.b}','${s.r}','${s.bed}',this)">${lbl2}</button>`:''}</div>`;
+    }).join('')}</div>`;
+    c.appendChild(div);
+  });
+}
+
+function togRoom(hd){hd.parentElement.classList.toggle('op')}
+function cycSt(b,r,bed,btn){
+  const key=b+'-'+r+'-'+bed;
+  const cur=rollSt[key]||'in';
+  const nxt=cur==='in'?'lv':cur==='lv'?'ab':'in';
+  rollSt[key]=nxt;LS.set('rst',rollSt);
+  const card=btn.parentElement;
+  card.querySelector('.dot').className='dot '+(nxt==='in'?'d-in':nxt==='lv'?'d-lv':'d-ab');
+  btn.className='bsb s-'+nxt;
+  btn.textContent=nxt==='in'?'✓ 在宿':nxt==='lv'?'⏸ 請假':'✗ 未到';
+  // update stats
+  const rooms=rollRooms();let tot=0,inC=0,lvC=0,abC=0;
+  rooms.forEach(rm=>stuInRoom(rm).forEach(s=>{tot++;const st=getRSt(s.b,s.r,s.bed);if(st==='in')inC++;else if(st==='lv')lvC++;else abC++;}));
+  document.getElementById('roll-stats').innerHTML=`<div class="sc"><div class="sl">本棟人數</div><div class="sv bl">${tot}</div></div><div class="sc"><div class="sl">確認在宿</div><div class="sv gr">${inC}</div></div><div class="sc"><div class="sl">請假中</div><div class="sv am">${lvC}</div></div><div class="sc"><div class="sl">未到/異常</div><div class="sv rd">${abC}</div></div>`;
+}
+
+// ═══ STUDENTS ═══
+function renderStudents(){
+  const q=document.getElementById('stu-q').value.toLowerCase();
+  let list=STUDENTS;
+  if(stuBld!=='ALL')list=list.filter(s=>s.b===stuBld);
+  if(q)list=list.filter(s=>s.name.includes(q)||s.id.includes(q)||(s.cls||'').toLowerCase().includes(q)||s.b.toLowerCase().includes(q)||(s.b+s.r).includes(q)||(s.eng||'').toLowerCase().includes(q)||(s.iCard||'').includes(q)||(s.nation||'').includes(q));
+  const c=document.getElementById('stu-list');c.innerHTML='';
+  if(!list.length){c.innerHTML='<div class="empty"><div class="ei">🔍</div><p>查無資料</p></div>';return}
+  list.forEach(s=>{
+    const av=s.g==='女'?'avf':'avm';
+    const nt=NTAG[s.nation]||'nun';
+    const stC=s.st==='入住'?'bg-in':s.st==='職場實習'?'bg-out':s.st==='請假外宿'?'bg-pend':s.st==='等候分配'?'bg-done':'bg-done';
+    const div=document.createElement('div');div.className='sr';
+    div.innerHTML=`<div class="av ${av}">${s.name[0]}</div>
+      <div class="si2"><div class="sn">${s.name}</div>
+      <div class="sm">${s.id} · ${s.cls} · <span class="ntag ${nt}">${s.nation}</span></div></div>
+      <div style="text-align:right"><div class="sr-rm">${s.b} ${s.r} ${s.bed}</div>
+      <div class="badge ${stC}" style="margin-top:3px">${s.st}</div></div>`;
+    div.onclick=()=>showStu(s);c.appendChild(div);
+  });
+}
+function showStu(s){
+  const nt=NTAG[s.nation]||'nun';
+  const stMap={'入住':'bg-in','職場實習':'bg-out','請假外宿':'bg-pend','打工':'bg-pend','返鄉':'bg-pend','晚歸':'bg-pend','病假':'bg-pend','其它':'bg-done'};
+    const stC=stMap[s.st]||'bg-done';
+  document.getElementById('ms-t').textContent=s.name;
+  document.getElementById('ms-b').innerHTML=`
+    <div style="display:flex;gap:14px;align-items:center;margin-bottom:16px">
+      <div class="av ${s.g==='女'?'avf':'avm'}" style="width:50px;height:50px;font-size:20px">${s.name[0]}</div>
+      <div>
+        <div style="font-size:18px;font-weight:800">${s.name}</div>
+        <div style="font-size:12px;color:var(--tx3);margin-top:2px">${s.eng||'—'}</div>
+        <div style="margin-top:5px;display:flex;gap:5px;flex-wrap:wrap">
+          <span class="ntag ${nt}">${s.nation||'—'}</span>
+          <span class="badge ${stC}">${s.st||'—'}</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;font-size:12px">
+      ${[
+        ['學號',s.id],['班級',s.cls],
+        ['年級',s.grade?s.grade+'年':'—'],['性別',s.g||'—'],
+        ['棟別／房號',s.b+' '+s.r+' '+s.bed],['入住日期',s.inDate||'—'],
+        ['聯絡電話',s.phone||'—'],['電子郵件',s.email||'—'],
+        ['緊急聯絡人',s.emgName||'—'],['緊急聯絡電話',s.emgPhone||'—'],
+        ['僑卡號',s.iCard||'—'],['英文姓名',s.eng||'—'],
+        ['先實習期間',s.internStart1&&s.internEnd1?s.internStart1+'～'+s.internEnd1:s.internStart1||'—'],
+        ['後實習期間',s.internStart2&&s.internEnd2?s.internStart2+'～'+s.internEnd2:s.internStart2||'—'],
+        ['輪調實習廠商',s.internCo||'—'],
+      ].map(([l,v])=>`<div style="background:#f8fafc;border:1px solid var(--b1);border-radius:6px;padding:7px 10px">
+        <div style="font-size:10px;color:var(--tx3);margin-bottom:2px">${l}</div>
+        <div style="font-weight:600;word-break:break-all;font-size:12px">${v}</div>
+      </div>`).join('')}
+    </div>`;
+  document.getElementById('ov-stu').classList.add('op');
+}
+function cov(id,e){if(!e||e.target.id===id)document.getElementById(id).classList.remove('op')}
+
+// ═══ LEAVE ═══
+function updateLvStudents(){
+  const cls=document.getElementById('lv-cls').value;
+  const sel=document.getElementById('lv-stus');sel.innerHTML='';
+  STUDENTS.filter(s=>s.cls===cls&&s.st!=='離宿').forEach(s=>{
+    const o=new Option(s.name+'（'+s.bed+' · '+s.st+'）',s.id);sel.add(o);
+  });
+}
+function mkLvFilterTabs(){
+  const c=document.getElementById('lv-filter-bts');c.innerHTML='';
+  [['all','全部'],['待審核','待審核'],['請假中','請假中'],['已返舍','已返舍']].forEach(([v,l])=>{
+    const b=document.createElement('button');b.className='bt'+(lvFilter===v?' on':'');
+    b.textContent=l;b.onclick=()=>{lvFilter=v;mkLvFilterTabs();renderLeaves()};c.appendChild(b);
+  });
+}
+function submitLeave(){
+  if(!canDo('leave_apply')){toast('您無申請假單權限');return}
+  const cls=document.getElementById('lv-cls').value;
+  const sel=document.getElementById('lv-stus');
+  const stuIds=Array.from(sel.selectedOptions).map(o=>o.value);
+  if(!stuIds.length){toast('請選擇學生');return}
+  const type=document.getElementById('lv-type').value;
+  const st=document.getElementById('lv-st').value;
+  const et=document.getElementById('lv-et').value;
+  const reason=document.getElementById('lv-reason').value||'—';
+  if(!st||!et){toast('請填寫請假時間');return}
+  if(st>=et){toast('結束時間需晚於開始時間');return}
+  const names=stuIds.map(id=>STUDENTS.find(s=>s.id===id)?.name||id).join('、');
+  const newId='L'+Date.now();
+  const byName=user.disp||user.name;
+  const today=new Date().toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit'});
+  // 導師提交即視為導師已同意（a1=導師，a2=舍監，a3=主管）
+  // 流程：導師申請（a1自動核准）→ 舍監審核（a2）→ 一級主管核准（a3）
+  const a1Auto='已申請 '+today+' '+byName;
+  leaves.unshift({id:newId,cls,stuIds,names,type,start:st,end:et,reason,
+    a1:a1Auto, a2:'—', a3:'—',
+    ret:'—',status:'待舍監審核',by:byName});
+  LS.set('leaves',leaves);
+  renderLeaves();updLvBadge();renderDash();
+  document.getElementById('lv-st').value='';document.getElementById('lv-et').value='';
+  document.getElementById('lv-reason').value='';
+  toast('✅ 假單已提交，等待舍監審核');
+  syncToGSheets('leave',leaves[0]);
+}
+
+function approveLv(id,role){
+  const l=leaves.find(x=>x.id===id);if(!l)return;
+  const today=new Date().toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit'});
+  const name=user.disp||user.name;
+  // a1=導師（提交時自動），a2=舍監，a3=主管
+  if(role==='a2'){
+    l.a2='核准 '+today+' '+name;
+    l.status='待主管核准';
+  }
+  if(role==='a3'){
+    l.a3='核准 '+today+' '+name;
+    l.status='請假中';
+  }
+  LS.set('leaves',leaves);renderLeaves();updLvBadge();toast('✅ 已核准');
+  syncToGSheets('leave',l);
+}
+
+function rejectLv(id){
+  const l=leaves.find(x=>x.id===id);if(!l)return;
+  const reason=prompt('請輸入駁回原因（可空白）：');
+  if(reason===null)return; // cancelled
+  l.status='已駁回';l.rejectBy=user.disp||user.name;l.rejectReason=reason||'未說明';
+  LS.set('leaves',leaves);renderLeaves();updLvBadge();toast('已駁回假單');
+  syncToGSheets('leave',l);
+}
+function markRet(id){
+  const l=leaves.find(x=>x.id===id);if(!l)return;
+  l.ret=new Date().toLocaleString('zh-TW');l.status='已返舍';
+  LS.set('leaves',leaves);renderLeaves();toast('✅ 已標記返舍');
+  syncToGSheets('leave',l);
+}
+function updLvBadge(){
+  const n=leaves.filter(l=>l.status==='待舍監審核'||l.status==='待主管核准').length;
+  const b=document.getElementById('lv-badge');b.style.display=n?'block':'none';b.textContent=n;
+}
+function mkLvFilterTabs(){
+  const c=document.getElementById('lv-filter-bts');c.innerHTML='';
+  const filters=[['all','全部'],['待舍監審核','待審核'],['待主管核准','待主管'],['請假中','請假中'],['已返舍','已返舍'],['已駁回','已駁回']];
+  filters.forEach(([v,l])=>{
+    const b=document.createElement('button');b.className='bt'+(lvFilter===v?' on':'');
+    b.textContent=l;b.onclick=()=>{lvFilter=v;mkLvFilterTabs();renderLeaves()};c.appendChild(b);
+  });
+}
+function renderLeaves(){
+  const list=lvFilter==='all'?leaves:leaves.filter(l=>l.status===lvFilter);
+  const c=document.getElementById('leave-list');
+  if(!list.length){c.innerHTML='<div class="empty"><div class="ei">📋</div><p>無符合紀錄</p></div>';return}
+  c.innerHTML='';
+  list.forEach(l=>{
+    const stColors={'待舍監審核':'bg-pend','待主管核准':'bg-out','請假中':'bg-out','已返舍':'bg-in','已駁回':'bg-ab'};
+    const stC=stColors[l.status]||'bg-pend';
+    const canW=canDo('leave_approve_w');
+    const canC=canDo('leave_approve_c');
+    const canAdmin=canDo('admin');
+    const div=document.createElement('div');div.className='lv-row';
+    div.innerHTML=`<div class="lv-hd">
+      <span class="lv-id">${l.id}</span>
+      <span class="lv-type">${l.type}</span>
+      <span class="badge ${stC}" style="margin-left:auto">${l.status}</span>
+    </div>
+    <div class="lv-detail">
+      🏫 <strong>${l.cls}</strong> · 👤 ${l.names}<br>
+      📅 ${l.start} ～ ${l.end}<br>
+      📝 ${l.reason}
+      ${l.by?'<br>📋 申請人：'+l.by:''}
+      ${l.ret&&l.ret!=='—'?'<br>🔙 返舍：'+l.ret:''}
+      ${l.rejectReason?'<br>❌ 駁回原因：'+l.rejectReason:''}
+    </div>
+    <div class="chips">
+      <span class="chip chip-ok">① 導師 ${l.a1}</span>
+      <span class="chip${l.a2!=='—'?' chip-ok':''}">② 舍監 ${l.a2!=='—'?l.a2:'待審核'}</span>
+      <span class="chip${l.a3!=='—'?' chip-ok':''}">③ 主管 ${l.a3!=='—'?l.a3:'待核准'}</span>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+      ${canW&&l.a2==='—'&&l.status==='待舍監審核'?`<button class="btn btn-g btn-sm" onclick="approveLv('${l.id}','a2')">✓ 舍監核准</button>`:''}
+      ${canW&&l.a2==='—'&&l.status==='待舍監審核'?`<button class="btn btn-r btn-sm" onclick="rejectLv('${l.id}')">✗ 駁回</button>`:''}
+      ${canC&&l.a3==='—'&&l.status==='待主管核准'?`<button class="btn btn-a btn-sm" onclick="approveLv('${l.id}','a3')">✓ 主管核准</button>`:''}
+      ${canC&&l.a3==='—'&&l.status==='待主管核准'?`<button class="btn btn-r btn-sm" onclick="rejectLv('${l.id}')">✗ 駁回</button>`:''}
+      ${(canW||canAdmin)&&l.status==='請假中'?`<button class="btn btn-o btn-sm" onclick="markRet('${l.id}')">🔙 標記返舍</button>`:''}
+    </div>`;
+    c.appendChild(div);
+  });
+}
+
+// ═══ SCORE ═══
+function updateScRooms(){
+  const b=document.getElementById('sc-b').value;
+  const sel=document.getElementById('sc-r');sel.innerHTML='';
+  ROOMS.filter(r=>r.b===b&&r.s==='正常').forEach(r=>sel.add(new Option(r.r,r.r)));
+}
+function usc(k,v){
+  scVals[k]=parseInt(v);document.getElementById('sv-'+k).textContent=v;
+  const t=Math.max(0,scVals.fl+scVals.dk+scVals.bd+scVals.tr+scVals.cl+scVals.bt+scVals.cm-scVals.pn*20);
+  const el=document.getElementById('sc-tot');el.textContent=t;
+  const g=t>=90?'A':t>=75?'B':t>=60?'C':'D';
+  el.className='stbig ss'+g;
+  document.getElementById('sc-gl').textContent={A:'⭐ 優良（90+）',B:'✅ 良好（75~89）',C:'📋 普通（60~74）',D:'⚠️ 待改善（59以下）'}[g];
+}
+function submitScore(){
+  if(!canDo('score')){toast('您無評分權限');return}
+  const b=document.getElementById('sc-b').value,r=document.getElementById('sc-r').value;
+  const ins=document.getElementById('sc-ins').value||user.disp||'生輔員';
+  const note=document.getElementById('sc-note').value;
+  const tot=parseInt(document.getElementById('sc-tot').textContent);
+  const gr=tot>=90?'A':tot>=75?'B':tot>=60?'C':'D';
+  const rec={date:new Date().toLocaleDateString('zh-TW'),b,r,ins,...scVals,tot,gr,note};
+  scores.unshift(rec);LS.set('scores',scores);
+  renderScoreHist();renderDash();
+  document.getElementById('sc-note').value='';
+  toast('✅ 評分已儲存');
+  syncToGSheets('score',rec);
+}
+function renderScoreHist(){
+  const c=document.getElementById('score-hist');
+  if(!scores.length){c.innerHTML='<div class="empty"><div class="ei">📝</div><p>尚無評分</p></div>';return}
+  c.innerHTML='';
+  scores.forEach(s=>{
+    const gl={A:'⭐優良',B:'✅良好',C:'📋普通',D:'⚠️待改善'}[s.gr];
+    c.innerHTML+=`<div class="srow"><div class="srm">${s.b} ${s.r}</div>
+      <div class="sri">${s.date} · ${s.ins}${s.note?' · '+s.note:''}</div>
+      <div class="ss ss${s.gr}">${s.tot}</div>
+      <div style="font-size:10px;color:var(--tx3)">${gl}</div></div>`;
+  });
+}
+
+// ═══ DASHBOARD ═══
+function renderDash(){
+  const totBeds=ROOMS.reduce((a,r)=>a+r.beds,0);
+  const inC=STUDENTS.filter(s=>s.st==='入住').length;
+  const empty=totBeds-inC;
+  const rate=Math.round(inC/totBeds*100);
+  document.getElementById('dash-stats').innerHTML=`
+    <div class="sc"><div class="sl">總床位</div><div class="sv bl">${totBeds}</div></div>
+    <div class="sc"><div class="sl">入住人數</div><div class="sv gr">${inC}</div></div>
+    <div class="sc"><div class="sl">空床位</div><div class="sv am">${empty}</div></div>
+    <div class="sc"><div class="sl">住宿率</div><div class="sv bl">${rate}%</div></div>`;
+  const bc=document.getElementById('d-blds');bc.innerHTML='';
+  BLDS.forEach(b=>{
+    const bb=ROOMS.filter(r=>r.b===b).reduce((a,r)=>a+r.beds,0);
+    const bi=STUDENTS.filter(s=>s.b===b&&s.st==='入住').length;
+    const br=bb>0?Math.round(bi/bb*100):0;
+    bc.innerHTML+=`<div class="pb-w"><div class="pb-l"><span>${b} ${isFem(b)?'女宿':'男宿'}</span><span>${bi}/${bb} · ${br}%</span></div><div class="pb"><div class="pbf ${isFem(b)?'pfp':'pfb'}" style="width:${br}%"></div></div></div>`;
+  });
+  const nc=document.getElementById('d-nat');nc.innerHTML='';
+  const nat={};STUDENTS.forEach(s=>nat[s.nation]=(nat[s.nation]||0)+1);
+  const ncl=['pfg','pfb','pfa','pfp','pfb','pfg','pfa'];let ni=0;
+  Object.entries(nat).sort((a,b)=>b[1]-a[1]).forEach(([n,cnt])=>{
+    const p=Math.round(cnt/STUDENTS.length*100);
+    nc.innerHTML+=`<div class="pb-w"><div class="pb-l"><span>${n}</span><span>${cnt}人 · ${p}%</span></div><div class="pb"><div class="pbf ${ncl[ni++%ncl.length]}" style="width:${p}%"></div></div></div>`;
+  });
+  const sc=document.getElementById('d-scores');sc.innerHTML='';
+  [...scores].sort((a,b)=>b.tot-a.tot).slice(0,5).forEach(s=>{
+    const gl={A:'⭐優良',B:'✅良好',C:'📋普通',D:'⚠️待改善'}[s.gr];
+    sc.innerHTML+=`<div class="srow"><div class="srm">${s.b} ${s.r}</div><div class="sri">${s.date}</div><div class="ss ss${s.gr}">${s.tot}</div><div style="font-size:10px;color:var(--tx3)">${gl}</div></div>`;
+  });
+  const pend=leaves.filter(l=>l.status==='待審核').length;
+  const onLv=leaves.filter(l=>l.status==='請假中').length;
+  const done=leaves.filter(l=>l.status==='已返舍').length;
+  document.getElementById('d-leave').innerHTML=`<div class="sg4" style="margin:0;grid-template-columns:repeat(2,1fr)">
+    <div class="sc"><div class="sl">總假單</div><div class="sv bl">${leaves.length}</div></div>
+    <div class="sc"><div class="sl">待審核</div><div class="sv pu">${pend}</div></div>
+    <div class="sc"><div class="sl">請假中</div><div class="sv am">${onLv}</div></div>
+    <div class="sc"><div class="sl">已返舍</div><div class="sv gr">${done}</div></div></div>`;
+}
+
+// ═══ ADMIN ═══
+function renderUserList(){
+  const c=document.getElementById('user-list');c.innerHTML='';
+  accounts.forEach(a=>{
+    const rc=RCOLOR[a.role]||'#4d8ef8';
+    c.innerHTML+=`<div class="user-row">
+      <div class="av" style="background:${rc}22;color:${rc}">${(a.disp||a.name)[0]}</div>
+      <div style="flex:1"><div style="font-size:14px;font-weight:700">${a.disp||a.name}</div>
+        <div style="font-size:11px;color:var(--tx3)">${a.name}</div></div>
+      <span class="role-pill rp-${a.role}">${RLABEL[a.role]}</span>
+      ${a.id!=='admin01'?`<button class="btn btn-o btn-sm" onclick="delUser('${a.id}')">移除</button>`:''}
+    </div>`;
+  });
+}
+function openAddUser(){document.getElementById('ov-adduser').classList.add('op')}
+function addUser(){
+  const name=document.getElementById('au-name').value.trim();
+  const disp=document.getElementById('au-disp').value.trim();
+  const role=document.getElementById('au-role').value;
+  const pw=document.getElementById('au-pw').value;
+  if(!name||!disp){toast('請填寫帳號和姓名');return}
+  if(accounts.find(a=>a.name===name)){toast('帳號已存在');return}
+  accounts.push({id:name,name,disp,role,pw});
+  LS.set('accounts',accounts);renderUserList();
+  cov('ov-adduser');toast('✅ 帳號已建立');
+}
+function delUser(id){
+  if(!confirm('確定移除此帳號？'))return;
+  accounts=accounts.filter(a=>a.id!==id);LS.set('accounts',accounts);renderUserList();toast('已移除');
+}
+function renderPermMatrix(){
+  const c=document.getElementById('perm-matrix');c.innerHTML='';
+  const roles=['warden','inspector','teacher','chief'];
+  roles.forEach(role=>{
+    const rc=RCOLOR[role];
+    let html=`<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:700;margin-bottom:8px;color:${rc}">${RLABEL[role]}</div><div class="perms-grid">`;
+    Object.keys(PERM_LABELS).filter(k=>k!=='admin').forEach(perm=>{
+      const on=(perms[role]||{})[perm]?'on':'';
+      html+=`<div class="perm-item">
+        <button class="perm-toggle ${on}" id="pt-${role}-${perm}" onclick="togPerm('${role}','${perm}',this)"></button>
+        <label onclick="document.getElementById('pt-${role}-${perm}').click()">${PERM_LABELS[perm]}</label>
+      </div>`;
+    });
+    html+=`</div></div>`;
+    c.innerHTML+=html;
+  });
+}
+function togPerm(role,perm,btn){
+  if(!perms[role])perms[role]={};
+  perms[role][perm]=!perms[role][perm];
+  btn.classList.toggle('on',perms[role][perm]);
+  LS.set('perms',perms);
+  applyPerms();
+  toast('權限已更新');
+}
+function saveGSConfig(){
+  gsConfig={url:document.getElementById('gs-url').value.trim(),id:document.getElementById('gs-id').value.trim()};
+  LS.set('gsc',gsConfig);toast('✅ 設定已儲存');
+}
+function testGS(){
+  if(!gsConfig.url){toast('請先填寫 Google Apps Script URL');return}
+  toast('🔄 測試連線中...');
+  fetch(gsConfig.url+'?action=test',{mode:'cors'})
+    .then(r=>{
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    })
+    .then(d=>{
+      if(d.ok||d.msg){toast('✅ 連線成功！Apps Script 正常運作');}
+      else{toast('⚠️ 連線成功但回應異常：'+(d.err||JSON.stringify(d)));}
+    })
+    .catch(e=>{
+      toast('❌ 連線失敗：'+e.message+'\n→ 請確認：①URL正確 ②部署為「任何人可存取」③是最新部署版本');
+    });
+}
+function copyScript(){
+  const txt=document.getElementById('gs-script').textContent;
+  navigator.clipboard.writeText(txt).then(()=>toast('✅ 程式碼已複製')).catch(()=>toast('請手動複製上方程式碼'));
+}
+function fullSyncNow(){
+  if(!gsConfig.url){toast('⚠️ 請先設定 Google Apps Script URL');return}
+  toast('🔄 全量同步中...');
+  // Send all leaves and scores batch
+  const sendAll=leaves.map(l=>fetch(gsConfig.url,{method:'POST',mode:'no-cors',
+    body:JSON.stringify({type:'leave',data:l}),headers:{'Content-Type':'text/plain'}}));
+  const sendScores=scores.map(s=>fetch(gsConfig.url,{method:'POST',mode:'no-cors',
+    body:JSON.stringify({type:'score',data:s}),headers:{'Content-Type':'text/plain'}}));
+  Promise.allSettled([...sendAll,...sendScores])
+    .then(results=>{
+      const ok=results.filter(r=>r.status==='fulfilled').length;
+      toast(`✅ 同步完成：${ok}/${results.length} 筆成功`);
+    });
+}
+
+// ═══ GOOGLE SHEETS SYNC ═══
+// POST with no-cors avoids CORS preflight issue with Google Apps Script
+// no-cors = fire-and-forget (can't read response body, but write succeeds)
+async function syncToGSheets(type,data){
+  if(!gsConfig.url)return;
+  try{
+    await fetch(gsConfig.url,{
+      method:'POST',
+      mode:'no-cors',
+      body:JSON.stringify({type,data}),
+      headers:{'Content-Type':'text/plain'}
+    });
+  }catch(e){console.warn('GSheets sync failed',e)}
+}
+function syncGSheets(){
+  if(!gsConfig.url){toast('⚠️ 請先在管理員設定 Google Apps Script URL');return}
+  fullSyncNow();
+}
+
+
+// ═══ PUSH STUDENTS TO GOOGLE SHEETS ═══
+async function pushStudentsToSheets(){
+  if(!gsConfig.url){toast('⚠️ 請先設定 Google Apps Script URL');return}
+  if(!confirm('確定將系統中所有 '+STUDENTS.length+' 位僑生資料推送覆寫至 Google Sheets「僑生資料」工作表？')){return}
+  toast('⬆️ 推送中，請稍候...');
+  try{
+    // 使用 no-cors 避免 CORS preflight，改 Content-Type 為 text/plain
+    await fetch(gsConfig.url,{
+      method:'POST',
+      mode:'no-cors',
+      body:JSON.stringify({type:'writeStudents',data:STUDENTS}),
+      headers:{'Content-Type':'text/plain'}
+    });
+    toast('✅ 已推送 '+STUDENTS.length+' 筆僑生資料至 Sheets（約3-5秒生效）');
+  }catch(e){toast('❌ 網路錯誤：'+e.message);}
+}
+
+// ═══ EXPORT STUDENTS CSV ═══
+function exportStudentsCSV(){
+  const headers=['學號','姓名','性別','年級','班級','國籍','電話','緊急聯絡人','緊急電話','Email','棟別','房號','床位','入住日期','住宿狀態','英文姓名','I僑卡號','先實習開始','先實習結束','後實習開始','後實習結束','實習廠商'];
+  const keys=['id','name','g','grade','cls','nation','phone','emgName','emgPhone','email','b','r','bed','inDate','st','eng','iCard','internStart1','internEnd1','internStart2','internEnd2','internCo'];
+  let rows=[csvRow(headers)];
+  STUDENTS.forEach(s=>rows.push(csvRow(keys.map(k=>s[k]||''))));
+  downloadFile('僑生資料_'+new Date().toLocaleDateString('zh-TW').replace(/\//g,'')+'.csv',rows.join('\n'));
+  toast('✅ 匯出 '+STUDENTS.length+' 筆僑生資料');
+}
+
+// ═══ SYNC STUDENTS FROM GOOGLE SHEETS ═══
+async function syncStudentsFromSheets(){
+  if(!gsConfig.url){toast('⚠️ 請先設定 Google Apps Script URL');return}
+  toast('🔄 正在從 Google Sheets 讀取僑生資料...');
+  try{
+    const res=await fetch(gsConfig.url+'?action=getStudents',{mode:'cors'});
+    const data=await res.json();
+    if(!data.ok){toast('❌ '+data.err);return}
+    const stus=data.students;
+    if(!stus||!stus.length){toast('⚠️ 工作表中沒有資料');return}
+    // Update in-memory STUDENTS array
+    STUDENTS.length=0;
+    stus.forEach(s=>STUDENTS.push(s));
+    // Backward-compat: ensure new fields exist
+    // Cache to localStorage
+    LS.set('sheetsStudents',stus);
+    LS.set('sheetsStudentsAt',new Date().toLocaleString('zh-TW'));
+    renderStudents();
+    renderDash();
+    // rebuild leave class selector
+    const clses=[...new Set(STUDENTS.map(s=>s.cls))].sort();
+    const cs=document.getElementById('lv-cls');
+    if(cs){cs.innerHTML='';clses.forEach(c=>cs.add(new Option(c,c)));updateLvStudents();}
+    toast('✅ 已從 Sheets 更新 '+stus.length+' 位僑生資料');
+    // Update sync time display
+    const el=document.getElementById('stu-sync-time');
+    if(el)el.textContent='最後同步：'+new Date().toLocaleString('zh-TW');
+  }catch(e){
+    toast('❌ 讀取失敗：'+e.message);
+  }
+}
+
+// ═══ EXPORT ═══
+function csvRow(arr){return arr.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')}
+function downloadFile(filename,content,mime='text/csv;charset=utf-8;'){
+  const link=document.createElement('a');
+  link.href='data:'+mime+',\uFEFF'+encodeURIComponent(content);
+  link.download=filename;link.click();
+}
+
+function exportRollCSV(){
+  const rooms=rollRooms();
+  let rows=[csvRow(['棟別','房號','床位','姓名','班級','國籍','狀態','點名時間'])];
+  const now=new Date().toLocaleString('zh-TW');
+  rooms.forEach(rm=>stuInRoom(rm).forEach(s=>{
+    const st=getRSt(s.b,s.r,s.bed);
+    rows.push(csvRow([s.b,s.r,s.bed,s.name,s.cls,s.nation,st==='in'?'在宿':st==='lv'?'請假':'未到',now]));
+  }));
+  downloadFile(`點名單_${rollBld}_${new Date().toLocaleDateString('zh-TW').replace(/\//g,'')}.csv`,rows.join('\n'));
+  toast('✅ CSV 匯出完成');
+}
+
+function exportRollExcel(){
+  // Simple HTML-based Excel export
+  const rooms=rollRooms();
+  let html=`<html><head><meta charset="UTF-8"><style>table{border-collapse:collapse}td,th{border:1px solid #ccc;padding:6px 10px;font-size:12px}th{background:#d0e4f7;font-weight:bold}</style></head><body>`;
+  html+=`<h2>樹人家商 僑生宿舍點名單 — ${rollBld}</h2>`;
+  html+=`<p>列印時間：${new Date().toLocaleString('zh-TW')}</p>`;
+  html+=`<table><tr><th>棟別</th><th>房號</th><th>床位</th><th>姓名</th><th>英文姓名</th><th>班級</th><th>國籍</th><th>狀態</th><th>備註</th></tr>`;
+  rooms.forEach(rm=>stuInRoom(rm).forEach(s=>{
+    const st=getRSt(s.b,s.r,s.bed);
+    const stlbl=st==='in'?'在宿':st==='lv'?'請假':'未到';
+    const color=st==='in'?'#16a34a':st==='lv'?'#d97706':'#dc2626';
+    html+=`<tr><td>${s.b}</td><td>${s.r}</td><td>${s.bed}</td><td>${s.name}</td><td>${s.eng||''}</td><td>${s.cls}</td><td>${s.nation}</td><td style="color:${color};font-weight:bold">${stlbl}</td><td></td></tr>`;
+  }));
+  html+=`</table></body></html>`;
+  downloadFile(`點名單_${rollBld}_${new Date().toLocaleDateString('zh-TW').replace(/\//g,'')}.xls`,html,'application/vnd.ms-excel;charset=utf-8;');
+  toast('✅ Excel 匯出完成');
+}
+
+function exportLeaveExcel(){
+  let html=`<html><head><meta charset="UTF-8"><style>table{border-collapse:collapse}td,th{border:1px solid #ccc;padding:6px 10px;font-size:12px}th{background:#d0e4f7;font-weight:bold}</style></head><body>`;
+  html+=`<h2>樹人家商 請假紀錄</h2><p>匯出時間：${new Date().toLocaleString('zh-TW')}</p>`;
+  html+=`<table><tr><th>單號</th><th>班級</th><th>學生</th><th>類別</th><th>開始</th><th>結束</th><th>事由</th><th>導師</th><th>舍監</th><th>主管</th><th>返舍</th><th>狀態</th></tr>`;
+  leaves.forEach(l=>{html+=`<tr><td>${l.id}</td><td>${l.cls}</td><td>${l.names}</td><td>${l.type}</td><td>${l.start}</td><td>${l.end}</td><td>${l.reason}</td><td>${l.a1}</td><td>${l.a2}</td><td>${l.a3}</td><td>${l.ret}</td><td>${l.status}</td></tr>`});
+  html+=`</table></body></html>`;
+  downloadFile(`請假紀錄_${new Date().toLocaleDateString('zh-TW').replace(/\//g,'')}.xls`,html,'application/vnd.ms-excel;charset=utf-8;');
+  toast('✅ Excel 匯出完成');
+}
+
+function exportScoreExcel(){
+  let html=`<html><head><meta charset="UTF-8"><style>table{border-collapse:collapse}td,th{border:1px solid #ccc;padding:6px 10px;font-size:12px}th{background:#d0e4f7;font-weight:bold}</style></head><body>`;
+  html+=`<h2>樹人家商 內務評分紀錄</h2><p>匯出時間：${new Date().toLocaleString('zh-TW')}</p>`;
+  html+=`<table><tr><th>日期</th><th>棟別</th><th>房號</th><th>人員</th><th>地面</th><th>書桌</th><th>棉被</th><th>垃圾</th><th>衣物</th><th>浴廁</th><th>公共</th><th>扣分</th><th>總分</th><th>等級</th><th>備註</th></tr>`;
+  scores.forEach(s=>{html+=`<tr><td>${s.date}</td><td>${s.b}</td><td>${s.r}</td><td>${s.ins}</td><td>${s.fl}</td><td>${s.dk}</td><td>${s.bd}</td><td>${s.tr}</td><td>${s.cl}</td><td>${s.bt}</td><td>${s.cm}</td><td>${s.pn}</td><td style="font-weight:bold">${s.tot}</td><td>${{A:'⭐優良',B:'✅良好',C:'📋普通',D:'⚠️待改善'}[s.gr]}</td><td>${s.note}</td></tr>`});
+  html+=`</table></body></html>`;
+  downloadFile(`評分紀錄_${new Date().toLocaleDateString('zh-TW').replace(/\//g,'')}.xls`,html,'application/vnd.ms-excel;charset=utf-8;');
+  toast('✅ Excel 匯出完成');
+}
+
+function exportDashExcel(){
+  let html=`<html><head><meta charset="UTF-8"><style>table{border-collapse:collapse}td,th{border:1px solid #ccc;padding:6px 10px;font-size:12px}th{background:#d0e4f7;font-weight:bold}h3{margin:16px 0 6px}</style></head><body>`;
+  html+=`<h2>樹人家商 僑生宿舍管理系統 完整報表</h2><p>匯出時間：${new Date().toLocaleString('zh-TW')}</p>`;
+  // Summary
+  const totBeds=ROOMS.reduce((a,r)=>a+r.beds,0);
+  const inC=STUDENTS.filter(s=>s.st==='入住').length;
+  html+=`<h3>住宿概況</h3><table><tr><th>總床位</th><th>入住人數</th><th>空床位</th><th>住宿率</th></tr><tr><td>${totBeds}</td><td>${inC}</td><td>${totBeds-inC}</td><td>${Math.round(inC/totBeds*100)}%</td></tr></table>`;
+  // Buildings
+  html+=`<h3>各棟概況</h3><table><tr><th>棟別</th><th>類型</th><th>床位</th><th>入住</th><th>入住率</th></tr>`;
+  BLDS.forEach(b=>{const bb=ROOMS.filter(r=>r.b===b).reduce((a,r)=>a+r.beds,0);const bi=STUDENTS.filter(s=>s.b===b&&s.st==='入住').length;html+=`<tr><td>${b}</td><td>${isFem(b)?'女宿':'男宿'}</td><td>${bb}</td><td>${bi}</td><td>${bb?Math.round(bi/bb*100):0}%</td></tr>`;});
+  html+=`</table>`;
+  // Leave summary
+  html+=`<h3>請假統計</h3><table><tr><th>總筆數</th><th>待審核</th><th>請假中</th><th>已返舍</th></tr><tr><td>${leaves.length}</td><td>${leaves.filter(l=>l.status==='待審核').length}</td><td>${leaves.filter(l=>l.status==='請假中').length}</td><td>${leaves.filter(l=>l.status==='已返舍').length}</td></tr></table>`;
+  html+=`</body></html>`;
+  downloadFile(`管理報表_${new Date().toLocaleDateString('zh-TW').replace(/\//g,'')}.xls`,html,'application/vnd.ms-excel;charset=utf-8;');
+  toast('✅ 完整報表匯出完成');
+}
+
+// ═══ TOAST ═══
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';
+  clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',2600);
+}
+
+// ═══ AUTO LOGIN ═══
+document.addEventListener('DOMContentLoaded',()=>{
+  const saved=LS.get('usr',null);
+  if(saved){user=saved;document.getElementById('scr-login').style.display='none';document.getElementById('app').style.display='block';initApp();}
+});
+
+// ════════════════════════════════════════════════
+// BED MANAGEMENT
+// ════════════════════════════════════════════════
+
+let bedMgmtBld = 'F1';
+let assignBedTarget = null; // {b,r,bed}
+
+// ── ROOM CONFIG (persisted in localStorage) ──
+// roomCfg: { "F1-1201": {beds:6,type:"住宿"}, ... }
+function getRoomCfg() {
+  return LS.get('roomCfg', {});
+}
+function setRoomCfg(cfg) {
+  LS.set('roomCfg', cfg);
+}
+
+// Build default room cfg from STUDENTS + BLDS
+function initRoomCfg() {
+  const cfg = getRoomCfg();
+  // Derive rooms from STUDENTS
+  STUDENTS.forEach(s => {
+    if (!s.b || !s.r) return;
+    const key = s.b + '-' + s.r;
+    if (!cfg[key]) cfg[key] = { beds: 6, type: '住宿' };
+  });
+  // Also add from BLDS definition
+  BLDS.forEach(bld => {
+    bld.rooms.forEach(rm => {
+      const key = bld.id + '-' + rm.num;
+      if (!cfg[key]) cfg[key] = { beds: rm.beds || 6, type: rm.type || '住宿' };
+    });
+  });
+  setRoomCfg(cfg);
+  return cfg;
+}
+
+function selectBedMgmtBld(bld, el) {
+  bedMgmtBld = bld;
+  document.querySelectorAll('#bed-mgmt-bts .bt').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  renderBedMgmt();
+}
+
+function renderBedMgmt() {
+  const cfg = getRoomCfg();
+  const bld = bedMgmtBld;
+  
+  // Get all rooms for this building
+  const roomNums = new Set();
+  STUDENTS.forEach(s => { if (s.b === bld && s.r) roomNums.add(s.r); });
+  // Add from cfg
+  Object.keys(cfg).forEach(k => { if (k.startsWith(bld+'-')) roomNums.add(k.split('-')[1]); });
+  
+  const rooms = [...roomNums].sort();
+  const container = document.getElementById('bed-mgmt-list');
+  if (!rooms.length) { container.innerHTML = '<div class="empty"><div class="ei">🏠</div><p>此棟尚無房間設定</p></div>'; return; }
+  
+  let html = '<div style="display:grid;gap:8px">';
+  rooms.forEach(rm => {
+    const key = bld + '-' + rm;
+    const rcfg = cfg[key] || { beds: 6, type: '住宿' };
+    const occupants = STUDENTS.filter(s => s.b===bld && s.r===rm && s.st==='入住');
+    const occ = occupants.length;
+    const cap = rcfg.beds;
+    const pct = cap > 0 ? Math.round(occ/cap*100) : 0;
+    const barColor = occ >= cap ? '#dc2626' : occ >= cap*0.8 ? '#d97706' : '#059669';
+    
+    html += `<div style="background:#f8fafc;border:1px solid var(--b1);border-radius:10px;padding:12px 14px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-family:var(--mono);font-weight:700;font-size:15px">${rm}</span>
+        <span style="font-size:11px;padding:2px 7px;border-radius:4px;background:${rcfg.type==='舍監'?'#fef3c7':rcfg.type==='備用'?'#f3f4f6':'#eff6ff'};color:${rcfg.type==='舍監'?'#92400e':rcfg.type==='備用'?'#6b7280':'#1e40af'};font-weight:700">${rcfg.type}</span>
+        <span style="font-size:11px;color:var(--tx2)">${occ}/${cap} 床</span>
+        <div style="flex:1"></div>
+        <button class="btn btn-o btn-sm" onclick="editRoom('${bld}','${rm}')">✏️ 編輯</button>
+      </div>
+      <div style="height:4px;background:#e2e8f0;border-radius:2px;margin-bottom:8px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${barColor};border-radius:2px;transition:width .5s"></div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px">
+        ${Array.from({length:cap},(_,i)=>{
+          const bedStr = (i+1)+'床';
+          const ocp = STUDENTS.find(s=>s.b===bld&&s.r===rm&&s.bed===bedStr&&s.st==='入住');
+          if (ocp) {
+            const av = ocp.g==='女'?'#db2777':'#2563eb';
+            return `<div style="background:white;border:1px solid var(--b1);border-radius:6px;padding:5px 8px;font-size:11px;min-width:80px;cursor:pointer" onclick="showBedMenu('${bld}','${rm}','${bedStr}','${ocp.name}')">
+              <div style="font-size:9px;color:var(--tx3)">${bedStr}</div>
+              <div style="font-weight:700;color:${av}">${ocp.name}</div>
+              <div style="font-size:9px;color:var(--tx3)">${ocp.cls||''}</div>
+            </div>`;
+          } else {
+            return `<div style="background:#f1f5f9;border:2px dashed var(--b2);border-radius:6px;padding:5px 8px;font-size:11px;min-width:80px;cursor:pointer;color:var(--tx3);text-align:center" onclick="openAssignBed('${bld}','${rm}','${bedStr}')">
+              <div style="font-size:9px">${bedStr}</div>
+              <div>＋ 分配</div>
+            </div>`;
+          }
+        }).join('')}
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+  renderUnassigned();
+}
+
+function editRoom(b, r) {
+  const cfg = getRoomCfg();
+  const key = b + '-' + r;
+  const rcfg = cfg[key] || { beds: 6, type: '住宿' };
+  document.getElementById('edit-room-title').textContent = `編輯 ${b} ${r}`;
+  document.getElementById('edit-room-body').innerHTML = `
+    <div class="lf"><label>床位數（可住人數）</label>
+      <input class="fi" id="er-beds" type="number" min="1" max="12" value="${rcfg.beds}"></div>
+    <div class="lf"><label>用途</label>
+      <select class="fs" id="er-type">
+        <option value="住宿" ${rcfg.type==='住宿'?'selected':''}>住宿</option>
+        <option value="舍監" ${rcfg.type==='舍監'?'selected':''}>舍監室</option>
+        <option value="備用" ${rcfg.type==='備用'?'selected':''}>備用</option>
+      </select></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-p" style="flex:1" onclick="saveEditRoom('${b}','${r}')">💾 儲存</button>
+      <button class="btn btn-r btn-sm" onclick="confirmDeleteRoom('${b}','${r}')">🗑️ 刪除房間</button>
+    </div>`;
+  // Make edit modal inline (no separate overlay needed - reuse ov-assign-bed)
+  const body = document.getElementById('edit-room-body').parentElement.parentElement;
+  document.getElementById('ov-assign-bed').classList.remove('op');
+  // Show as toast-like instead
+  showEditRoomModal(b, r, rcfg);
+}
+
+function showEditRoomModal(b, r, rcfg) {
+  const overlay = document.createElement('div');
+  overlay.className = 'ov op';
+  overlay.id = 'ov-edit-room-dynamic';
+  overlay.innerHTML = `<div class="modal">
+    <div class="mhd"><span class="mtitle">✏️ 編輯 ${b}-${r}</span>
+      <button class="mclose" onclick="document.getElementById('ov-edit-room-dynamic').remove()">✕</button></div>
+    <div class="lf"><label>床位數（可住人數）</label>
+      <input class="fi" id="er-beds" type="number" min="1" max="12" value="${rcfg.beds}"></div>
+    <div class="lf"><label>用途</label>
+      <select class="fs" id="er-type">
+        <option value="住宿" ${rcfg.type==='住宿'?'selected':''}>住宿</option>
+        <option value="舍監" ${rcfg.type==='舍監'?'selected':''}>舍監室</option>
+        <option value="備用" ${rcfg.type==='備用'?'selected':''}>備用</option>
+      </select></div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-p" style="flex:1" onclick="saveEditRoom('${b}','${r}')">💾 儲存</button>
+      <button class="btn btn-r" onclick="confirmDeleteRoom('${b}','${r}')">🗑️ 刪除</button>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.onclick = e => { if(e.target===overlay) overlay.remove(); };
+}
+
+function saveEditRoom(b, r) {
+  const cfg = getRoomCfg();
+  const key = b + '-' + r;
+  cfg[key] = {
+    beds: parseInt(document.getElementById('er-beds').value) || 6,
+    type: document.getElementById('er-type').value
+  };
+  setRoomCfg(cfg);
+  const dyn = document.getElementById('ov-edit-room-dynamic');
+  if (dyn) dyn.remove();
+  renderBedMgmt();
+  toast('✅ 已儲存 ' + b + '-' + r + ' 設定');
+}
+
+function confirmDeleteRoom(b, r) {
+  const occupied = STUDENTS.filter(s=>s.b===b&&s.r===r&&s.st==='入住');
+  if (occupied.length > 0) {
+    toast('⚠️ 請先移出 ' + occupied.length + ' 位住宿學生再刪除房間');
+    return;
+  }
+  if (!confirm(`確定刪除 ${b}-${r}？此動作無法復原。`)) return;
+  const cfg = getRoomCfg();
+  delete cfg[b+'-'+r];
+  setRoomCfg(cfg);
+  const dyn = document.getElementById('ov-edit-room-dynamic');
+  if (dyn) dyn.remove();
+  renderBedMgmt();
+  toast('🗑️ 已刪除 ' + b + '-' + r);
+}
+
+function openAddRoom() {
+  document.getElementById('ov-add-room').classList.add('op');
+}
+
+function confirmAddRoom() {
+  const b = document.getElementById('ar-bld').value;
+  const r = document.getElementById('ar-room').value.trim();
+  const beds = parseInt(document.getElementById('ar-beds').value) || 6;
+  const type = document.getElementById('ar-type').value;
+  if (!r) { toast('⚠️ 請輸入房號'); return; }
+  const cfg = getRoomCfg();
+  const key = b + '-' + r;
+  if (cfg[key]) { toast('⚠️ 此房間已存在'); return; }
+  cfg[key] = { beds, type };
+  setRoomCfg(cfg);
+  closeOv('ov-add-room');
+  bedMgmtBld = b;
+  document.querySelectorAll('#bed-mgmt-bts .bt').forEach((el,i)=>{
+    el.classList.toggle('on', ['F1','F2','F3','M1','M2','M3'][i]===b);
+  });
+  renderBedMgmt();
+  toast('✅ 已新增 ' + b + '-' + r + '（' + beds + ' 床）');
+}
+
+function showBedMenu(b, r, bed, name) {
+  const overlay = document.createElement('div');
+  overlay.className = 'ov op';
+  overlay.id = 'ov-bed-menu';
+  overlay.innerHTML = `<div class="modal" style="max-width:340px">
+    <div class="mhd"><span class="mtitle">${b}-${r} ${bed}</span>
+      <button class="mclose" onclick="document.getElementById('ov-bed-menu').remove()">✕</button></div>
+    <div style="font-size:15px;font-weight:700;margin-bottom:14px;padding:10px;background:#f8fafc;border-radius:8px;text-align:center">${name}</div>
+    <div style="display:grid;gap:8px">
+      <button class="btn btn-o" onclick="moveBed('${b}','${r}','${bed}','${name}')">↔️ 換床（移至其他床位）</button>
+      <button class="btn btn-r" onclick="vacateBed('${b}','${r}','${bed}','${name}')">🚪 退宿（移除床位）</button>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.onclick = e => { if(e.target===overlay) overlay.remove(); };
+}
+
+function vacateBed(b, r, bed, name) {
+  if (!confirm(`確定將 ${name} 從 ${b}-${r}-${bed} 退宿？`)) return;
+  const s = STUDENTS.find(s=>s.b===b&&s.r===r&&s.bed===bed&&s.name===name);
+  if (s) { s.b=''; s.r=''; s.bed=''; s.st='等候分配'; }
+  document.getElementById('ov-bed-menu')?.remove();
+  renderBedMgmt();
+  toast(`✅ ${name} 已退宿，移至等候分配`);
+  saveStudentsToLS();
+}
+
+function moveBed(b, r, bed, name) {
+  document.getElementById('ov-bed-menu')?.remove();
+  openAssignBed(b, r, bed, name);
+}
+
+function openAssignBed(b, r, bed, currentName) {
+  assignBedTarget = { b, r, bed };
+  const title = currentName ? `換床：${currentName} → ${b}-${r}-${bed}` : `分配：${b}-${r}-${bed}`;
+  document.getElementById('assign-bed-title').textContent = title;
+  document.getElementById('assign-search').value = '';
+  renderAssignSearch();
+  document.getElementById('ov-assign-bed').classList.add('op');
+}
+
+function renderAssignSearch() {
+  const q = document.getElementById('assign-search').value.trim();
+  // Show unassigned + search
+  let pool = STUDENTS.filter(s => s.st==='等候分配' || s.st==='職場實習' || !s.b);
+  if (q) pool = STUDENTS.filter(s => s.name.includes(q) || s.id.includes(q) || (s.cls||'').includes(q));
+  const list = document.getElementById('assign-search-list');
+  if (!pool.length) { list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--tx3)">查無學生</div>'; return; }
+  list.innerHTML = pool.slice(0,30).map(s => `
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-bottom:1px solid var(--b1);cursor:pointer" onclick="assignStudentToBed('${s.id}')">
+      <div class="av ${s.g==='女'?'avf':'avm'}" style="width:32px;height:32px;font-size:13px">${s.name[0]}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700">${s.name}</div>
+        <div style="font-size:11px;color:var(--tx3)">${s.id} · ${s.cls||'—'} · <span class="badge ${s.st==='等候分配'?'bg-done':'bg-out'}">${s.st}</span></div>
+      </div>
+      <div style="font-size:11px;color:var(--ac);text-align:right">${s.b?s.b+'-'+s.r+'-'+s.bed:'無床位'}</div>
+    </div>`).join('');
+}
+
+function assignStudentToBed(sid) {
+  const s = STUDENTS.find(s => s.id === sid);
+  if (!s || !assignBedTarget) return;
+  // Check if target bed is occupied
+  const existing = STUDENTS.find(st => st.b===assignBedTarget.b && st.r===assignBedTarget.r && st.bed===assignBedTarget.bed && st.st==='入住' && st.id!==sid);
+  if (existing) {
+    toast('⚠️ 此床位已有 ' + existing.name + ' 入住');
+    return;
+  }
+  s.b = assignBedTarget.b;
+  s.r = assignBedTarget.r;
+  s.bed = assignBedTarget.bed;
+  s.st = '入住';
+  closeOv('ov-assign-bed');
+  renderBedMgmt();
+  toast(`✅ ${s.name} 已分配至 ${s.b}-${s.r}-${s.bed}`);
+  saveStudentsToLS();
+}
+
+function saveStudentsToLS() {
+  LS.set('studentsOverride', STUDENTS);
+}
+
+function renderUnassigned() {
+  const list = STUDENTS.filter(s => s.st==='等候分配' || (!s.b && s.st!=='職場實習'));
+  const el = document.getElementById('unassigned-list');
+  const cnt = document.getElementById('unassigned-count');
+  if (cnt) cnt.textContent = list.length;
+  if (!el) return;
+  if (!list.length) { el.innerHTML = '<div style="font-size:12px;color:var(--tx3);padding:8px">無等候分配學生 ✅</div>'; return; }
+  el.innerHTML = list.map(s => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:1px solid var(--b1)">
+      <div class="av ${s.g==='女'?'avf':'avm'}" style="width:28px;height:28px;font-size:11px">${s.name[0]}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:700">${s.name}</div>
+        <div style="font-size:10px;color:var(--tx3)">${s.id} · ${s.cls||'—'} · ${s.g}</div>
+      </div>
+      <button class="btn btn-p btn-sm" onclick="promptAssignUnassigned('${s.id}')">分配</button>
+    </div>`).join('');
+}
+
+function promptAssignUnassigned(sid) {
+  document.getElementById('assign-search').value = STUDENTS.find(s=>s.id===sid)?.name||'';
+  assignBedTarget = null;
+  document.getElementById('assign-bed-title').textContent = '選擇要分配的床位';
+  renderAssignSearch();
+  // show building selector in assign modal
+  document.getElementById('ov-assign-bed').classList.add('op');
+  // pre-fill search with student name to confirm
+  setTimeout(() => renderAssignSearch(), 100);
+}
+
+// On init, load students override if available
+function loadStudentsOverride() {
+  const override = LS.get('studentsOverride', null);
+  if (override && override.length) {
+    STUDENTS.length = 0;
+    override.forEach(s => STUDENTS.push(s));
+  }
+  initRoomCfg();
+}
+
+</script>
+</body>
+</html>
