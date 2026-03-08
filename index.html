@@ -256,20 +256,35 @@ input[type=range]{width:100%;accent-color:var(--ac);height:3px}
       <h1>僑生宿舍<em>管理系統</em></h1>
       <p>OVERSEAS STUDENT DORMITORY SYSTEM</p>
     </div>
-    <div id="gs-url-setup" style="display:none;margin-bottom:14px;padding:12px;background:#fef3c7;border-radius:10px;border:1px solid #fcd34d">
-      <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:6px">⚙️ 首次設定：請輸入 Google Apps Script 網址</div>
-      <input class="li" id="gs-url-input" placeholder="https://script.google.com/macros/s/..." style="margin-bottom:6px">
-      <button class="lbtn" style="padding:8px;font-size:13px" onclick="saveGsUrl()">儲存並繼續</button>
+
+    <!-- 狀態提示 -->
+    <div id="login-status" style="display:none;padding:8px 12px;border-radius:8px;font-size:13px;margin-bottom:10px;text-align:center"></div>
+
+    <!-- 登入表單 -->
+    <div class="lf"><label>帳號</label>
+      <input class="li" id="l-u" placeholder="帳號" autocomplete="username"
+        onkeydown="if(event.key==='Enter')document.getElementById('l-p').focus()">
     </div>
-    <div id="login-form-area">
-      <div class="lf"><label>帳號</label><input class="li" id="l-u" placeholder="帳號" onkeydown="if(event.key==='Enter')document.getElementById('l-p').focus()"></div>
-      <div class="lf"><label>密碼</label><input class="li" type="password" id="l-p" placeholder="密碼" onkeydown="if(event.key==='Enter')doLogin()"></div>
-      <button class="lbtn" id="login-btn" onclick="doLogin()">登入系統</button>
-      <div class="lhint" id="login-hint" style="color:#6b7280">預設帳號：admin　密碼：admin1234</div>
-      <div style="margin-top:10px;text-align:center">
-        <button onclick="toggleGsSetup()" style="background:none;border:none;color:#9ca3af;font-size:12px;cursor:pointer;text-decoration:underline">⚙️ 修改試算表網址</button>
-      </div>
+    <div class="lf"><label>密碼</label>
+      <input class="li" type="password" id="l-p" placeholder="密碼" autocomplete="current-password"
+        onkeydown="if(event.key==='Enter')doLogin()">
     </div>
+    <button class="lbtn" id="login-btn" onclick="doLogin()">登入系統</button>
+
+    <div style="margin-top:12px;text-align:center">
+      <button onclick="toggleGsSetup()" style="background:none;border:none;color:#9ca3af;font-size:12px;cursor:pointer">
+        ⚙️ 設定試算表網址
+      </button>
+    </div>
+
+    <!-- GS URL 設定（摺疊） -->
+    <div id="gs-url-setup" style="display:none;margin-top:10px;padding:10px;background:#fef3c7;border-radius:8px;border:1px solid #fcd34d">
+      <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:6px">Google Apps Script 網址</div>
+      <input id="gs-url-input" class="li" placeholder="https://script.google.com/macros/s/..." style="font-size:12px;margin-bottom:6px">
+      <button onclick="saveGsUrl()" class="lbtn" style="padding:7px;font-size:12px">儲存網址</button>
+    </div>
+
+    <div class="lhint" style="margin-top:12px">初始帳號：admin　密碼：admin1234</div>
   </div>
 </div>
 
@@ -532,114 +547,110 @@ input[type=range]{width:100%;accent-color:var(--ac);height:3px}
 
           <div style="background:#0a0d14;border:1px solid var(--b2);border-radius:8px;padding:12px;font-family:monospace;font-size:11px;color:#7dd3fc;line-height:1.7;overflow-x:auto;margin-bottom:12px;position:relative">
             <button onclick="copyScript()" style="position:absolute;top:8px;right:8px;background:#334155;border:none;color:#94a3b8;padding:3px 10px;border-radius:5px;font-size:10px;cursor:pointer;font-weight:700">複製</button>
-<pre id="gs-script" style="white-space:pre-wrap;margin:0">function doPost(e) {
+<pre id="gs-script" style="white-space:pre-wrap;margin:0;font-size:12px;line-height:1.6">// ═══ 樹人家商 僑生宿舍管理系統 - Google Apps Script ═══
+// 部署方式：執行身分「我」、存取權限「所有人（含匿名）」
+
+function doPost(e) {
   try {
-    var data = JSON.parse(e.postData.contents);
+    var d = JSON.parse(e.postData.contents);
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var type = data.type;
-    var payload = data.data;
+    var type = d.type, data = d.data;
 
-    if (type === "leave") {
-      var sh = ss.getSheetByName("請假清單") || ss.insertSheet("請假清單");
-      if (sh.getLastRow() === 0) sh.appendRow(["假單ID","班級","學生名單","假別","開始日","結束日","原因","導師審核","舍監審核","主管核准","返宿日","狀態"]);
-      var rows = sh.getDataRange().getValues();
-      var found = false;
-      for (var i = 1; i &lt; rows.length; i++) {
-        if (rows[i][0] === payload.id) {
-          sh.getRange(i+1,1,1,12).setValues([[payload.id,payload.cls,payload.names,payload.type,payload.start,payload.end,payload.reason,payload.a1,payload.a2,payload.a3,payload.ret,payload.status]]);
-          found = true; break;
-        }
-      }
-      if (!found) sh.appendRow([payload.id,payload.cls,payload.names,payload.type,payload.start,payload.end,payload.reason,payload.a1,payload.a2,payload.a3,payload.ret,payload.status]);
-    }
-
-    if (type === "score") {
-      var sh = ss.getSheetByName("內務評分") || ss.insertSheet("內務評分");
-      if (sh.getLastRow() === 0) sh.appendRow(["日期","棟別","房號","檢查人","地板","桌面","床鋪","垃圾","衣物","浴室","公物","罰則","總分","等級","備註"]);
-      sh.appendRow([payload.date,payload.b,payload.r,payload.ins,payload.fl,payload.dk,payload.bd,payload.tr,payload.cl,payload.bt,payload.cm,payload.pn,payload.tot,payload.gr,payload.note]);
-    }
-
-    if (type === "roll") {
-      var sh = ss.getSheetByName("點名紀錄") || ss.insertSheet("點名紀錄");
-      if (sh.getLastRow() === 0) sh.appendRow(["點名時間","棟別","房號","床位","姓名","狀態","班級"]);
-      sh.appendRow([new Date().toLocaleString("zh-TW"),payload.building,payload.room,payload.bed,payload.name,payload.status,payload.cls]);
-    }
-
-    if (type === "rollBatch") {
-      var sh = ss.getSheetByName("點名紀錄") || ss.insertSheet("點名紀錄");
-      if (sh.getLastRow() === 0) sh.appendRow(["點名時間","棟別","房號","床位","姓名","狀態","班級"]);
-      var rows2d = payload.rows.map(function(r){ return [r.time,r.building,r.room,r.bed,r.name,r.status,r.cls]; });
-      if (rows2d.length) sh.getRange(sh.getLastRow()+1, 1, rows2d.length, 7).setValues(rows2d);
-    }
-
-    if (type === "writeStudents") {
-      var sh = ss.getSheetByName("僑生資料") || ss.insertSheet("僑生資料");
+    if (type === "writeAccounts") {
+      var sh = getOrCreate(ss, "帳號管理");
       sh.clearContents();
-      sh.appendRow(["學號","姓名","性別","年級","班級","國籍/地區","聯絡電話","緊急聯絡人","緊急聯絡電話","電子郵件","棟別","房號","床位","入住日期","住宿狀態","英文姓名","I僑卡號","先實習開始","先實習結束","後實習開始","後實習結束","輪調實習廠商"]);
-      var rows2d = payload.map(function(s){ return [s.id,s.name,s.g,s.grade,s.cls,s.nation,s.phone,s.emgName,s.emgPhone,s.email,s.b,s.r,s.bed,s.inDate,s.st,s.eng,s.iCard,s.internStart1||"",s.internEnd1||"",s.internStart2||"",s.internEnd2||"",s.internCo||""]; });
-      if (rows2d.length) sh.getRange(2, 1, rows2d.length, 22).setValues(rows2d);
+      sh.appendRow(["帳號ID","顯示姓名","帳號","密碼","職務","狀態"]);
+      if (data.length) sh.getRange(2,1,data.length,6).setValues(
+        data.map(function(a){return[a.id,a.disp||"",a.user||"",a.pass||"",a.role,a.st||"啟用"];})
+      );
     }
-
+    if (type === "writeStudents") {
+      var sh = getOrCreate(ss, "僑生資料");
+      sh.clearContents();
+      sh.appendRow(["學號","姓名","性別","年級","班級","國籍","電話","緊急聯絡人","緊急電話","Email","棟別","房號","床位","入住日期","狀態","英文姓名","I僑卡號","先實習開始","先實習結束","後實習開始","後實習結束","實習廠商"]);
+      if (data.length) sh.getRange(2,1,data.length,22).setValues(
+        data.map(function(s){return[s.id,s.name,s.g,s.grade,s.cls,s.nation,s.phone,s.emgName||"",s.emgPhone||"",s.email||"",s.b||"",s.r||"",s.bed||"",s.inDate||"",s.st,s.eng||"",s.iCard||"",s.internStart1||"",s.internEnd1||"",s.internStart2||"",s.internEnd2||"",s.internCo||""];})
+      );
+    }
     if (type === "writeRooms") {
-      var sh = ss.getSheetByName("房間設定") || ss.insertSheet("房間設定");
+      var sh = getOrCreate(ss, "房間設定");
       sh.clearContents();
       sh.appendRow(["棟別","樓層","房號","房型","床位數","狀態"]);
-      var rows2d = payload.map(function(r){ return [r.b,r.fl,r.r,r.t,r.beds,r.s]; });
-      if (rows2d.length) sh.getRange(2, 1, rows2d.length, 6).setValues(rows2d);
+      if (data.length) sh.getRange(2,1,data.length,6).setValues(
+        data.map(function(r){return[r.b,r.fl,r.r,r.t,r.beds,r.s];})
+      );
     }
-
-    return buildResp({ok:true});
-  } catch(err) {
-    return buildResp({ok:false, err:err.message});
-  }
+    if (type === "rollBatch") {
+      var sh = getOrCreate(ss, "點名紀錄");
+      if (sh.getLastRow()===0) sh.appendRow(["點名時間","棟別","房號","床位","姓名","狀態","班級"]);
+      var rows = data.rows.map(function(r){return[r.time,r.building,r.room,r.bed,r.name,r.status,r.cls];});
+      if (rows.length) sh.getRange(sh.getLastRow()+1,1,rows.length,7).setValues(rows);
+    }
+    if (type === "leave") {
+      var sh = getOrCreate(ss, "請假清單");
+      if (sh.getLastRow()===0) sh.appendRow(["假單ID","班級","學生","假別","開始","結束","原因","導師","舍監","主管","狀態"]);
+      var rows = sh.getDataRange().getValues(); var found=false;
+      for (var i=1;i&lt;rows.length;i++){
+        if(rows[i][0]===data.id){sh.getRange(i+1,1,1,11).setValues([[data.id,data.cls,data.names,data.type,data.start,data.end,data.reason,data.a1||"",data.a2||"",data.a3||"",data.status]]);found=true;break;}
+      }
+      if(!found) sh.appendRow([data.id,data.cls,data.names,data.type,data.start,data.end,data.reason,data.a1||"",data.a2||"",data.a3||"",data.status]);
+    }
+    if (type === "score") {
+      var sh = getOrCreate(ss, "內務評分");
+      if (sh.getLastRow()===0) sh.appendRow(["日期","棟別","房號","檢查人","地板","桌面","床鋪","垃圾","衣物","浴室","公物","罰則","總分","等級","備註"]);
+      sh.appendRow([data.date,data.b,data.r,data.ins,data.fl||0,data.dk||0,data.bd||0,data.tr||0,data.cl||0,data.bt||0,data.cm||0,data.pn||0,data.tot,data.gr,data.note||""]);
+    }
+    return ok({saved:true});
+  } catch(err) { return ok({error:err.message}); }
 }
 
 function doGet(e) {
-  var param = e &amp;&amp; e.parameter ? e.parameter : {};
+  var p = (e &amp;&amp; e.parameter) ? e.parameter : {};
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
 
-  if (param.action === "getStudents") {
-    try {
-      var ss = SpreadsheetApp.getActiveSpreadsheet();
-      var sh = ss.getSheetByName("僑生資料");
-      if (!sh) return buildResp({ok:false, err:"找不到「僑生資料」工作表"});
-      var rows = sh.getDataRange().getValues();
-      var students = [];
-      for (var i = 1; i &lt; rows.length; i++) {
-        var r = rows[i];
-        if (!r[0]) continue;
-        students.push({id:String(r[0]||""),name:String(r[1]||""),g:String(r[2]||""),grade:String(r[3]||"1"),cls:String(r[4]||""),nation:String(r[5]||""),phone:String(r[6]||""),emgName:String(r[7]||""),emgPhone:String(r[8]||""),email:String(r[9]||""),b:String(r[10]||""),r:String(r[11]||""),bed:String(r[12]||""),inDate:String(r[13]||""),st:String(r[14]||"入住"),eng:String(r[15]||""),iCard:String(r[16]||""),internStart1:String(r[17]||""),internEnd1:String(r[18]||""),internStart2:String(r[19]||""),internEnd2:String(r[20]||""),internCo:String(r[21]||"")});
-      }
-      return buildResp({ok:true, students:students});
-    } catch(err) {
-      return buildResp({ok:false, err:err.message});
+  if (p.action === "getAccounts") {
+    var sh = ss.getSheetByName("帳號管理");
+    if (!sh) return ok({ok:false,err:"尚無帳號管理工作表，請先從網頁推送帳號"});
+    var rows = sh.getDataRange().getValues();
+    var list = [];
+    for (var i=1;i&lt;rows.length;i++){
+      var r=rows[i]; if(!r[0]) continue;
+      list.push({id:String(r[0]),disp:String(r[1]),user:String(r[2]),pass:String(r[3]),role:String(r[4]||"warden"),st:String(r[5]||"啟用")});
     }
+    return ok({ok:true,accounts:list});
   }
 
-  if (param.action === "getRooms") {
-    try {
-      var ss = SpreadsheetApp.getActiveSpreadsheet();
-      var sh = ss.getSheetByName("房間設定");
-      if (!sh) return buildResp({ok:false, err:"找不到「房間設定」工作表"});
-      var rows = sh.getDataRange().getValues();
-      var rooms = [];
-      for (var i = 1; i &lt; rows.length; i++) {
-        var r = rows[i];
-        if (!r[0]) continue;
-        rooms.push({b:String(r[0]),fl:Number(r[1]||0),r:String(r[2]),t:String(r[3]),beds:Number(r[4]||6),s:String(r[5]||"正常")});
-      }
-      return buildResp({ok:true, rooms:rooms});
-    } catch(err) {
-      return buildResp({ok:false, err:err.message});
+  if (p.action === "getStudents") {
+    var sh = ss.getSheetByName("僑生資料");
+    if (!sh) return ok({ok:false,err:"找不到僑生資料工作表"});
+    var rows = sh.getDataRange().getValues(); var list=[];
+    for (var i=1;i&lt;rows.length;i++){
+      var r=rows[i]; if(!r[0]) continue;
+      list.push({id:String(r[0]),name:String(r[1]),g:String(r[2]),grade:String(r[3]),cls:String(r[4]),nation:String(r[5]),phone:String(r[6]),emgName:String(r[7]||""),emgPhone:String(r[8]||""),email:String(r[9]||""),b:String(r[10]||""),r:String(r[11]||""),bed:String(r[12]||""),inDate:String(r[13]||""),st:String(r[14]||"入住"),eng:String(r[15]||""),iCard:String(r[16]||""),internStart1:String(r[17]||""),internEnd1:String(r[18]||""),internStart2:String(r[19]||""),internEnd2:String(r[20]||""),internCo:String(r[21]||"")});
     }
+    return ok({ok:true,students:list});
   }
 
-  return buildResp({ok:true, msg:"Connected", time:new Date().toLocaleString("zh-TW")});
+  if (p.action === "getRooms") {
+    var sh = ss.getSheetByName("房間設定");
+    if (!sh) return ok({ok:false,err:"找不到房間設定工作表"});
+    var rows = sh.getDataRange().getValues(); var list=[];
+    for (var i=1;i&lt;rows.length;i++){
+      var r=rows[i]; if(!r[0]) continue;
+      list.push({b:String(r[0]),fl:Number(r[1]||0),r:String(r[2]),t:String(r[3]),beds:Number(r[4]||6),s:String(r[5]||"正常")});
+    }
+    return ok({ok:true,rooms:list});
+  }
+
+  return ok({ok:true,msg:"Connected",time:new Date().toLocaleString("zh-TW")});
 }
 
-function buildResp(obj) {
-  var out = ContentService.createTextOutput(JSON.stringify(obj));
-  out.setMimeType(ContentService.MimeType.JSON);
-  return out;
+function getOrCreate(ss, name) {
+  return ss.getSheetByName(name) || ss.insertSheet(name);
+}
+function ok(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
 }</pre>
           </div>
 
@@ -761,19 +772,20 @@ let rollSt=LS.get('rst',{});
 let leaves=LS.get('leaves',initLeaves());
 let scores=LS.get('scores',initScores());
 let scVals={fl:20,dk:15,bd:15,tr:15,cl:10,bt:15,cm:5,pn:0};
-let accounts=LS.get('accounts',initAccounts());
+// 帳號：從localStorage讀取，若格式不符則重置
+let accounts=(()=>{
+  const raw=LS.get('accounts',null);
+  // 若有快取且格式正確（有 user 或 name 欄位）就使用
+  if(raw&&Array.isArray(raw)&&raw.length>0) return raw;
+  return initAccounts();
+})();
 let perms=LS.get('perms',JSON.parse(JSON.stringify(DEFAULT_PERMS)));
 let gsConfig=LS.get('gsc',{url:'',id:''});
 let lvFilter='all';
 
 function initAccounts(){return[
-  {id:'admin01',name:'admin01',disp:'系統管理員',role:'admin',pw:'1234'},
-  {id:'warden01',name:'warden01',disp:'王舍監',role:'warden',pw:'1234'},
-  {id:'warden02',name:'warden02',disp:'陳舍監',role:'warden',pw:'1234'},
-  {id:'ins01',name:'ins01',disp:'李生輔員',role:'inspector',pw:'1234'},
-  {id:'teacher01',name:'teacher01',disp:'張導師',role:'teacher',pw:'1234'},
-  {id:'chief01',name:'chief01',disp:'林主任',role:'chief',pw:'1234'},
-];}
+  {id:'admin01',user:'admin',pass:'admin1234',disp:'系統管理員',role:'admin',st:'啟用'}
+]}
 
 function initLeaves(){return[
   {id:'L001',cls:'資訊一仁',stuIds:['418079','418086'],names:'何國強、周天輝',type:'晚歸',start:'2026-03-07T22:00',end:'2026-03-07T23:30',reason:'系上聯誼活動',a1:'已申請 03/07 張導師',a2:'核准 03/07 王舍監',a3:'核准 03/07 林主任',ret:'2026-03-07 23:20',status:'已返舍',by:'張導師'},
@@ -791,91 +803,77 @@ function initScores(){return[
 ];}
 
 // ═══ LOGIN ═══
-let loginRole='admin';
-function pickRole(el){
-  document.querySelectorAll('.rc').forEach(c=>c.classList.remove('on'));
-  el.classList.add('on');
-  loginRole=el.dataset.role;
-}
-async function doLogin(){
-  const u=document.getElementById('l-u').value.trim();
-  const p=document.getElementById('l-p').value.trim();
-  if(!u||!p){toast('請輸入帳號和密碼');return}
-  const btn=document.getElementById('login-btn');
-  if(btn){btn.disabled=true;btn.textContent='驗證中...';}
-
-  function matchAcc(list,u,p){
-    return list.find(a=>{
-      const uMatch=(a.user&&a.user===u)||(a.name&&a.name===u);
-      const pMatch=(a.pass&&a.pass===p)||(a.pw&&a.pw===p);
-      return uMatch&&pMatch&&a.st!=='停用';
-    });
-  }
-  function doEnter(acc){
-    user={id:acc.id||acc.name,name:acc.user||acc.name,disp:acc.disp||acc.user||acc.name,role:acc.role};
-    LS.set('usr',user);
-    document.getElementById('scr-login').style.display='none';
-    document.getElementById('app').style.display='block';
-    initApp();
-  }
-
-  // 1. 先嘗試從試算表取得最新帳號
-  if(gsConfig.url){
-    try{
-      const res=await fetch(gsConfig.url+'?action=getAccounts',{mode:'cors'});
-      const d=await res.json();
-      if(d.ok&&d.accounts&&d.accounts.length){
-        accounts=d.accounts;
-        LS.set('accounts',accounts);
-      }
-    }catch(e){}
-  }
-
-  // 2. 驗證帳號（本機快取或剛從Sheets取得）
-  const acc=matchAcc(accounts,u,p);
-  if(acc){doEnter(acc);return}
-
-  // 3. 找不到 - 顯示錯誤
-  toast('❌ 帳號或密碼錯誤');
-  if(btn){btn.disabled=false;btn.textContent='登入系統';}
-}
-function doLogout(){if(!confirm('確定登出？'))return;LS.set('usr',null);location.reload();}
-
-
-// ═══ ACCOUNT SYNC (Sheets as master) ═══
-async async function pushAccountsToSheets(){
-  if(!gsConfig.url){toast('⚠️ 尚未設定試算表網址，帳號僅存本機');return;}
-  try{
-    await fetch(gsConfig.url,{method:'POST',mode:'no-cors',
-      body:JSON.stringify({type:'writeAccounts',data:accounts}),
-      headers:{'Content-Type':'text/plain'}});
-  }catch(e){toast('⚠️ 同步試算表失敗，帳號已存本機');}
-}
-async function syncAccountsFromSheets(){
-  if(!gsConfig.url){toast('⚠️ 請先設定 Google Apps Script URL');return}
-  try{
-    const res=await fetch(gsConfig.url+'?action=getAccounts',{mode:'cors'});
-    const d=await res.json();
-    if(!d.ok){toast('❌ '+d.err);return}
-    accounts=d.accounts||[];
-    LS.set('accounts',accounts);
-    renderUserList();
-    toast('✅ 已從試算表同步 '+accounts.length+' 個帳號');
-  }catch(e){toast('❌ 同步失敗：'+e.message);}
+function showLoginStatus(msg,color){
+  const el=document.getElementById('login-status');
+  if(!el)return;
+  const colors={red:['#fee2e2','#991b1b'],green:['#d1fae5','#065f46'],blue:['#dbeafe','#1e40af']};
+  const c=colors[color]||colors.blue;
+  el.textContent=msg;el.style.background=c[0];el.style.color=c[1];el.style.display='block';
 }
 function toggleGsSetup(){
   const el=document.getElementById('gs-url-setup');
-  const show=el.style.display==='none';
+  const show=el.style.display==='none'||!el.style.display;
   el.style.display=show?'block':'none';
-  if(show) document.getElementById('gs-url-input').value=gsConfig.url||'';
+  if(show){const inp=document.getElementById('gs-url-input');if(inp)inp.value=gsConfig.url||'';}
 }
 function saveGsUrl(){
-  const url=document.getElementById('gs-url-input').value.trim();
-  if(!url.includes('script.google.com')){toast('⚠️ 請輸入正確的 Apps Script 網址');return}
-  gsConfig.url=url;
-  LS.set('gsc',gsConfig);
+  const url=(document.getElementById('gs-url-input').value||'').trim();
+  if(!url||!url.includes('script.google.com')){showLoginStatus('請輸入正確的 Apps Script 網址','red');return;}
+  gsConfig.url=url;LS.set('gsc',gsConfig);
   document.getElementById('gs-url-setup').style.display='none';
-  toast('✅ 試算表網址已儲存');
+  showLoginStatus('✅ 網址已儲存，請輸入帳號密碼登入','green');
+}
+async function doLogin(){
+  const u=(document.getElementById('l-u').value||'').trim();
+  const p=(document.getElementById('l-p').value||'').trim();
+  if(!u||!p){showLoginStatus('請輸入帳號和密碼','red');return;}
+  const btn=document.getElementById('login-btn');
+  if(btn){btn.disabled=true;btn.textContent='驗證中...';}
+  showLoginStatus('驗證中...','blue');
+  // 若有試算表網址，先同步最新帳號
+  if(gsConfig.url){
+    try{
+      const r=await fetch(gsConfig.url+'?action=getAccounts',{mode:'cors',cache:'no-store'});
+      const d=await r.json();
+      if(d.ok&&Array.isArray(d.accounts)&&d.accounts.length){
+        accounts=d.accounts;LS.set('accounts',accounts);
+      }
+    }catch(e){}
+  }
+  // 比對帳號（相容新舊兩種格式）
+  const acc=accounts.find(a=>{
+    const u2=a.user||a.name||'';
+    const p2=a.pass||a.pw||'';
+    return u2===u&&p2===p&&a.st!=='停用';
+  });
+  if(!acc){
+    showLoginStatus('❌ 帳號或密碼錯誤','red');
+    if(btn){btn.disabled=false;btn.textContent='登入系統';}
+    return;
+  }
+  user={id:acc.id||u,name:acc.user||acc.name||u,disp:acc.disp||acc.user||acc.name||u,role:acc.role||'warden'};
+  LS.set('usr',user);
+  document.getElementById('scr-login').style.display='none';
+  document.getElementById('app').style.display='block';
+  initApp();
+}
+function doLogout(){if(!confirm('確定登出？'))return;LS.set('usr',null);location.reload();}
+async function pushAccountsToSheets(){
+  if(!gsConfig.url){toast('⚠️ 尚未設定試算表網址');return;}
+  await fetch(gsConfig.url,{method:'POST',mode:'no-cors',
+    body:JSON.stringify({type:'writeAccounts',data:accounts}),
+    headers:{'Content-Type':'text/plain'}}).catch(()=>{});
+  toast('✅ 帳號已推送至試算表');
+}
+async function syncAccountsFromSheets(){
+  if(!gsConfig.url){toast('⚠️ 請先設定試算表網址');return;}
+  try{
+    const r=await fetch(gsConfig.url+'?action=getAccounts',{mode:'cors',cache:'no-store'});
+    const d=await r.json();
+    if(!d.ok){toast('❌ '+d.err);return;}
+    accounts=d.accounts||[];LS.set('accounts',accounts);
+    renderUserList();toast('✅ 已從試算表同步 '+accounts.length+' 個帳號');
+  }catch(e){toast('❌ 同步失敗：'+e.message);}
 }
 
 // ═══ APP INIT ═══
