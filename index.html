@@ -252,9 +252,9 @@ input[type=range]{width:100%;accent-color:var(--ac);height:3px}
 <div id="scr-login">
   <div class="lbox">
     <div class="lhead">
-      <div class="sch">樹人家商 · 高雄市</div>
+      <div class="sch">新北市私立樹人家商</div>
       <h1>僑生宿舍<em>管理系統</em></h1>
-      <p>OVERSEAS STUDENT DORMITORY SYSTEM v4.0</p>
+      <p>OVERSEAS STUDENT DORMITORY SYSTEM</p>
     </div>
     <div id="gs-url-setup" style="display:none;margin-bottom:14px;padding:12px;background:#fef3c7;border-radius:10px;border:1px solid #fcd34d">
       <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:6px">⚙️ 首次設定：請輸入 Google Apps Script 網址</div>
@@ -265,7 +265,7 @@ input[type=range]{width:100%;accent-color:var(--ac);height:3px}
       <div class="lf"><label>帳號</label><input class="li" id="l-u" placeholder="帳號" onkeydown="if(event.key==='Enter')document.getElementById('l-p').focus()"></div>
       <div class="lf"><label>密碼</label><input class="li" type="password" id="l-p" placeholder="密碼" onkeydown="if(event.key==='Enter')doLogin()"></div>
       <button class="lbtn" id="login-btn" onclick="doLogin()">登入系統</button>
-      <div class="lhint" id="login-hint" style="color:#6b7280">帳號由管理員於試算表設定</div>
+      <div class="lhint" id="login-hint" style="color:#6b7280">預設帳號：admin　密碼：admin1234</div>
       <div style="margin-top:10px;text-align:center">
         <button onclick="toggleGsSetup()" style="background:none;border:none;color:#9ca3af;font-size:12px;cursor:pointer;text-decoration:underline">⚙️ 修改試算表網址</button>
       </div>
@@ -799,47 +799,45 @@ function pickRole(el){
 }
 async function doLogin(){
   const u=document.getElementById('l-u').value.trim();
-  const p=document.getElementById('l-p').value;
-  if(!u){toast('請輸入帳號');return}
-  if(!p){toast('請輸入密碼');return}
+  const p=document.getElementById('l-p').value.trim();
+  if(!u||!p){toast('請輸入帳號和密碼');return}
   const btn=document.getElementById('login-btn');
-  btn.disabled=true; btn.textContent='驗證中...';
-  try{
-    // Try Sheets auth first
-    if(gsConfig.url){
-      const res=await fetch(gsConfig.url+'?action=getAccounts',{mode:'cors'});
-      const d=await res.json();
-      if(d.ok&&d.accounts){
-        accounts=d.accounts; LS.set('accounts',accounts);
-      }
-    }
-    // Validate against cached/fetched accounts
-    const acc=accounts.find(a=>a.user===u&&a.pass===p&&a.st!=='停用');
-    if(!acc){
-      toast('❌ 帳號或密碼錯誤，或帳號已停用');
-      btn.disabled=false; btn.textContent='登入';
-      return;
-    }
-    user={id:acc.id,name:acc.user,disp:acc.disp||acc.user,role:acc.role};
+  if(btn){btn.disabled=true;btn.textContent='驗證中...';}
+
+  function matchAcc(list,u,p){
+    return list.find(a=>{
+      const uMatch=(a.user&&a.user===u)||(a.name&&a.name===u);
+      const pMatch=(a.pass&&a.pass===p)||(a.pw&&a.pw===p);
+      return uMatch&&pMatch&&a.st!=='停用';
+    });
+  }
+  function doEnter(acc){
+    user={id:acc.id||acc.name,name:acc.user||acc.name,disp:acc.disp||acc.user||acc.name,role:acc.role};
     LS.set('usr',user);
     document.getElementById('scr-login').style.display='none';
     document.getElementById('app').style.display='block';
     initApp();
-  }catch(e){
-    // Sheets unreachable - try local cache only
-    const acc=accounts.find(a=>a.user===u&&a.pass===p&&a.st!=='停用');
-    if(acc){
-      user={id:acc.id,name:acc.user,disp:acc.disp||acc.user,role:acc.role};
-      LS.set('usr',user);
-      document.getElementById('scr-login').style.display='none';
-      document.getElementById('app').style.display='block';
-      initApp();
-      toast('⚠️ 以本機快取登入（試算表暫時無法連線）');
-    }else{
-      toast('❌ 無法連線試算表，且無本機快取帳號');
-      btn.disabled=false; btn.textContent='登入';
-    }
   }
+
+  // 1. 先嘗試從試算表取得最新帳號
+  if(gsConfig.url){
+    try{
+      const res=await fetch(gsConfig.url+'?action=getAccounts',{mode:'cors'});
+      const d=await res.json();
+      if(d.ok&&d.accounts&&d.accounts.length){
+        accounts=d.accounts;
+        LS.set('accounts',accounts);
+      }
+    }catch(e){}
+  }
+
+  // 2. 驗證帳號（本機快取或剛從Sheets取得）
+  const acc=matchAcc(accounts,u,p);
+  if(acc){doEnter(acc);return}
+
+  // 3. 找不到 - 顯示錯誤
+  toast('❌ 帳號或密碼錯誤');
+  if(btn){btn.disabled=false;btn.textContent='登入系統';}
 }
 function doLogout(){if(!confirm('確定登出？'))return;LS.set('usr',null);location.reload();}
 
@@ -885,6 +883,16 @@ function initApp(){
   // Reload ROOMS from localStorage now that LS is available
   const savedRooms=LS.get('rooms_v2',null);
   if(savedRooms&&savedRooms.length){ ROOMS.length=0; savedRooms.forEach(r=>ROOMS.push(r)); }
+  // Migrate old account schema {name,pw} → {user,pass}
+  accounts=accounts.map(a=>({
+    id:a.id||a.name||'u'+Date.now(),
+    user:a.user||a.name||'',
+    pass:a.pass||a.pw||'',
+    disp:a.disp||a.name||'',
+    role:a.role||'warden',
+    st:a.st||'啟用'
+  }));
+  LS.set('accounts',accounts);
   // header
   const rc=RCOLOR[user.role]||'#4d8ef8';
   const av=document.getElementById('hav');
