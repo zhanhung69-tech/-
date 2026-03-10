@@ -1341,7 +1341,7 @@ async function loadAccounts(){
           ${isAdmin?`<td><div style="display:flex;gap:5px">
             <button class="btn bgh bsm" onclick="openEditAcc('${a.username}','${a.display}','${a.role}','${a.active}')">✏️ 編輯</button>
             <button class="btn br  bsm" onclick="resetPwd('${a.username}')">🔑 重設密碼</button>
-            <button class="btn ${active?'br':'bg'} bsm" onclick="toggleActive('${a.username}','${active?'0':'1}')">${active?'停用':'啟用'}</button>
+            <button class="btn ${active?'br':'bg'} bsm" onclick="toggleActive('${a.username}','"+(active?'0':'1')+"')">${active?'停用':'啟用'}</button>
           </div></td>`:''}
         </tr>`;
       }).join('')}</tbody></table></div>`;
