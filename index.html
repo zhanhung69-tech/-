@@ -284,7 +284,7 @@ textarea.fi{resize:vertical;min-height:70px}
             <div class="chd">
               <span class="ctitle">📋 點名作業</span>
               <div style="display:flex;gap:6px;flex-wrap:wrap">
-                <button class="btn bpdf bsm" onclick="exportRollPDF()">🖨️ 列印</button>
+                <button class="btn bpdf bsm" onclick="openPrintModal('roll')">🖨️ 列印</button>
                 <button class="btn bp   bsm" onclick="submitRoll()">💾 儲存</button>
               </div>
             </div>
@@ -350,7 +350,7 @@ textarea.fi{resize:vertical;min-height:70px}
               <span class="ctitle">📄 假單列表</span>
               <div style="display:flex;gap:6px;flex-wrap:wrap">
                 <button class="btn btd  bsm" onclick="showTodayModal()">📅 今日名單</button>
-                <button class="btn bpdf bsm" onclick="exportLeavesPDF()">🖨️ PDF</button>
+                <button class="btn bpdf bsm" onclick="openPrintModal('leaves')">🖨️ 列印篩選</button>
               </div>
             </div>
             <div class="cbody">
@@ -380,7 +380,7 @@ textarea.fi{resize:vertical;min-height:70px}
                   </div>
                   <div style="display:flex;flex-direction:column;gap:8px">
                     <button class="btn bp"   onclick="submitScore()">💾 儲存</button>
-                    <button class="btn bpdf" onclick="exportScorePDF()">🖨️ PDF</button>
+                    <button class="btn bpdf" onclick="openPrintModal('score')">🖨️ 列印</button>
                   </div>
                 </div>
                 <div class="fr"><label class="flbl">備　註</label><input class="fi" id="sc-note" placeholder="選填"></div>
@@ -457,7 +457,7 @@ textarea.fi{resize:vertical;min-height:70px}
             <div class="chd">
               <span class="ctitle">📋 違規紀錄</span>
               <div style="display:flex;gap:6px;flex-wrap:wrap">
-                <button class="btn bpdf bsm" onclick="exportViosPDF()">🖨️ PDF</button>
+                <button class="btn bpdf bsm" onclick="openPrintModal('violations')">🖨️ 列印篩選</button>
               </div>
             </div>
             <div class="cbody">
@@ -615,6 +615,19 @@ textarea.fi{resize:vertical;min-height:70px}
     <div class="mft">
       <button class="btn bg" onclick="saveHandle()">✅ 確認處理</button>
       <button class="btn bgh" onclick="closeModal('m-handle')">取消</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal: 列印篩選 -->
+<div class="modal-ov" id="m-print">
+  <div class="modal" style="max-width:480px">
+    <div class="mhd"><span class="mtit" id="m-print-title">🖨️ 列印選項</span><button class="mcl" onclick="closeModal('m-print')">✕</button></div>
+    <div class="mbody" id="m-print-body"></div>
+    <div class="mft">
+      <button class="btn bpdf" onclick="doPrint()">🖨️ 列印</button>
+      <button class="btn bgh" onclick="closeModal('m-print')">取消</button>
     </div>
   </div>
 </div>
@@ -1489,6 +1502,265 @@ async function changeOwnPwd(){
     document.getElementById('pwd-cfm').value='';
     setTimeout(()=>doLogout(),2000);
   }catch(e){toast('❌ '+e.message);}
+}
+
+
+// ── 列印篩選 Modal ────────────────────────────────────
+let _printType = '';
+
+function openPrintModal(type){
+  _printType = type;
+  const title = {roll:'🖨️ 點名列印選項', leaves:'🖨️ 請假列印篩選', score:'🖨️ 評分列印篩選', violations:'🖨️ 違規列印篩選'}[type]||'🖨️ 列印';
+  document.getElementById('m-print-title').textContent = title;
+
+  const clsList = [...new Set(students.map(s=>s.cls).filter(Boolean))].sort();
+  const clsOpts = '<option value="">全部班級</option>'+clsList.map(c=>`<option value="${c}">${c}</option>`).join('');
+  const leaveTypes = ['全部','打工','職場實習','工讀','晚歸','外宿','返鄉','病假','其它'];
+  const vioCats = ['全部','違禁物品（菸酒等）','宵禁違規','打架鬥毆','財物損毀','衛生不合格','其它'];
+
+  let body = '';
+  if(type === 'roll'){
+    body = `
+      <div class="fg">
+        <div class="fr" style="grid-column:1/-1">
+          <label class="flbl">列印內容</label>
+          <select class="fi" id="pr-roll-mode">
+            <option value="absent">⚠️ 僅列印未到＋請假人員</option>
+            <option value="leave">🟡 僅列印請假人員</option>
+            <option value="ab_only">❌ 僅列印未到人員</option>
+            <option value="all">📋 全部人員（含在宿）</option>
+          </select>
+        </div>
+        <div class="fr" style="grid-column:1/-1">
+          <label class="flbl">備　註</label>
+          <input class="fi" id="pr-roll-note" placeholder="選填，會印在列印單上">
+        </div>
+      </div>
+      <div style="margin-top:10px;padding:10px;background:var(--amb-l);border-radius:var(--rs);font-size:12px;color:var(--amb);font-weight:600">
+        💡 預設列印「未到＋請假」，方便舍監快速掌握異常人員
+      </div>`;
+  } else if(type === 'leaves'){
+    const today = new Date().toISOString().slice(0,10);
+    const monthStart = today.slice(0,7)+'-01';
+    body = `
+      <div class="fg">
+        <div class="fr"><label class="flbl">開始日期</label><input class="fi" type="date" id="pr-lv-sd" value="${monthStart}"></div>
+        <div class="fr"><label class="flbl">結束日期</label><input class="fi" type="date" id="pr-lv-ed" value="${today}"></div>
+        <div class="fr"><label class="flbl">班　　級</label><select class="fi" id="pr-lv-cls">${clsOpts}</select></div>
+        <div class="fr"><label class="flbl">假別類型</label>
+          <select class="fi" id="pr-lv-type">${leaveTypes.map(t=>`<option value="${t==='全部'?'':t}">${t}</option>`).join('')}</select>
+        </div>
+        <div class="fr" style="grid-column:1/-1"><label class="flbl">狀　　態</label>
+          <select class="fi" id="pr-lv-st">
+            <option value="">全部狀態</option>
+            <option value="待學務處核章">待學務處核章</option>
+            <option value="待實習處核章">待實習處核章</option>
+            <option value="待招生中心核章">待招生中心核章</option>
+            <option value="請假中">請假中</option>
+            <option value="已返舍">已返舍</option>
+            <option value="已駁回">已駁回</option>
+          </select>
+        </div>
+      </div>`;
+  } else if(type === 'score'){
+    const today = new Date().toISOString().slice(0,10);
+    const monthStart = today.slice(0,7)+'-01';
+    body = `
+      <div class="fg">
+        <div class="fr"><label class="flbl">開始日期</label><input class="fi" type="date" id="pr-sc-sd" value="${monthStart}"></div>
+        <div class="fr"><label class="flbl">結束日期</label><input class="fi" type="date" id="pr-sc-ed" value="${today}"></div>
+        <div class="fr"><label class="flbl">棟　　別</label>
+          <select class="fi" id="pr-sc-bld">
+            <option value="">全部棟別</option>
+            ${BLDS.map(b=>`<option value="${b}">${bldLbl(b)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="fr"><label class="flbl">最低等級</label>
+          <select class="fi" id="pr-sc-gr">
+            <option value="">全部等級</option>
+            <option value="A">A 優良（90+）</option>
+            <option value="B">B 良好（75-89）</option>
+            <option value="C">C 普通（60-74）</option>
+            <option value="D">D 待改善（59以下）</option>
+          </select>
+        </div>
+      </div>`;
+  } else if(type === 'violations'){
+    const today = new Date().toISOString().slice(0,10);
+    const monthStart = today.slice(0,7)+'-01';
+    body = `
+      <div class="fg">
+        <div class="fr"><label class="flbl">開始日期</label><input class="fi" type="date" id="pr-vio-sd" value="${monthStart}"></div>
+        <div class="fr"><label class="flbl">結束日期</label><input class="fi" type="date" id="pr-vio-ed" value="${today}"></div>
+        <div class="fr"><label class="flbl">班　　級</label><select class="fi" id="pr-vio-cls">${clsOpts}</select></div>
+        <div class="fr"><label class="flbl">違規類別</label>
+          <select class="fi" id="pr-vio-cat">${vioCats.map(c=>`<option value="${c==='全部'?'':c}">${c}</option>`).join('')}</select>
+        </div>
+        <div class="fr"><label class="flbl">嚴重程度</label>
+          <select class="fi" id="pr-vio-lvl">
+            <option value="">全部</option>
+            <option value="serious">🔴 嚴重</option>
+            <option value="normal">🟠 一般</option>
+            <option value="minor">🟡 輕微</option>
+          </select>
+        </div>
+        <div class="fr"><label class="flbl">處理狀態</label>
+          <select class="fi" id="pr-vio-st">
+            <option value="">全部</option>
+            <option value="待處理">待處理</option>
+            <option value="已處理">已處理</option>
+            <option value="記過">記過</option>
+            <option value="警告">警告</option>
+            <option value="申誡">申誡</option>
+            <option value="移送學務處">移送學務處</option>
+          </select>
+        </div>
+      </div>`;
+  }
+  document.getElementById('m-print-body').innerHTML = body;
+  document.getElementById('m-print').classList.add('on');
+}
+
+function doPrint(){
+  const t = _printType;
+  closeModal('m-print');
+  if(t==='roll')       doPrintRoll();
+  else if(t==='leaves')     doPrintLeaves();
+  else if(t==='score')      doPrintScore();
+  else if(t==='violations') doPrintViolations();
+}
+
+// 點名列印
+function doPrintRoll(){
+  const mode = document.getElementById('pr-roll-mode')?.value || 'absent';
+  const note = document.getElementById('pr-roll-note')?.value || '';
+  const bstus = students.filter(s=>s.b===rollBld&&s.st==='入住');
+  let list = bstus;
+  if(mode==='absent')   list = bstus.filter(s=>{ const st=rollState[s.id]||'in'; return st==='ab'||st==='lv'; });
+  else if(mode==='leave')   list = bstus.filter(s=>(rollState[s.id]||'in')==='lv');
+  else if(mode==='ab_only') list = bstus.filter(s=>(rollState[s.id]||'in')==='ab');
+  if(!list.length){ toast('無符合條件的人員'); return; }
+  const stLabel = {in:'✅ 在宿', lv:'🟡 請假', ab:'❌ 未到'};
+  const stColor = {in:'#16a34a', lv:'#d97706', ab:'#dc2626'};
+  const rows = list.sort((a,b)=>String(a.r||'').localeCompare(String(b.r||''))||String(a.bed||'').localeCompare(String(b.bed||'')))
+    .map(s=>{
+      const st = rollState[s.id]||'in';
+      return `<tr><td>${s.r||''}</td><td>${s.bed||''}</td><td style="font-weight:700">${s.name}</td><td>${s.eng||''}</td><td>${s.cls||''}</td>
+        <td style="color:${stColor[st]||'#000'};font-weight:700">${stLabel[st]||st}</td>
+        <td>${rollState[s.id+'_note']||''}</td>
+        <td style="width:80px;border-bottom:1px solid #ccc">&nbsp;</td></tr>`;
+    }).join('');
+  const modeLabel = {absent:'未到＋請假人員', leave:'請假人員', ab_only:'未到人員', all:'全部人員'}[mode]||'';
+  printHTML(`點名單 — ${bldLbl(rollBld)} · ${modeLabel}`,`
+    ${note?`<div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;padding:8px 14px;margin-bottom:16px;font-size:13px">📝 ${note}</div>`:''}
+    <div style="display:flex;gap:16px;margin-bottom:14px;font-size:13px">
+      <span>棟別：<strong>${bldLbl(rollBld)}</strong></span>
+      <span>人數：<strong>${list.length} 人</strong></span>
+      <span>日期：<strong>${new Date().toLocaleDateString('zh-TW')}</strong></span>
+    </div>
+    <table border="1" cellpadding="8" style="border-collapse:collapse;width:100%;font-size:13px">
+      <tr style="background:#1e3a8a;color:#fff"><th>房號</th><th>床位</th><th>姓名</th><th>英文姓名</th><th>班級</th><th>狀態</th><th>備註</th><th>簽名確認</th></tr>
+      ${rows}
+    </table>`);
+}
+
+// 請假列印
+function doPrintLeaves(){
+  const sd  = document.getElementById('pr-lv-sd')?.value || '';
+  const ed  = document.getElementById('pr-lv-ed')?.value || '';
+  const cls = document.getElementById('pr-lv-cls')?.value || '';
+  const typ = document.getElementById('pr-lv-type')?.value || '';
+  const st  = document.getElementById('pr-lv-st')?.value || '';
+  let list = [...leaves];
+  if(sd) list = list.filter(l=>String(l.created_at||'').slice(0,10)>=sd);
+  if(ed) list = list.filter(l=>String(l.created_at||'').slice(0,10)<=ed);
+  if(cls) list = list.filter(l=>l.cls===cls);
+  if(typ) list = list.filter(l=>l.type===typ);
+  if(st)  list = list.filter(l=>l.status===st);
+  if(!list.length){ toast('無符合條件的假單'); return; }
+  const rows = list.map(l=>`<tr>
+    <td style="font-size:11px">${l.id}</td>
+    <td>${l.cls}</td><td>${l.names}</td><td>${l.type}</td>
+    <td style="font-size:11px">${l.start}<br>～${l.end}</td>
+    <td>${l.reason||'—'}</td>
+    <td><span style="font-weight:700;color:${ST_BADGE[l.status]==='bact'?'#16a34a':ST_BADGE[l.status]==='brej'?'#dc2626':'#d97706'}">${l.status}</span></td>
+  </tr>`).join('');
+  const filters = [sd&&`${sd}起`, ed&&`${ed}止`, cls&&`班級:${cls}`, typ&&`類型:${typ}`, st&&`狀態:${st}`].filter(Boolean).join('・') || '全部';
+  printHTML(`請假紀錄 — ${filters}`,`
+    <div style="display:flex;gap:16px;margin-bottom:14px;font-size:13px">
+      <span>篩選：<strong>${filters}</strong></span>
+      <span>共 <strong>${list.length}</strong> 筆</span>
+    </div>
+    <table border="1" cellpadding="7" style="border-collapse:collapse;width:100%;font-size:12px">
+      <tr style="background:#1e3a8a;color:#fff"><th>單號</th><th>班級</th><th>姓名</th><th>類別</th><th>期間</th><th>事由</th><th>狀態</th></tr>
+      ${rows}
+    </table>`);
+}
+
+// 評分列印
+function doPrintScore(){
+  const sd  = document.getElementById('pr-sc-sd')?.value || '';
+  const ed  = document.getElementById('pr-sc-ed')?.value || '';
+  const bld = document.getElementById('pr-sc-bld')?.value || '';
+  const grF = document.getElementById('pr-sc-gr')?.value || '';
+  const grOrder = ['A','B','C','D'];
+  let list = [...scores];
+  if(sd) list = list.filter(s=>String(s.date||'').replace(/\//g,'-')>=sd);
+  if(ed) list = list.filter(s=>String(s.date||'').replace(/\//g,'-')<=ed);
+  if(bld) list = list.filter(s=>s.b===bld);
+  if(grF) list = list.filter(s=>grOrder.indexOf(s.gr)>=grOrder.indexOf(grF));
+  if(!list.length){ toast('無符合條件的評分紀錄'); return; }
+  const gi={A:'⭐',B:'✅',C:'📋',D:'⚠️'};
+  const rows = list.map(s=>`<tr>
+    <td>${s.date}</td><td>${bldLbl(s.b)}</td><td>${s.r}</td><td>${s.ins}</td>
+    <td>${s.fl}</td><td>${s.dk}</td><td>${s.bd}</td><td>${s.tr}</td>
+    <td>${s.cl}</td><td>${s.bt}</td><td>${s.cm}</td><td>${s.pn}</td>
+    <td style="font-weight:800">${s.tot}</td>
+    <td>${gi[s.gr]||''} ${s.gr}</td><td>${s.note||''}</td>
+  </tr>`).join('');
+  printHTML(`內務評分紀錄`,`
+    <div style="margin-bottom:14px;font-size:13px">共 <strong>${list.length}</strong> 筆</div>
+    <table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;font-size:11px">
+      <tr style="background:#1e3a8a;color:#fff"><th>日期</th><th>棟</th><th>房</th><th>人員</th><th>地面</th><th>書桌</th><th>棉被</th><th>垃圾</th><th>衣物</th><th>浴廁</th><th>公共</th><th>扣分</th><th>總分</th><th>等級</th><th>備註</th></tr>
+      ${rows}
+    </table>`);
+}
+
+// 違規列印
+function doPrintViolations(){
+  const sd  = document.getElementById('pr-vio-sd')?.value || '';
+  const ed  = document.getElementById('pr-vio-ed')?.value || '';
+  const cls = document.getElementById('pr-vio-cls')?.value || '';
+  const cat = document.getElementById('pr-vio-cat')?.value || '';
+  const lvl = document.getElementById('pr-vio-lvl')?.value || '';
+  const st  = document.getElementById('pr-vio-st')?.value || '';
+  let list = [...violations];
+  if(sd) list = list.filter(v=>String(v.created_at||'').slice(0,10).replace(/\//g,'-')>=sd);
+  if(ed) list = list.filter(v=>String(v.created_at||'').slice(0,10).replace(/\//g,'-')<=ed);
+  if(cls) list = list.filter(v=>v.cls===cls);
+  if(cat) list = list.filter(v=>v.category===cat);
+  if(lvl) list = list.filter(v=>v.level===lvl);
+  if(st)  list = list.filter(v=>v.status===st);
+  if(!list.length){ toast('無符合條件的違規紀錄'); return; }
+  const rows = list.map(v=>`<tr>
+    <td style="font-size:11px">${v.id}</td>
+    <td>${v.cls}</td><td>${v.names}</td><td>${v.category}</td>
+    <td>${VIO_LEVEL_LBL[v.level]||v.level}</td>
+    <td style="font-size:11px">${v.description}</td>
+    <td style="font-weight:700">${v.status}</td>
+    <td style="font-size:11px">${v.handled_by||'—'}</td>
+    <td style="font-size:11px">${String(v.created_at||'').slice(0,10)}</td>
+  </tr>`).join('');
+  const filters = [sd&&`${sd}起`, ed&&`${ed}止`, cls&&`班級:${cls}`, cat&&`類別:${cat}`, lvl&&`嚴重度:${lvl}`, st&&`狀態:${st}`].filter(Boolean).join('・') || '全部';
+  printHTML(`違規通報紀錄 — ${filters}`,`
+    <div style="display:flex;gap:16px;margin-bottom:14px;font-size:13px">
+      <span>篩選：<strong>${filters}</strong></span>
+      <span>共 <strong>${list.length}</strong> 筆</span>
+    </div>
+    <table border="1" cellpadding="7" style="border-collapse:collapse;width:100%;font-size:12px">
+      <tr style="background:#1e3a8a;color:#fff"><th>編號</th><th>班級</th><th>學生</th><th>類別</th><th>嚴重度</th><th>描述</th><th>狀態</th><th>處理人</th><th>日期</th></tr>
+      ${rows}
+    </table>`);
 }
 
 // ── 工具 ─────────────────────────────────────────────
