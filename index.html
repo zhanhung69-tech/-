@@ -727,9 +727,9 @@ async function startApp(){
   if(!hp('all')) { document.getElementById('acc-create-card').style.display='none'; }
 
   await loadAll();
-  buildBldTabs('roll-blds',rollBld,b=>{rollBld=b;buildBldTabs('roll-blds',rollBld,arguments.callee);renderRoll();});
-  buildBldTabs('stu-blds',stuBld,b=>{stuBld=b;buildBldTabs('stu-blds',stuBld,arguments.callee);renderStudents();},true);
-  buildBldTabs('bed-blds',bedBld,b=>{bedBld=b;buildBldTabs('bed-blds',bedBld,arguments.callee);renderBeds();});
+  buildBldTabs('roll-blds',rollBld,switchRollBld);
+  buildBldTabs('stu-blds',stuBld,switchStuBld,true);
+  buildBldTabs('bed-blds',bedBld,switchBedBld);
   initScSliders(); initScForm(); initLvForm(); initVioForm();
   renderDash(); renderLvTabs(); renderLeaves(); renderScHist(); renderVioTabs(); renderViolations();
   checkSync();
@@ -737,16 +737,15 @@ async function startApp(){
 
 async function loadAll(){
   try{
-    const [sR,lR,scR,vR]=await Promise.all([
+    const [sR,lR,scR,vR,bR]=await Promise.all([
       gasGet({action:'students'}), gasGet({action:'leaves'}),
       gasGet({action:'scores'}),   gasGet({action:'violations'}),
+      gasGet({action:'beds'}),
     ]);
     students  =(sR.data||[]).map(s=>({...s,id:String(s.id).split('.')[0]}));
     leaves    = lR.data||[];
     scores    = scR.data||[];
     violations= vR.data||[];
-    // 床位資料
-    const bR = await gasGet({action:'beds'});
     bedData   = bR.data||{};
     setSyncOK(true);
   }catch(e){setSyncOK(false);toast('⚠️ 載入失敗：'+e.message);}
@@ -818,11 +817,15 @@ function renderDash(){
 }
 
 // ── 棟別 Tabs ─────────────────────────────────────────
-function buildBldTabs(id,active,onClick,withAll=false){
+function buildBldTabs(id,active,fnName,withAll=false){
   const c=document.getElementById(id);
   const list=withAll?[['ALL','全部'],...BLDS.map(b=>[b,bldLbl(b)])]:BLDS.map(b=>[b,bldLbl(b)]);
-  c.innerHTML=list.map(([b,l])=>`<div class="btab ${b==='ALL'?'all':(isFem(b)?'fem':'mal')} ${b===active?'on':''}" onclick="(${onClick.toString()})('${b}')">${l}</div>`).join('');
+  const fn=typeof fnName==='string'?fnName:fnName.name||'';
+  c.innerHTML=list.map(([b,l])=>`<div class="btab ${b==='ALL'?'all':(isFem(b)?'fem':'mal')} ${b===active?'on':''}" onclick="${fn}('${b}')">${l}</div>`).join('');
 }
+function switchRollBld(b){rollBld=b;buildBldTabs('roll-blds',b,switchRollBld);renderRoll();}
+function switchStuBld(b){stuBld=b;buildBldTabs('stu-blds',b,switchStuBld,true);renderStudents();}
+function switchBedBld(b){bedBld=b;buildBldTabs('bed-blds',b,switchBedBld);renderBeds();}
 
 // ── 點名 ─────────────────────────────────────────────
 function renderRoll(){
