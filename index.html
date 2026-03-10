@@ -249,6 +249,7 @@ textarea.fi{resize:vertical;min-height:70px}
         <div class="ni"     data-pg="score"       onclick="navTo('score')">    <span class="ico">🏆</span>內務評分</div>
         <div class="ni"     data-pg="beds"        onclick="navTo('beds')">     <span class="ico">🛏️</span>床位管理</div>
         <div class="ni"     data-pg="violations"  onclick="navTo('violations')"><span class="ico">🚨</span>違規通報<span class="nbadge" id="nb-vio">0</span></div>
+        <div class="ni"     data-pg="accounts"    onclick="navTo('accounts')"> <span class="ico">👤</span>帳號管理</div>
       </nav>
       <div class="sb-ft">
         <div class="sync-row"><span class="sdot" id="sdot"></span><span class="stxt" id="stxt">連線中…</span></div>
@@ -462,6 +463,47 @@ textarea.fi{resize:vertical;min-height:70px}
           </div>
         </div>
 
+        <!-- 帳號管理 -->
+        <div class="pg" id="pg-accounts">
+          <div class="card" id="acc-create-card">
+            <div class="chd"><span class="ctitle">➕ 新增帳號</span></div>
+            <div class="cbody">
+              <div class="fg">
+                <div class="fr"><label class="flbl">登入帳號（英文）</label><input class="fi" id="acc-uname" placeholder="如：principal01"></div>
+                <div class="fr"><label class="flbl">職務名稱（中文）</label><input class="fi" id="acc-display" placeholder="如：校長"></div>
+                <div class="fr"><label class="flbl">角　色</label>
+                  <select class="fi" id="acc-role">
+                    <option value="admin">系統管理員</option>
+                    <option value="warden">生輔組舍監</option>
+                    <option value="teacher" selected>導師</option>
+                    <option value="academic">學務處</option>
+                    <option value="intern">實習處</option>
+                    <option value="recruit">招生中心</option>
+                  </select>
+                </div>
+                <div class="fr"><label class="flbl">初始密碼（選填）</label><input class="fi" id="acc-initpwd" placeholder="預設：Welcome@1234"></div>
+              </div>
+              <div style="margin-top:6px;font-size:12px;color:var(--slat-l)">💡 初始密碼若不填則預設為 Welcome@1234，使用者登入後請自行修改</div>
+              <div style="margin-top:14px"><button class="btn bp" onclick="createAccount()">✅ 建立帳號</button></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="chd"><span class="ctitle">👤 帳號列表</span><button class="btn bgh bsm" onclick="loadAccounts()">🔄 重新整理</button></div>
+            <div class="cbody" id="acc-list"><div class="loading"><div class="spin"></div>載入中…</div></div>
+          </div>
+          <div class="card">
+            <div class="chd"><span class="ctitle">🔑 修改我的密碼</span></div>
+            <div class="cbody">
+              <div class="fg">
+                <div class="fr"><label class="flbl">舊　密　碼</label><input class="fi" type="password" id="pwd-old" placeholder="輸入目前密碼"></div>
+                <div class="fr"><label class="flbl">新　密　碼</label><input class="fi" type="password" id="pwd-new" placeholder="至少 6 碼"></div>
+                <div class="fr"><label class="flbl">確認新密碼</label><input class="fi" type="password" id="pwd-cfm" placeholder="再輸入一次"></div>
+              </div>
+              <div style="margin-top:14px"><button class="btn bp" onclick="changeOwnPwd()">🔑 確認修改</button></div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -580,7 +622,7 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbw4Wlq3t5SO12e7Cs8bNgZy
 
 const BLDS   = ['F1','F2','F3','M1','M2','M3'];
 const BFLOOR = {F1:'12F',F2:'11F',F3:'10F',M1:'9F',M2:'8F',M3:'6F'};
-const bldLbl = b => (b[0]==='F'?'女':'男')+' '+BFLOOR[b];
+const bldLbl = b => (b[0]==='F'?'女':'男')+BFLOOR[b];
 const isFem  = b => b[0]==='F';
 
 const LEAVE_FLOW = {
@@ -604,7 +646,7 @@ const ROLE_PERMS  = {
   recruit:  ['leave_approve_3','view_students','view_leaves','view_dash'],
 };
 
-const PG_TITLES = {dash:'儀表板',roll:'點名作業',students:'僑生管理',leaves:'請假管理',score:'內務評分',beds:'床位管理',violations:'違規通報'};
+const PG_TITLES = {dash:'儀表板',roll:'點名作業',students:'僑生管理',leaves:'請假管理',score:'內務評分',beds:'床位管理',violations:'違規通報',accounts:'帳號管理'};
 
 const ST_BADGE = {'待學務處核章':'bpend','待實習處核章':'bpend','待招生中心核章':'bout','請假中':'bact','已返舍':'bret','已駁回':'brej'};
 
@@ -663,6 +705,8 @@ async function startApp(){
   if(!hp('score'))       qs('[data-pg=score]').style.display='none';
   if(!hp('manage_beds')&&!hp('all')) qs('[data-pg=beds]').style.display='none';
   if(!hp('view_violations')&&!hp('report_violation')&&!hp('all')) qs('[data-pg=violations]').style.display='none';
+  // 帳號管理：所有人都可看到（修改自己密碼），但新增/編輯只有 admin
+  if(!hp('all')) { document.getElementById('acc-create-card').style.display='none'; }
 
   await loadAll();
   buildBldTabs('roll-blds',rollBld,b=>{rollBld=b;buildBldTabs('roll-blds',rollBld,arguments.callee);renderRoll();});
@@ -712,6 +756,7 @@ function navTo(pg){
   if(pg==='score')      {renderScHist();initScForm();}
   if(pg==='beds')       renderBeds();
   if(pg==='violations') {renderVioTabs();renderViolations();}
+  if(pg==='accounts')   loadAccounts();
 }
 function openSB(){qs('#sidebar').classList.add('open');qs('#sb-ov').classList.add('on');}
 function closeSB(){qs('#sidebar').classList.remove('open');qs('#sb-ov').classList.remove('on');}
@@ -1272,6 +1317,114 @@ function exportViosPDF(){
     <tr style="background:#1e3a8a;color:#fff"><th>編號</th><th>班級</th><th>學生</th><th>類別</th><th>嚴重度</th><th>描述</th><th>狀態</th><th>通報人</th><th>時間</th></tr>${rows}</table>`);
 }
 
+// ── 帳號管理 ─────────────────────────────────────────
+const ROLE_OPT = {admin:'系統管理員',warden:'生輔組舍監',teacher:'導師',academic:'學務處',intern:'實習處',recruit:'招生中心'};
+
+async function loadAccounts(){
+  const c=document.getElementById('acc-list');
+  c.innerHTML='<div class="loading"><div class="spin"></div>載入中…</div>';
+  try{
+    const r=await gasGet({action:'accounts'});
+    const list=r.data||[];
+    const isAdmin=hp('all');
+    if(!list.length){c.innerHTML='<div class="empty"><div class="empty-ico">👤</div><p>無帳號資料</p></div>';return;}
+    c.innerHTML=`<div style="overflow-x:auto"><table class="rt">
+      <thead><tr><th>帳號</th><th>職務名稱</th><th>角色</th><th>狀態</th>${isAdmin?'<th>操作</th>':''}</tr></thead>
+      <tbody>${list.map(a=>{
+        const active=String(a.active)==='1';
+        return `<tr>
+          <td style="font-family:var(--mo);font-size:12px">${a.username}</td>
+          <td style="font-weight:700">${a.display||'—'}</td>
+          <td><span style="background:var(--pri-l);color:var(--pri);padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700">${ROLE_OPT[a.role]||a.role}</span></td>
+          <td><span style="background:${active?'var(--grn-l)':'var(--red-l)'};color:${active?'var(--grn)':'var(--red)'};padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700">${active?'啟用':'停用'}</span></td>
+          ${isAdmin?`<td><div style="display:flex;gap:5px">
+            <button class="btn bgh bsm" onclick="openEditAcc('${a.username}','${a.display}','${a.role}','${a.active}')">✏️ 編輯</button>
+            <button class="btn br  bsm" onclick="resetPwd('${a.username}')">🔑 重設密碼</button>
+            <button class="btn ${active?'br':'bg'} bsm" onclick="toggleActive('${a.username}','${active?'0':'1}')">${active?'停用':'啟用'}</button>
+          </div></td>`:''}
+        </tr>`;
+      }).join('')}</tbody></table></div>`;
+  }catch(e){c.innerHTML='<div class="empty"><p>載入失敗</p></div>';}
+}
+
+async function createAccount(){
+  const uname  =document.getElementById('acc-uname').value.trim();
+  const display=document.getElementById('acc-display').value.trim();
+  const role   =document.getElementById('acc-role').value;
+  const initpwd=document.getElementById('acc-initpwd').value.trim()||'Welcome@1234';
+  if(!uname||!display){toast('請填寫帳號和職務名稱');return;}
+  if(!/^[a-zA-Z0-9_]+$/.test(uname)){toast('帳號只能使用英文、數字、底線');return;}
+  try{
+    const r=await gasPost({action:'create_account',username:uname,display,role,init_pwd:initpwd});
+    if(!r.ok){toast('❌ '+r.error);return;}
+    toast(`✅ 帳號已建立　初始密碼：${r.init_pwd}`);
+    // 彈出提示框讓管理員抄下密碼
+    alert(`帳號建立成功！\n\n登入帳號：${uname}\n職務名稱：${display}\n角　　色：${ROLE_OPT[role]||role}\n初始密碼：${r.init_pwd}\n\n請告知使用者登入後自行修改密碼。`);
+    document.getElementById('acc-uname').value='';
+    document.getElementById('acc-display').value='';
+    document.getElementById('acc-initpwd').value='';
+    loadAccounts();
+  }catch(e){toast('❌ '+e.message);}
+}
+
+// 開啟編輯 Modal（管理員）
+let _editAcc=null;
+function openEditAcc(username,display,role,active){
+  _editAcc=username;
+  // 用 prompt 快速完成（避免額外 Modal）
+  const newDisplay=prompt(`職務名稱（目前：${display}）`,display);
+  if(newDisplay===null)return;
+  const roles=Object.keys(ROLE_OPT);
+  const roleStr=roles.map((r,i)=>`${i+1}.${ROLE_OPT[r]}`).join('  ');
+  const idx=prompt(`角色（${roleStr}）\n請輸入數字：`,roles.indexOf(role)+1);
+  if(idx===null)return;
+  const newRole=roles[parseInt(idx)-1]||role;
+  gasPost({action:'update_account',username,display:newDisplay,role:newRole}).then(r=>{
+    if(!r.ok){toast('❌ '+r.error);return;}
+    toast('✅ 已更新');loadAccounts();
+  }).catch(e=>toast('❌ '+e.message));
+}
+
+async function resetPwd(username){
+  if(!confirm(`確定要重設「${username}」的密碼為 Welcome@1234？`))return;
+  try{
+    const r=await gasPost({action:'update_account',username,reset_pwd:true});
+    if(!r.ok){toast('❌ '+r.error);return;}
+    alert(`密碼已重設！\n\n登入帳號：${username}\n新密碼：${r.reset_pwd}\n\n請通知使用者盡快修改。`);
+    toast('✅ 密碼已重設');
+  }catch(e){toast('❌ '+e.message);}
+}
+
+async function toggleActive(username,active){
+  const label=active==='1'?'啟用':'停用';
+  if(!confirm(`確定要${label}帳號「${username}」？`))return;
+  try{
+    const r=await gasPost({action:'update_account',username,active});
+    if(!r.ok){toast('❌ '+r.error);return;}
+    toast(`✅ 已${label}`);loadAccounts();
+  }catch(e){toast('❌ '+e.message);}
+}
+
+// 使用者自行修改密碼
+async function changeOwnPwd(){
+  const oldp=document.getElementById('pwd-old').value;
+  const newp=document.getElementById('pwd-new').value;
+  const cfm =document.getElementById('pwd-cfm').value;
+  if(!oldp||!newp||!cfm){toast('請填寫所有欄位');return;}
+  if(newp!==cfm){toast('❌ 新密碼與確認密碼不符');return;}
+  if(newp.length<6){toast('❌ 新密碼至少 6 碼');return;}
+  if(oldp===newp){toast('新密碼不能與舊密碼相同');return;}
+  try{
+    const r=await gasPost({action:'change_own_pwd',username:user.username,old_pwd:oldp,new_pwd:newp});
+    if(!r.ok){toast('❌ '+r.error);return;}
+    toast('✅ 密碼已修改，請重新登入');
+    document.getElementById('pwd-old').value='';
+    document.getElementById('pwd-new').value='';
+    document.getElementById('pwd-cfm').value='';
+    setTimeout(()=>doLogout(),2000);
+  }catch(e){toast('❌ '+e.message);}
+}
+
 // ── 工具 ─────────────────────────────────────────────
 function printHTML(title,body){
   const w=window.open('','_blank','width=1050,height=750');
@@ -1293,5 +1446,3 @@ function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e
 </script>
 </body>
 </html>
-
-
