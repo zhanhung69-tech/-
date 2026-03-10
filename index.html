@@ -917,22 +917,34 @@ function renderRoll(){
   const autoLv={};
   leaves.filter(l=>l.status==='請假中').forEach(lv=>{
     String(lv.stu_ids||'').split(',').map(s=>s.trim()).filter(Boolean).forEach(sid=>{
-      if(bstus.find(s=>s.id===sid)) autoLv[sid]={status:'lv',note:lv.type+'（'+lv.id+'）'};
+      if(bstus.find(s=>s.id===sid)) autoLv[sid]={status:'lv',type:lv.type,note:lv.type+'（'+lv.id+'）'};
     });
   });
 
   // 統計
-  let inN=0,lvN=0,abN=0;
+  let inN=0,abN=0;
+  const lvCount={};
   bstus.forEach(s=>{
     const st=rollState[s.id]||(autoLv[s.id]?'lv':'in');
-    if(st==='in') inN++; else if(st==='lv') lvN++; else abN++;
+    if(st==='in') inN++;
+    else if(st==='ab') abN++;
+    else {
+      const typ = autoLv[s.id]?.type || '請假';
+      lvCount[typ] = (lvCount[typ]||0)+1;
+    }
   });
+  const lvN = Object.values(lvCount).reduce((a,b)=>a+b,0);
+  const lvChips = Object.entries(lvCount).map(([t,n])=>{
+    const s=LV_TYPE_STYLE[t]||LV_DEFAULT;
+    return `<span style="background:${s.chipBg};color:${s.chip};padding:4px 12px;border-radius:99px;font-size:12px;font-weight:800">${s.icon} ${t} ${n}</span>`;
+  }).join('');
 
   const c=document.getElementById('roll-content');
   c.innerHTML=`
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center">
       <span style="background:var(--grn-l);color:var(--grn);padding:5px 14px;border-radius:99px;font-size:13px;font-weight:700">✅ 在宿 ${inN}</span>
-      <span style="background:var(--amb-l);color:var(--amb);padding:5px 14px;border-radius:99px;font-size:13px;font-weight:700">🟡 請假 ${lvN}</span>
+      ${lvN?`<span style="background:var(--amb-l);color:var(--amb);padding:5px 14px;border-radius:99px;font-size:13px;font-weight:700">🟡 請假 ${lvN}</span>`:''}
+      ${lvChips}
       <span style="background:var(--red-l);color:var(--red);padding:5px 14px;border-radius:99px;font-size:13px;font-weight:700">❌ 未到 ${abN}</span>
     </div>
     <div class="roll-rooms" id="roll-rooms"></div>`;
@@ -954,24 +966,44 @@ function renderRoll(){
   });
 }
 
+// 假別樣式對照
+const LV_TYPE_STYLE = {
+  '晚歸':   {bg:'#fef3c7',border:'#fbbf24',chip:'#92400e',chipBg:'#fde68a',icon:'🌙'},
+  '外宿':   {bg:'#ede9fe',border:'#a78bfa',chip:'#4c1d95',chipBg:'#ddd6fe',icon:'🏠'},
+  '返鄉':   {bg:'#dbeafe',border:'#60a5fa',chip:'#1e3a8a',chipBg:'#bfdbfe',icon:'✈️'},
+  '病假':   {bg:'#fee2e2',border:'#f87171',chip:'#7f1d1d',chipBg:'#fecaca',icon:'🏥'},
+  '打工':   {bg:'#dcfce7',border:'#4ade80',chip:'#14532d',chipBg:'#bbf7d0',icon:'💼'},
+  '職場實習':{bg:'#dcfce7',border:'#4ade80',chip:'#14532d',chipBg:'#bbf7d0',icon:'🏭'},
+  '工讀':   {bg:'#dcfce7',border:'#4ade80',chip:'#14532d',chipBg:'#bbf7d0',icon:'📚'},
+  '其它':   {bg:'#fef9c3',border:'#fcd34d',chip:'#78350f',chipBg:'#fef08a',icon:'📋'},
+};
+const LV_DEFAULT = {bg:'#fef9c3',border:'#fcd34d',chip:'#78350f',chipBg:'#fef08a',icon:'📋'};
+
 function renderRoomCard(rm,stus,autoLv){
   const beds=stus.map(s=>{
     const auto=autoLv[s.id];
     const st=rollState[s.id]||'in';
     const isLv=st==='lv', isAb=st==='ab', isIn=st==='in';
-    const bg=isLv?'#fef9c3':isAb?'#fee2e2':'#f0fdf4';
-    const border=isLv?'#fcd34d':isAb?'#fca5a5':'#86efac';
+    const lvStyle = isLv && auto ? (LV_TYPE_STYLE[auto.type]||LV_DEFAULT) : LV_DEFAULT;
+    const bg     = isLv ? lvStyle.bg     : isAb ? '#fee2e2' : '#f0fdf4';
+    const border = isLv ? lvStyle.border : isAb ? '#fca5a5' : '#86efac';
+    // 假別 chip 顯示
+    const lvChip = auto
+      ? `<span style="font-size:10px;background:${lvStyle.chipBg};color:${lvStyle.chip};border-radius:99px;padding:1px 8px;font-weight:800;white-space:nowrap">${lvStyle.icon} ${auto.type}</span>`
+      : '';
+    // 請假按鈕文字：有假單就顯示假別，否則顯示「請假」
+    const lvBtnTxt = auto ? (auto.type.length>2 ? auto.type.slice(0,2)+'…' : auto.type) : '請假';
     return `<div style="border:2px solid ${border};background:${bg};border-radius:8px;padding:10px 12px;min-width:150px;flex:1">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
         <span style="font-size:11px;font-weight:800;color:var(--slat);background:#fff;border:1px solid var(--bdr);border-radius:4px;padding:1px 7px">${s.bed||'?'}床</span>
-        ${auto?'<span style="font-size:10px;background:var(--amb-l);color:var(--amb);border-radius:99px;padding:1px 7px;font-weight:700">假單</span>':''}
+        ${lvChip}
       </div>
       <div style="font-size:14px;font-weight:800;color:#1e293b;margin-bottom:2px">${s.name}</div>
       <div style="font-size:11px;color:var(--slat-l);margin-bottom:8px">${s.cls||''}</div>
       <div style="display:flex;gap:4px;margin-bottom:6px">
-        <button class="rsb s-in ${isIn?'on':''}" style="flex:1;font-size:11px" onclick="setRollCard('${s.id}','in','${rm}')">在宿</button>
-        <button class="rsb s-lv ${isLv?'on':''}" style="flex:1;font-size:11px" onclick="setRollCard('${s.id}','lv','${rm}')">請假</button>
-        <button class="rsb s-ab ${isAb?'on':''}" style="flex:1;font-size:11px" onclick="setRollCard('${s.id}','ab','${rm}')">未到</button>
+        <button class="rsb s-in ${isIn?'on':''}" style="flex:1;font-size:11px" onclick="setRollCard('${s.id}','in','${rm}')">✅在宿</button>
+        <button class="rsb s-lv ${isLv?'on':''}" style="flex:1;font-size:11px;${auto?'font-weight:800':''}" onclick="setRollCard('${s.id}','lv','${rm}')">${auto?(lvStyle.icon+' '+lvBtnTxt):'🟡請假'}</button>
+        <button class="rsb s-ab ${isAb?'on':''}" style="flex:1;font-size:11px" onclick="setRollCard('${s.id}','ab','${rm}')">❌未到</button>
       </div>
       <input style="width:100%;border:1px solid var(--bdr);border-radius:4px;padding:3px 6px;font-size:11px;background:#fff" 
         value="${(rollState[s.id+'_note']||'').replace(/"/g,'&quot;')}" 
@@ -992,7 +1024,7 @@ function setRollCard(id,st,rm){
   const autoLv={};
   leaves.filter(l=>l.status==='請假中').forEach(lv=>{
     String(lv.stu_ids||'').split(',').map(s=>s.trim()).filter(Boolean).forEach(sid=>{
-      if(bstus.find(s=>s.id===sid)) autoLv[sid]={status:'lv',note:lv.type+'（'+lv.id+'）'};
+      if(bstus.find(s=>s.id===sid)) autoLv[sid]={status:'lv',type:lv.type,note:lv.type+'（'+lv.id+'）'};
     });
   });
   const stus=bstus.filter(s=>String(s.r||'?')===rm).sort((a,b)=>String(a.bed||'').localeCompare(String(b.bed||'')));
