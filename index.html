@@ -676,13 +676,14 @@ async function doLogin(){
   const u=document.getElementById('iu').value.trim(), p=document.getElementById('ip').value;
   if(!u||!p){showLE('請填寫帳號和密碼');return;}
   const btn=qs('#scr-login .btn');btn.textContent='登入中…';btn.disabled=true;
+  showLE('🔄 連線中，請稍候…');
   try{
     const r=await gasGet({action:'login',username:u,password:p});
-    if(!r.ok){showLE(r.error||'帳號或密碼錯誤');return;}
+    if(!r.ok){showLE('❌ '+(r.error||'帳號或密碼錯誤'));return;}
     token=r.token; user=r.user;
     localStorage.setItem('gt',token); localStorage.setItem('gu',JSON.stringify(user));
     startApp();
-  }catch(e){showLE('無法連線，請確認 GAS_URL 設定正確');}
+  }catch(e){showLE('❌ 連線失敗：'+e.message);}
   finally{btn.textContent='登　入';btn.disabled=false;}
 }
 function showLE(m){const e=document.getElementById('lerr');e.textContent=m;e.style.display='block';}
