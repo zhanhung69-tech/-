@@ -917,7 +917,11 @@ function renderRoll(){
   const autoLv={};
   leaves.filter(l=>l.status==='請假中').forEach(lv=>{
     String(lv.stu_ids||'').split(',').map(s=>s.trim()).filter(Boolean).forEach(sid=>{
-      if(bstus.find(s=>s.id===sid)) autoLv[sid]={status:'lv',type:lv.type,note:lv.type+'（'+lv.id+'）'};
+      if(bstus.find(s=>s.id===sid)) autoLv[sid]={
+          status:'lv', type:lv.type, id:lv.id,
+          reason:lv.reason||'', start:String(lv.start||'').slice(0,10), end:String(lv.end||'').slice(0,10),
+          note:lv.type+'（'+lv.id+'）'
+        };
     });
   });
 
@@ -984,30 +988,65 @@ function renderRoomCard(rm,stus,autoLv){
     const auto=autoLv[s.id];
     const st=rollState[s.id]||'in';
     const isLv=st==='lv', isAb=st==='ab', isIn=st==='in';
-    const lvStyle = isLv && auto ? (LV_TYPE_STYLE[auto.type]||LV_DEFAULT) : LV_DEFAULT;
-    const bg     = isLv ? lvStyle.bg     : isAb ? '#fee2e2' : '#f0fdf4';
+    const lvStyle = (isLv && auto) ? (LV_TYPE_STYLE[auto.type]||LV_DEFAULT) : LV_DEFAULT;
+
+    // 卡片底色和邊框
+    const bg     = isLv ? lvStyle.bg     : isAb ? '#fff1f2' : '#f0fdf4';
     const border = isLv ? lvStyle.border : isAb ? '#fca5a5' : '#86efac';
-    // 假別 chip 顯示
-    const lvChip = auto
-      ? `<span style="font-size:10px;background:${lvStyle.chipBg};color:${lvStyle.chip};border-radius:99px;padding:1px 8px;font-weight:800;white-space:nowrap">${lvStyle.icon} ${auto.type}</span>`
-      : '';
-    // 請假按鈕文字：有假單就顯示假別，否則顯示「請假」
-    const lvBtnTxt = auto ? (auto.type.length>2 ? auto.type.slice(0,2)+'…' : auto.type) : '請假';
-    return `<div style="border:2px solid ${border};background:${bg};border-radius:8px;padding:10px 12px;min-width:150px;flex:1">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <span style="font-size:11px;font-weight:800;color:var(--slat);background:#fff;border:1px solid var(--bdr);border-radius:4px;padding:1px 7px">${s.bed||'?'}床</span>
-        ${lvChip}
+
+    // ── 假單資訊區塊 ──
+    let lvInfoBlock = '';
+    if(auto){
+      const reason = auto.reason && auto.reason!=='—' ? auto.reason : '';
+      const period = (auto.start&&auto.end) ? auto.start.slice(5)+'～'+auto.end.slice(5) : '';
+      lvInfoBlock = `
+        <div style="background:${lvStyle.chipBg};border-radius:6px;padding:6px 9px;margin-bottom:7px;font-size:11px">
+          <div style="font-weight:800;color:${lvStyle.chip};margin-bottom:2px">${lvStyle.icon} ${auto.type}${period?' · '+period:''}</div>
+          ${reason?`<div style="color:${lvStyle.chip};opacity:.85">📋 ${reason}</div>`:''}
+          <div style="color:${lvStyle.chip};opacity:.7;font-size:10px;margin-top:1px">單號：${auto.id}</div>
+        </div>`;
+    } else if(isLv){
+      // 手動標記請假 → 顯示下拉選假別
+      const savedType = rollState[s.id+'_lvtype']||'晚歸';
+      const opts = ['晚歸','外宿','返鄉','病假','打工','工讀','其它'].map(t=>
+        `<option value="${t}" ${t===savedType?'selected':''}>${(LV_TYPE_STYLE[t]||LV_DEFAULT).icon} ${t}</option>`
+      ).join('');
+      lvInfoBlock = `
+        <div style="background:var(--amb-l);border-radius:6px;padding:6px 9px;margin-bottom:7px">
+          <select style="width:100%;border:1px solid var(--amb);border-radius:4px;font-size:11px;padding:2px 4px;background:#fff"
+            onchange="rollState['${s.id}_lvtype']=this.value;rollState['${s.id}_note']='手動：'+this.options[this.selectedIndex].text;setRollCard('${s.id}','lv','${rm}')">
+            ${opts}
+          </select>
+        </div>`;
+    }
+
+    // ── 三個狀態按鈕 ──
+    const btnLvLabel = auto
+      ? (lvStyle.icon+' '+(auto.type.length>3?auto.type.slice(0,3)+'…':auto.type))
+      : '🟡 請假';
+
+    return `<div style="border:2px solid ${border};background:${bg};border-radius:10px;padding:10px 12px;min-width:160px;flex:1">
+      <!-- 床號 -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+        <span style="font-size:11px;font-weight:800;color:var(--slat);background:#fff;border:1px solid var(--bdr);border-radius:4px;padding:1px 8px">${s.bed||'?'}床</span>
+        ${isIn?'<span style="font-size:10px;color:var(--grn);font-weight:700">✅ 在宿</span>':''}
+        ${isAb?'<span style="font-size:10px;color:var(--red);font-weight:700">❌ 未到</span>':''}
       </div>
-      <div style="font-size:14px;font-weight:800;color:#1e293b;margin-bottom:2px">${s.name}</div>
-      <div style="font-size:11px;color:var(--slat-l);margin-bottom:8px">${s.cls||''}</div>
-      <div style="display:flex;gap:4px;margin-bottom:6px">
-        <button class="rsb s-in ${isIn?'on':''}" style="flex:1;font-size:11px" onclick="setRollCard('${s.id}','in','${rm}')">✅在宿</button>
-        <button class="rsb s-lv ${isLv?'on':''}" style="flex:1;font-size:11px;${auto?'font-weight:800':''}" onclick="setRollCard('${s.id}','lv','${rm}')">${auto?(lvStyle.icon+' '+lvBtnTxt):'🟡請假'}</button>
-        <button class="rsb s-ab ${isAb?'on':''}" style="flex:1;font-size:11px" onclick="setRollCard('${s.id}','ab','${rm}')">❌未到</button>
+      <!-- 姓名 + 班級 -->
+      <div style="font-size:14px;font-weight:800;color:#1e293b;margin-bottom:1px">${s.name}</div>
+      <div style="font-size:11px;color:var(--slat-l);margin-bottom:7px">${s.cls||''}</div>
+      <!-- 假單資訊 -->
+      ${lvInfoBlock}
+      <!-- 三個按鈕 -->
+      <div style="display:flex;gap:3px;margin-bottom:6px">
+        <button class="rsb s-in ${isIn?'on':''}" style="flex:1;font-size:11px;padding:4px 2px" onclick="setRollCard('${s.id}','in','${rm}')">✅ 在宿</button>
+        <button class="rsb s-lv ${isLv?'on':''}" style="flex:1;font-size:11px;padding:4px 2px" onclick="setRollCard('${s.id}','lv','${rm}')">${btnLvLabel}</button>
+        <button class="rsb s-ab ${isAb?'on':''}" style="flex:1;font-size:11px;padding:4px 2px" onclick="setRollCard('${s.id}','ab','${rm}')">❌ 未到</button>
       </div>
-      <input style="width:100%;border:1px solid var(--bdr);border-radius:4px;padding:3px 6px;font-size:11px;background:#fff" 
-        value="${(rollState[s.id+'_note']||'').replace(/"/g,'&quot;')}" 
-        placeholder="${auto?auto.note:'備註'}" 
+      <!-- 備註 -->
+      <input style="width:100%;border:1px solid var(--bdr);border-radius:4px;padding:3px 6px;font-size:11px;background:#fff;box-sizing:border-box"
+        value="${(rollState[s.id+'_note']||'').replace(/"/g,'&quot;')}"
+        placeholder="${auto?'備註（假單已帶入）':'備註'}"
         oninput="rollState['${s.id}_note']=this.value">
     </div>`;
   }).join('');
@@ -1024,7 +1063,11 @@ function setRollCard(id,st,rm){
   const autoLv={};
   leaves.filter(l=>l.status==='請假中').forEach(lv=>{
     String(lv.stu_ids||'').split(',').map(s=>s.trim()).filter(Boolean).forEach(sid=>{
-      if(bstus.find(s=>s.id===sid)) autoLv[sid]={status:'lv',type:lv.type,note:lv.type+'（'+lv.id+'）'};
+      if(bstus.find(s=>s.id===sid)) autoLv[sid]={
+          status:'lv', type:lv.type, id:lv.id,
+          reason:lv.reason||'', start:String(lv.start||'').slice(0,10), end:String(lv.end||'').slice(0,10),
+          note:lv.type+'（'+lv.id+'）'
+        };
     });
   });
   const stus=bstus.filter(s=>String(s.r||'?')===rm).sort((a,b)=>String(a.bed||'').localeCompare(String(b.bed||'')));
