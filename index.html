@@ -199,6 +199,10 @@ textarea.fi{resize:vertical;min-height:70px}
 /* TOAST */
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e293b;color:#fff;padding:10px 22px;border-radius:99px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+/* ROLL ROOM CARDS */
+.roll-rooms{display:flex;flex-direction:column;gap:4px}
+.roll-room-card{background:var(--sf2);border:1px solid var(--bdr);border-radius:var(--r);padding:14px 16px}
+
 /* MISC */
 .loading{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--slat-l);font-size:13px}
 .spin{width:18px;height:18px;border:2px solid var(--bdr);border-top-color:var(--pri);border-radius:50%;animation:sp .7s linear infinite;margin-right:8px;flex-shrink:0}
@@ -815,7 +819,7 @@ function renderRoll(){
   const rooms={};
   bstus.forEach(s=>{const k=String(s.r||'?');if(!rooms[k])rooms[k]=[];rooms[k].push(s);});
 
-  // 取假單自動帶入
+  // 假單自動帶入
   const autoLv={};
   leaves.filter(l=>l.status==='請假中').forEach(lv=>{
     String(lv.stu_ids||'').split(',').map(s=>s.trim()).filter(Boolean).forEach(sid=>{
@@ -823,31 +827,92 @@ function renderRoll(){
     });
   });
 
-  document.getElementById('roll-content').innerHTML=`<div style="overflow-x:auto"><table class="rt">
-    <thead><tr><th>房號</th><th>床位</th><th>姓名</th><th>英文姓名</th><th>班級</th><th>點名狀態</th><th>備　註</th></tr></thead>
-    <tbody id="rtbody"></tbody></table></div>`;
-  const tb=document.getElementById('rtbody');
+  // 統計
+  let inN=0,lvN=0,abN=0;
+  bstus.forEach(s=>{
+    const st=rollState[s.id]||(autoLv[s.id]?'lv':'in');
+    if(st==='in') inN++; else if(st==='lv') lvN++; else abN++;
+  });
+
+  const c=document.getElementById('roll-content');
+  c.innerHTML=`
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+      <span style="background:var(--grn-l);color:var(--grn);padding:5px 14px;border-radius:99px;font-size:13px;font-weight:700">✅ 在宿 ${inN}</span>
+      <span style="background:var(--amb-l);color:var(--amb);padding:5px 14px;border-radius:99px;font-size:13px;font-weight:700">🟡 請假 ${lvN}</span>
+      <span style="background:var(--red-l);color:var(--red);padding:5px 14px;border-radius:99px;font-size:13px;font-weight:700">❌ 未到 ${abN}</span>
+    </div>
+    <div class="roll-rooms" id="roll-rooms"></div>`;
+
+  const rr=document.getElementById('roll-rooms');
   Object.keys(rooms).sort().forEach(rm=>{
-    rooms[rm].sort((a,b)=>String(a.bed||'').localeCompare(String(b.bed||''))).forEach(s=>{
+    const stus=rooms[rm].sort((a,b)=>String(a.bed||'').localeCompare(String(b.bed||'')));
+    // 預設狀態
+    stus.forEach(s=>{
       const auto=autoLv[s.id];
-      const st=rollState[s.id]||(auto?'lv':'in');
-      const note=rollState[s.id+'_note']||(auto?auto.note:'');
-      if(!rollState[s.id]&&auto) rollState[s.id]='lv';
-      const tr=document.createElement('tr');
-      if(auto&&st==='lv') tr.style.background='#fef9c3';
-      tr.innerHTML=`
-        <td style="font-family:var(--mo)">${s.r||'—'}</td><td>${s.bed||'—'}</td>
-        <td style="font-weight:700">${s.name}</td><td style="color:var(--slat-l);font-size:12px">${s.eng||''}</td>
-        <td>${s.cls||''}</td>
-        <td><div style="display:flex;gap:5px">
-          <button class="rsb s-in ${st==='in'?'on':''}" onclick="setRoll('${s.id}','in',this)">在宿</button>
-          <button class="rsb s-lv ${st==='lv'?'on':''}" onclick="setRoll('${s.id}','lv',this)">請假${auto?'🟡':''}</button>
-          <button class="rsb s-ab ${st==='ab'?'on':''}" onclick="setRoll('${s.id}','ab',this)">未到</button>
-        </div></td>
-        <td><input style="border:1px solid var(--bdr);border-radius:4px;padding:3px 6px;font-size:12px;width:140px" value="${note}" oninput="rollState['${s.id}_note']=this.value" placeholder="${auto?auto.note:''}"></td>`;
-      tb.appendChild(tr);
+      if(!rollState[s.id]) rollState[s.id]=auto?'lv':'in';
+      if(!rollState[s.id+'_note']&&auto) rollState[s.id+'_note']=auto.note;
+    });
+    const card=document.createElement('div');
+    card.className='roll-room-card';
+    card.id='rrc-'+rm;
+    card.innerHTML=renderRoomCard(rm,stus,autoLv);
+    rr.appendChild(card);
+  });
+}
+
+function renderRoomCard(rm,stus,autoLv){
+  const beds=stus.map(s=>{
+    const auto=autoLv[s.id];
+    const st=rollState[s.id]||'in';
+    const isLv=st==='lv', isAb=st==='ab', isIn=st==='in';
+    const bg=isLv?'#fef9c3':isAb?'#fee2e2':'#f0fdf4';
+    const border=isLv?'#fcd34d':isAb?'#fca5a5':'#86efac';
+    return `<div style="border:2px solid ${border};background:${bg};border-radius:8px;padding:10px 12px;min-width:150px;flex:1">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:11px;font-weight:800;color:var(--slat);background:#fff;border:1px solid var(--bdr);border-radius:4px;padding:1px 7px">${s.bed||'?'}床</span>
+        ${auto?'<span style="font-size:10px;background:var(--amb-l);color:var(--amb);border-radius:99px;padding:1px 7px;font-weight:700">假單</span>':''}
+      </div>
+      <div style="font-size:14px;font-weight:800;color:#1e293b;margin-bottom:2px">${s.name}</div>
+      <div style="font-size:11px;color:var(--slat-l);margin-bottom:8px">${s.cls||''}</div>
+      <div style="display:flex;gap:4px;margin-bottom:6px">
+        <button class="rsb s-in ${isIn?'on':''}" style="flex:1;font-size:11px" onclick="setRollCard('${s.id}','in','${rm}')">在宿</button>
+        <button class="rsb s-lv ${isLv?'on':''}" style="flex:1;font-size:11px" onclick="setRollCard('${s.id}','lv','${rm}')">請假</button>
+        <button class="rsb s-ab ${isAb?'on':''}" style="flex:1;font-size:11px" onclick="setRollCard('${s.id}','ab','${rm}')">未到</button>
+      </div>
+      <input style="width:100%;border:1px solid var(--bdr);border-radius:4px;padding:3px 6px;font-size:11px;background:#fff" 
+        value="${(rollState[s.id+'_note']||'').replace(/"/g,'&quot;')}" 
+        placeholder="${auto?auto.note:'備註'}" 
+        oninput="rollState['${s.id}_note']=this.value">
+    </div>`;
+  }).join('');
+  return `<div style="margin-bottom:14px">
+    <div style="font-size:13px;font-weight:800;color:var(--pri-d);background:var(--pri-l);border-radius:6px;padding:6px 12px;margin-bottom:8px;display:inline-block">🚪 ${rm} 號房</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">${beds}</div>
+  </div>`;
+}
+
+function setRollCard(id,st,rm){
+  rollState[id]=st;
+  // 重新渲染該房間
+  const bstus=students.filter(s=>s.b===rollBld&&s.st==='入住');
+  const autoLv={};
+  leaves.filter(l=>l.status==='請假中').forEach(lv=>{
+    String(lv.stu_ids||'').split(',').map(s=>s.trim()).filter(Boolean).forEach(sid=>{
+      if(bstus.find(s=>s.id===sid)) autoLv[sid]={status:'lv',note:lv.type+'（'+lv.id+'）'};
     });
   });
+  const stus=bstus.filter(s=>String(s.r||'?')===rm).sort((a,b)=>String(a.bed||'').localeCompare(String(b.bed||'')));
+  const card=document.getElementById('rrc-'+rm);
+  if(card) card.innerHTML=renderRoomCard(rm,stus,autoLv);
+  // 更新統計
+  let inN=0,lvN=0,abN=0;
+  bstus.forEach(s=>{const st2=rollState[s.id]||'in';if(st2==='in')inN++;else if(st2==='lv')lvN++;else abN++;});
+  const tags=document.querySelectorAll('.roll-rooms~div span, #roll-content>div:first-child span');
+  const statsDiv=document.querySelector('#roll-content>div:first-child');
+  if(statsDiv) statsDiv.innerHTML=`
+    <span style="background:var(--grn-l);color:var(--grn);padding:5px 14px;border-radius:99px;font-size:13px;font-weight:700">✅ 在宿 ${inN}</span>
+    <span style="background:var(--amb-l);color:var(--amb);padding:5px 14px;border-radius:99px;font-size:13px;font-weight:700">🟡 請假 ${lvN}</span>
+    <span style="background:var(--red-l);color:var(--red);padding:5px 14px;border-radius:99px;font-size:13px;font-weight:700">❌ 未到 ${abN}</span>`;
 }
 
 function setRoll(id,st,btn){
