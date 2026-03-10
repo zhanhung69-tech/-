@@ -655,6 +655,13 @@ textarea.fi{resize:vertical;min-height:70px}
         <div class="fr"><label class="flbl">英文姓名</label><input class="fi" id="ms-eng" placeholder="English Name"></div>
         <div class="fr"><label class="flbl">班　　級</label><input class="fi" id="ms-cls" placeholder="如：觀一仁"></div>
         <div class="fr"><label class="flbl">國　　籍</label><input class="fi" id="ms-nation" placeholder="如：越南"></div>
+        <div class="fr"><label class="flbl">性　　別</label>
+          <select class="fi" id="ms-gender">
+            <option value="">未填</option>
+            <option value="男">男</option>
+            <option value="女">女</option>
+          </select>
+        </div>
         <div class="fr"><label class="flbl">狀　　態</label>
           <select class="fi" id="ms-st">
             <option value="入住">入住</option>
@@ -1101,6 +1108,7 @@ function openStuModal(id){
   document.getElementById('ms-b').value     = s.b||'';
   document.getElementById('ms-r').value     = s.r||'';
   document.getElementById('ms-bed').value   = s.bed||'';
+  document.getElementById('ms-gender').value= s.gender||'';
   document.getElementById('ms-phone').value = s.phone||'';
   document.getElementById('ms-email').value = s.email||'';
   document.getElementById('ms-remark').value= s.remark||'';
@@ -1120,6 +1128,7 @@ async function saveStu(){
     r:      document.getElementById('ms-r').value.trim(),
     bed:    document.getElementById('ms-bed').value,
     phone:  document.getElementById('ms-phone').value.trim(),
+    gender: document.getElementById('ms-gender').value,
     email:  document.getElementById('ms-email').value.trim(),
     remark: document.getElementById('ms-remark').value.trim(),
   };
