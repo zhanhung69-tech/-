@@ -1033,7 +1033,7 @@ function exportRollPDF(){
 // ── 僑生 ─────────────────────────────────────────────
 function renderStudents(){
   const q=(document.getElementById('stu-q')?.value||'').toLowerCase();
-  const canEdit=hp('all');
+  const canEdit=hp('all')||hp('roll');
   if(canEdit) { const btn=document.getElementById('stu-add-btn'); if(btn) btn.style.display='inline-flex'; }
 
   // ── 未安排床位 / 職場實習 ──
@@ -1055,7 +1055,7 @@ function renderStudents(){
         <td>${s.cls||'—'}</td>
         <td><span style="color:${stColor[s.st]||'var(--slat)'};font-weight:700">${s.st||'—'}</span></td>
         <td style="font-size:12px;color:var(--slat-l)">${s.b?bldLbl(s.b):''} ${s.r||''} ${s.bed||''}</td>
-        ${canEdit?`<td><button class="btn bgh bsm" onclick="openStuModal('${s.id}')">✏️ 編輯</button></td>`:''}
+        ${(hp('all')||hp('roll'))?`<td><button class="btn bgh bsm" onclick="openStuModal('${s.id}')">✏️ 編輯</button></td>`:''}
       </tr>`).join('')}</tbody>
     </table></div>`;
   } else {
@@ -1124,6 +1124,7 @@ async function saveStu(){
     remark: document.getElementById('ms-remark').value.trim(),
   };
   if(!body.id||!body.name){toast('請填寫學號和姓名');return;}
+  if(isNew && !hp('all')){toast('新增學生需要管理員權限');return;}
   try{
     const action = isNew ? 'add_student' : 'update_student';
     const r = await gasPost({action, ...body});
@@ -1138,6 +1139,7 @@ async function saveStu(){
 }
 
 async function deleteStu(){
+  if(!hp('all')){toast('刪除需要管理員權限');return;}
   const s = students.find(x=>x.id===_stuEditId);
   if(!s||!confirm(`確定要刪除學生「${s.name}」？此操作無法復原`)) return;
   try{
