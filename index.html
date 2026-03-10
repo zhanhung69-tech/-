@@ -297,10 +297,21 @@ textarea.fi{resize:vertical;min-height:70px}
 
         <!-- 僑生 -->
         <div class="pg" id="pg-students">
+          <!-- 未安排床位 / 職場實習 -->
+          <div class="card" id="stu-unassigned-card">
+            <div class="chd">
+              <span class="ctitle">⚠️ 未安排床位 / 職場實習</span>
+              <span id="stu-unassigned-count" style="font-size:12px;color:var(--slat-l)"></span>
+            </div>
+            <div class="cbody" id="stu-unassigned"></div>
+          </div>
           <div class="card">
             <div class="chd">
               <span class="ctitle">👥 僑生管理</span>
-              <input class="fi" id="stu-q" placeholder="🔍 搜尋…" style="width:200px" oninput="renderStudents()">
+              <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+                <input class="fi" id="stu-q" placeholder="🔍 搜尋姓名/學號/班級…" style="width:180px" oninput="renderStudents()">
+                <button class="btn bp bsm" onclick="openStuModal(null)" id="stu-add-btn" style="display:none">➕ 新增學生</button>
+              </div>
             </div>
             <div class="cbody">
               <div id="stu-blds" class="btabs"></div>
@@ -628,6 +639,55 @@ textarea.fi{resize:vertical;min-height:70px}
     <div class="mft">
       <button class="btn bpdf" onclick="doPrint()">🖨️ 列印</button>
       <button class="btn bgh" onclick="closeModal('m-print')">取消</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal: 學生資料編輯 -->
+<div class="modal-ov" id="m-stu">
+  <div class="modal" style="max-width:600px">
+    <div class="mhd"><span class="mtit" id="m-stu-title">✏️ 編輯學生資料</span><button class="mcl" onclick="closeModal('m-stu')">✕</button></div>
+    <div class="mbody">
+      <div class="fg">
+        <div class="fr"><label class="flbl">學　號 *</label><input class="fi" id="ms-id" placeholder="如：1234567"></div>
+        <div class="fr"><label class="flbl">中文姓名 *</label><input class="fi" id="ms-name" placeholder="姓名"></div>
+        <div class="fr"><label class="flbl">英文姓名</label><input class="fi" id="ms-eng" placeholder="English Name"></div>
+        <div class="fr"><label class="flbl">班　　級</label><input class="fi" id="ms-cls" placeholder="如：觀一仁"></div>
+        <div class="fr"><label class="flbl">國　　籍</label><input class="fi" id="ms-nation" placeholder="如：越南"></div>
+        <div class="fr"><label class="flbl">狀　　態</label>
+          <select class="fi" id="ms-st">
+            <option value="入住">入住</option>
+            <option value="離宿">離宿</option>
+            <option value="職場實習">職場實習</option>
+            <option value="休學">休學</option>
+            <option value="退宿">退宿</option>
+          </select>
+        </div>
+        <div class="fr"><label class="flbl">棟　　別</label>
+          <select class="fi" id="ms-b">
+            <option value="">未分配</option>
+            <option value="F1">女12F</option><option value="F2">女11F</option><option value="F3">女10F</option>
+            <option value="M1">男9F</option><option value="M2">男8F</option><option value="M3">男6F</option>
+          </select>
+        </div>
+        <div class="fr"><label class="flbl">房　　號</label><input class="fi" id="ms-r" placeholder="如：1201"></div>
+        <div class="fr"><label class="flbl">床　　位</label>
+          <select class="fi" id="ms-bed">
+            <option value="">未分配</option>
+            <option value="A">A（1床）</option><option value="B">B（2床）</option><option value="C">C（3床）</option>
+            <option value="D">D（4床）</option><option value="E">E（5床）</option><option value="F">F（6床）</option>
+          </select>
+        </div>
+        <div class="fr"><label class="flbl">電　　話</label><input class="fi" id="ms-phone" placeholder="選填"></div>
+        <div class="fr"><label class="flbl">Email</label><input class="fi" id="ms-email" placeholder="選填"></div>
+        <div class="fr" style="grid-column:1/-1"><label class="flbl">備　　註</label><textarea class="fi" id="ms-remark" rows="2" placeholder="選填"></textarea></div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn bp" onclick="saveStu()">💾 儲存</button>
+      <button class="btn br" id="ms-del-btn" onclick="deleteStu()" style="display:none">🗑️ 刪除</button>
+      <button class="btn bgh" onclick="closeModal('m-stu')">取消</button>
     </div>
   </div>
 </div>
@@ -973,18 +1033,122 @@ function exportRollPDF(){
 // ── 僑生 ─────────────────────────────────────────────
 function renderStudents(){
   const q=(document.getElementById('stu-q')?.value||'').toLowerCase();
-  let list=students.filter(s=>s.st==='入住');
+  const canEdit=hp('all');
+  if(canEdit) { const btn=document.getElementById('stu-add-btn'); if(btn) btn.style.display='inline-flex'; }
+
+  // ── 未安排床位 / 職場實習 ──
+  const unassigned = students.filter(s=>
+    !s.b || !s.r || !s.bed || s.st==='職場實習' || s.st==='離宿' || s.st==='休學' || s.st==='退宿'
+  );
+  const uCard=document.getElementById('stu-unassigned-card');
+  const uContent=document.getElementById('stu-unassigned');
+  const uCount=document.getElementById('stu-unassigned-count');
+  if(unassigned.length){
+    uCard.style.display='block';
+    uCount.textContent=`共 ${unassigned.length} 人`;
+    const stColor={'職場實習':'var(--pri)','離宿':'var(--slat)','休學':'var(--amb)','退宿':'var(--red)','入住':'var(--grn)'};
+    uContent.innerHTML=`<div style="overflow-x:auto"><table class="rt">
+      <thead><tr><th>學號</th><th>姓名</th><th>班級</th><th>狀態</th><th>棟/房/床</th>${canEdit?'<th>操作</th>':''}</tr></thead>
+      <tbody>${unassigned.map(s=>`<tr>
+        <td style="font-family:var(--mo);font-size:12px">${s.id}</td>
+        <td style="font-weight:700">${s.name}</td>
+        <td>${s.cls||'—'}</td>
+        <td><span style="color:${stColor[s.st]||'var(--slat)'};font-weight:700">${s.st||'—'}</span></td>
+        <td style="font-size:12px;color:var(--slat-l)">${s.b?bldLbl(s.b):''} ${s.r||''} ${s.bed||''}</td>
+        ${canEdit?`<td><button class="btn bgh bsm" onclick="openStuModal('${s.id}')">✏️ 編輯</button></td>`:''}
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+  } else {
+    uCard.style.display='none';
+  }
+
+  // ── 入住學生清單 ──
+  let list=students.filter(s=>s.st==='入住'&&s.b&&s.r&&s.bed);
   if(stuBld!=='ALL') list=list.filter(s=>s.b===stuBld);
-  if(q) list=list.filter(s=>(s.name||'').toLowerCase().includes(q)||String(s.r||'').includes(q)||(s.cls||'').toLowerCase().includes(q));
+  if(q) list=list.filter(s=>(s.name||'').toLowerCase().includes(q)||String(s.id).includes(q)||String(s.r||'').includes(q)||(s.cls||'').toLowerCase().includes(q));
   const c=document.getElementById('stu-content');
   if(!list.length){c.innerHTML='<div class="empty"><div class="empty-ico">👥</div><p>無符合資料</p></div>';return;}
   const rooms={};
   list.forEach(s=>{const k=(s.b||'?')+'|'+(s.r||'?');if(!rooms[k])rooms[k]=[];rooms[k].push(s);});
   c.innerHTML=`<div class="rg">${Object.keys(rooms).sort().map(k=>{
     const stus=rooms[k];
-    return `<div class="rc"><div class="rnum">${bldLbl(stus[0].b)} · ${stus[0].r}</div>
-      ${stus.sort((a,b)=>String(a.bed||'').localeCompare(String(b.bed||''))).map(s=>`<div class="brow"><span style="font-weight:600">${s.name}</span><span style="font-size:11px;color:var(--slat-l)">${s.bed||''}</span></div>`).join('')}</div>`;
+    return `<div class="rc">
+      <div class="rnum">${bldLbl(stus[0].b)} · ${stus[0].r}</div>
+      ${stus.sort((a,b)=>String(a.bed||'').localeCompare(String(b.bed||''))).map(s=>`
+        <div class="brow" style="cursor:${canEdit?'pointer':'default'}" ${canEdit?`onclick="openStuModal('${s.id}')"`:''}>
+          <span style="font-weight:600">${s.name}</span>
+          <span style="font-size:11px;color:var(--slat-l)">${s.bed||''}${canEdit?'  ✏️':''}</span>
+        </div>`).join('')}
+    </div>`;
   }).join('')}</div>`;
+}
+
+// ── 學生編輯 Modal ────────────────────────────────────
+let _stuEditId = null;
+function openStuModal(id){
+  _stuEditId = id;
+  const isNew = !id;
+  document.getElementById('m-stu-title').textContent = isNew ? '➕ 新增學生' : '✏️ 編輯學生資料';
+  document.getElementById('ms-del-btn').style.display = isNew||!hp('all') ? 'none' : 'inline-flex';
+  document.getElementById('ms-id').disabled = !isNew;
+  const s = isNew ? {} : students.find(x=>x.id===id)||{};
+  document.getElementById('ms-id').value    = s.id||'';
+  document.getElementById('ms-name').value  = s.name||'';
+  document.getElementById('ms-eng').value   = s.eng||'';
+  document.getElementById('ms-cls').value   = s.cls||'';
+  document.getElementById('ms-nation').value= s.nation||'';
+  document.getElementById('ms-st').value    = s.st||'入住';
+  document.getElementById('ms-b').value     = s.b||'';
+  document.getElementById('ms-r').value     = s.r||'';
+  document.getElementById('ms-bed').value   = s.bed||'';
+  document.getElementById('ms-phone').value = s.phone||'';
+  document.getElementById('ms-email').value = s.email||'';
+  document.getElementById('ms-remark').value= s.remark||'';
+  document.getElementById('m-stu').classList.add('on');
+}
+
+async function saveStu(){
+  const isNew = !_stuEditId;
+  const body = {
+    id:     document.getElementById('ms-id').value.trim(),
+    name:   document.getElementById('ms-name').value.trim(),
+    eng:    document.getElementById('ms-eng').value.trim(),
+    cls:    document.getElementById('ms-cls').value.trim(),
+    nation: document.getElementById('ms-nation').value.trim(),
+    st:     document.getElementById('ms-st').value,
+    b:      document.getElementById('ms-b').value,
+    r:      document.getElementById('ms-r').value.trim(),
+    bed:    document.getElementById('ms-bed').value,
+    phone:  document.getElementById('ms-phone').value.trim(),
+    email:  document.getElementById('ms-email').value.trim(),
+    remark: document.getElementById('ms-remark').value.trim(),
+  };
+  if(!body.id||!body.name){toast('請填寫學號和姓名');return;}
+  try{
+    const action = isNew ? 'add_student' : 'update_student';
+    const r = await gasPost({action, ...body});
+    if(!r.ok){toast('❌ '+r.error);return;}
+    toast(isNew?'✅ 已新增學生':'✅ 已更新資料');
+    closeModal('m-stu');
+    // 重新載入學生資料
+    const sR = await gasGet({action:'students'});
+    students = (sR.data||[]).map(s=>({...s,id:String(s.id).split('.')[0]}));
+    renderStudents(); renderDash();
+  }catch(e){toast('❌ '+e.message);}
+}
+
+async function deleteStu(){
+  const s = students.find(x=>x.id===_stuEditId);
+  if(!s||!confirm(`確定要刪除學生「${s.name}」？此操作無法復原`)) return;
+  try{
+    const r = await gasPost({action:'delete_student',id:_stuEditId});
+    if(!r.ok){toast('❌ '+r.error);return;}
+    toast('✅ 已刪除');
+    closeModal('m-stu');
+    const sR = await gasGet({action:'students'});
+    students = (sR.data||[]).map(s=>({...s,id:String(s.id).split('.')[0]}));
+    renderStudents(); renderDash();
+  }catch(e){toast('❌ '+e.message);}
 }
 
 // ── 請假 ─────────────────────────────────────────────
