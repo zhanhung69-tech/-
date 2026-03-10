@@ -820,12 +820,23 @@ function renderDash(){
 function buildBldTabs(id,active,fnName,withAll=false){
   const c=document.getElementById(id);
   const list=withAll?[['ALL','全部'],...BLDS.map(b=>[b,bldLbl(b)])]:BLDS.map(b=>[b,bldLbl(b)]);
-  const fn=typeof fnName==='string'?fnName:fnName.name||'';
-  c.innerHTML=list.map(([b,l])=>`<div class="btab ${b==='ALL'?'all':(isFem(b)?'fem':'mal')} ${b===active?'on':''}" onclick="${fn}('${b}')">${l}</div>`).join('');
+  c.innerHTML=list.map(([b,l])=>`<div class="btab ${b==='ALL'?'all':(isFem(b)?'fem':'mal')} ${b===active?'on':''}" onclick="bldSwitch('${id}','${b}')">${l}</div>`).join('');
 }
-function switchRollBld(b){rollBld=b;buildBldTabs('roll-blds',b,switchRollBld);renderRoll();}
-function switchStuBld(b){stuBld=b;buildBldTabs('stu-blds',b,switchStuBld,true);renderStudents();}
-function switchBedBld(b){bedBld=b;buildBldTabs('bed-blds',b,switchBedBld);renderBeds();}
+const BLD_SWITCH_MAP={
+  'roll-blds': b=>{rollBld=b;renderRoll();},
+  'stu-blds':  b=>{stuBld=b;renderStudents();},
+  'bed-blds':  b=>{bedBld=b;renderBeds();}
+};
+function bldSwitch(id,b){
+  // 更新 active 樣式
+  document.querySelectorAll('#'+id+' .btab').forEach(el=>{
+    el.classList.toggle('on', el.getAttribute('onclick')===`bldSwitch('${id}','${b}')`);
+  });
+  if(BLD_SWITCH_MAP[id]) BLD_SWITCH_MAP[id](b);
+}
+function switchRollBld(b){bldSwitch('roll-blds',b);}
+function switchStuBld(b){bldSwitch('stu-blds',b);}
+function switchBedBld(b){bldSwitch('bed-blds',b);}
 
 // ── 點名 ─────────────────────────────────────────────
 function renderRoll(){
