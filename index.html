@@ -410,6 +410,8 @@ textarea.fi{resize:vertical;min-height:70px}
               <span class="ctitle">🛏️ 床位管理</span>
               <div style="display:flex;gap:6px;flex-wrap:wrap">
                 <button class="btn bp bsm" onclick="openMoveModal()">🔄 調換學生床位</button>
+                <button class="btn bg bsm" id="btn-add-room" onclick="openAddRoomModal()" style="display:none">➕ 新增房間</button>
+                <button class="btn bgh bsm" id="btn-add-bed" onclick="openAddBedModal()" style="display:none">🛏 新增床位</button>
               </div>
             </div>
             <div class="cbody">
@@ -767,10 +769,92 @@ textarea.fi{resize:vertical;min-height:70px}
   </div>
 </div>
 
+
+<!-- Modal: 新增房間 -->
+<div class="modal-ov" id="m-add-room">
+  <div class="modal" style="max-width:420px">
+    <div class="mhd"><span class="mtit">➕ 新增房間</span><button class="mcl" onclick="closeModal('m-add-room')">✕</button></div>
+    <div class="mbody">
+      <div class="fg">
+        <div class="fr"><label class="flbl">棟　別</label>
+          <select class="fi" id="ar-bld"></select>
+        </div>
+        <div class="fr"><label class="flbl">房　號</label>
+          <input class="fi" id="ar-room" placeholder="如 1201"></div>
+        <div class="fr"><label class="flbl">床位數</label>
+          <select class="fi" id="ar-beds">
+            <option value="2">2 床</option><option value="3">3 床</option>
+            <option value="4" selected>4 床</option><option value="5">5 床</option>
+            <option value="6">6 床</option>
+          </select>
+        </div>
+        <div class="fr"><label class="flbl">備　註</label>
+          <input class="fi" id="ar-note" placeholder="選填"></div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn bp" onclick="submitAddRoom()">💾 新增</button>
+      <button class="btn bgh" onclick="closeModal('m-add-room')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: 新增/修改床位 -->
+<div class="modal-ov" id="m-add-bed">
+  <div class="modal" style="max-width:420px">
+    <div class="mhd"><span class="mtit" id="ab-title">🛏 新增床位</span><button class="mcl" onclick="closeModal('m-add-bed')">✕</button></div>
+    <div class="mbody">
+      <div id="ab-info" style="background:var(--pri-l);border-radius:var(--rs);padding:8px 12px;margin-bottom:12px;font-size:13px;font-weight:700;color:var(--pri-d)"></div>
+      <div class="fg">
+        <div class="fr"><label class="flbl">床位號</label>
+          <select class="fi" id="ab-bed">
+            <option value="A">A 床</option><option value="B">B 床</option>
+            <option value="C">C 床</option><option value="D">D 床</option>
+            <option value="E">E 床</option><option value="F">F 床</option>
+          </select>
+        </div>
+        <div class="fr"><label class="flbl">狀　態</label>
+          <select class="fi" id="ab-status">
+            <option value="empty">空床</option><option value="repair">維修中</option>
+            <option value="disabled">停用</option>
+          </select>
+        </div>
+        <div class="fr" style="grid-column:1/-1"><label class="flbl">備　註</label>
+          <input class="fi" id="ab-note" placeholder="選填"></div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn bp" onclick="submitAddBed()">💾 儲存</button>
+      <button class="btn bgh" onclick="closeModal('m-add-bed')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: 修改房間 -->
+<div class="modal-ov" id="m-edit-room">
+  <div class="modal" style="max-width:420px">
+    <div class="mhd"><span class="mtit">✏️ 修改房間資訊</span><button class="mcl" onclick="closeModal('m-edit-room')">✕</button></div>
+    <div class="mbody">
+      <div id="er-info" style="background:var(--amb-l);border-radius:var(--rs);padding:8px 12px;margin-bottom:12px;font-size:13px;font-weight:700;color:var(--amb)"></div>
+      <div class="fg">
+        <div class="fr"><label class="flbl">新房號</label>
+          <input class="fi" id="er-newroom" placeholder="輸入新房號"></div>
+        <div class="fr"><label class="flbl">備　註</label>
+          <input class="fi" id="er-note" placeholder="選填"></div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn bp" onclick="submitEditRoom()">💾 儲存</button>
+      <button class="btn br" onclick="submitDeleteRoom()" style="margin-right:auto">🗑️ 刪除房間</button>
+      <button class="btn bgh" onclick="closeModal('m-edit-room')">取消</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbx1Xqvc6gg1He5zS-CLU6JB160yvY7N_r2qikBfPvdRe8vud-GurIRoiUsz5UEgMLLq/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbw4Wlq3t5SO12e7Cs8bNgZyWgmvag1V6IB4t-RqMtJY9r0YbudMPAdHvqj-tZXrjac/exec';
 
 const BLDS   = ['F1','F2','F3','M1','M2','M3'];
 
@@ -1550,6 +1634,26 @@ function exportLeavesPDF(){
 
 // ── 評分 ─────────────────────────────────────────────
 // ── 環境衛生評核（新模式）────────────────────────────────
+
+// 不合格下拉選項：房間
+const NG_OPTIONS_ROOM = [
+  '床上雜亂',
+  '床上凌亂、物品亂丟',
+  '垃圾未倒',
+  '衣物亂掛',
+  '食物未收',
+  '電線未收',
+];
+// 不合格下拉選項：公共空間（廁所/浴室/公共/曬衣間通用）
+const NG_OPTIONS_PUBLIC = [
+  '垃圾未收',
+  '資源回收未收',
+  '個人物品未收',
+  '水電未管制',
+  '地面積水',
+  '廁所髒臭',
+];
+
 const SC_ITEMS_NEW = [
   {k:'fl', l:'地板清潔'},
   {k:'dk', l:'書桌整潔'},
@@ -1741,12 +1845,26 @@ function renderScCard(rm, bld, customLabel, isPrevNg){
         📝 其它
       </button>
     </div>
-    <!-- 說明文字（不合格或其它才顯示） -->
-    ${isNg||isOt?`<div style="margin-bottom:8px">
-      <input id="sc-desc-${rm}" style="width:100%;border:1.5px solid ${isNg?'#fca5a5':'#fcd34d'};border-radius:6px;padding:6px 10px;font-size:12px;box-sizing:border-box;background:#fff"
-        placeholder="${isNg?'請說明不合格原因…':'請說明其它情況…'}"
+    <!-- 說明（不合格→下拉選單；其它→文字輸入） -->
+    ${isNg?`<div style="margin-bottom:8px">
+      <select id="sc-desc-${rm}"
+        style="width:100%;border:1.5px solid #fca5a5;border-radius:6px;padding:6px 10px;font-size:12px;background:#fff;color:#1e293b"
+        onchange="handleNgSelect('${rm}',this.value,${isPublic})">
+        <option value="">— 請選擇不合格原因 —</option>
+        ${(isPublic?NG_OPTIONS_PUBLIC:NG_OPTIONS_ROOM).map(o=>`<option value="${o}" ${note===o?'selected':''}>${o}</option>`).join('')}
+        <option value="__other__" ${note&&![...(isPublic?NG_OPTIONS_PUBLIC:NG_OPTIONS_ROOM)].includes(note)?'selected':''}>其它（補充說明）</option>
+      </select>
+      ${note&&![...(isPublic?NG_OPTIONS_PUBLIC:NG_OPTIONS_ROOM)].includes(note)&&note!=='__other__'?`
+      <input id="sc-desc-other-${rm}" style="width:100%;margin-top:4px;border:1.5px solid #fca5a5;border-radius:6px;padding:5px 10px;font-size:12px;box-sizing:border-box;background:#fff"
+        placeholder="補充說明…" value="${note.replace(/"/g,'&quot;')}"
+        oninput="scRoomNote['${rm}']=scRoomNote['${rm}']||{}; scRoomNote['${rm}'].overall=this.value">`:
+      ''}
+    </div>`:''}
+    ${isOt?`<div style="margin-bottom:8px">
+      <input id="sc-desc-${rm}" style="width:100%;border:1.5px solid #fcd34d;border-radius:6px;padding:6px 10px;font-size:12px;box-sizing:border-box;background:#fff"
+        placeholder="請補充說明其它情況…"
         value="${note.replace(/"/g,'&quot;')}"
-        oninput="scRoomNote['${rm}'] = scRoomNote['${rm}']||{}; scRoomNote['${rm}'].overall=this.value">
+        oninput="scRoomNote['${rm}']=scRoomNote['${rm}']||{}; scRoomNote['${rm}'].overall=this.value">
     </div>`:''}
     <!-- 備註 -->
     <div style="margin-bottom:8px">
@@ -1778,6 +1896,28 @@ function renderScCard(rm, bld, customLabel, isPrevNg){
   </div>`;
 }
 
+
+function handleNgSelect(rm, val, isPublic){
+  if(!scRoomNote[rm]) scRoomNote[rm]={};
+  if(val==='__other__'){
+    scRoomNote[rm].overall = '';
+    // 顯示文字輸入框
+    const existing = document.getElementById('sc-desc-other-'+rm);
+    if(!existing){
+      const inp = document.createElement('input');
+      inp.id = 'sc-desc-other-'+rm;
+      inp.style.cssText='width:100%;margin-top:4px;border:1.5px solid #fca5a5;border-radius:6px;padding:5px 10px;font-size:12px;box-sizing:border-box;background:#fff';
+      inp.placeholder='補充說明…';
+      inp.oninput = ()=>{ scRoomNote[rm].overall = inp.value; };
+      document.getElementById('sc-desc-'+rm).insertAdjacentElement('afterend', inp);
+      inp.focus();
+    }
+  } else {
+    scRoomNote[rm].overall = val;
+    const existing = document.getElementById('sc-desc-other-'+rm);
+    if(existing) existing.remove();
+  }
+}
 function setScItem(rm, val){
   if(!scRoomState[rm]) scRoomState[rm]={};
   scRoomState[rm].overall = val;
@@ -1983,14 +2123,30 @@ function renderBeds(){
   const c=document.getElementById('bed-content');
   const bld=bedBld;
   const bldRooms=bedData[bld]||{};
-  if(!Object.keys(bldRooms).length){c.innerHTML='<div class="empty"><div class="empty-ico">🛏️</div><p>本棟暫無資料</p></div>';return;}
-
   const canEdit=hp('manage_beds')||hp('all');
-  let emptyN=0,occN=0,repairN=0;
 
+  // 顯示新增按鈕（只有 admin/warden 可見）
+  const btnRoom=document.getElementById('btn-add-room');
+  const btnBed=document.getElementById('btn-add-bed');
+  if(btnRoom) btnRoom.style.display=canEdit?'':'none';
+  if(btnBed)  btnBed.style.display=canEdit?'':'none';
+
+  if(!Object.keys(bldRooms).length){
+    c.innerHTML='<div class="empty"><div class="empty-ico">🛏️</div><p>本棟暫無資料<br><small>可點上方「新增房間」建立</small></p></div>';
+    return;
+  }
+
+  let emptyN=0,occN=0,repairN=0;
   const html=`<div class="bed-grid">${Object.keys(bldRooms).sort().map(rm=>{
     const beds=bldRooms[rm];
-    return `<div class="bed-card"><div class="bed-room">${bldLbl(bld)} · 房號 ${rm}</div>
+    return `<div class="bed-card">
+      <div class="bed-room" style="display:flex;justify-content:space-between;align-items:center">
+        <span>${bldLbl(bld)} · 房號 ${rm}</span>
+        ${canEdit?`<div style="display:flex;gap:4px">
+          <button onclick="openAddBedForRoom('${bld}','${rm}')" style="padding:2px 8px;font-size:11px;background:var(--grn-l);color:var(--grn);border:1px solid var(--grn);border-radius:4px;cursor:pointer">＋床</button>
+          <button onclick="openEditRoomModal('${bld}','${rm}')" style="padding:2px 8px;font-size:11px;background:var(--amb-l);color:var(--amb);border:1px solid var(--amb);border-radius:4px;cursor:pointer">✏️</button>
+        </div>`:''}
+      </div>
       ${Object.keys(beds).sort().map(bed=>{
         const b=beds[bed];
         const st=b.status||'empty';
@@ -2006,6 +2162,7 @@ function renderBeds(){
           </div>
           <span class="bed-stat ${stCls}">${stLabel}</span>
           ${canEdit&&st!=='occupied'?`<button class="bed-edit" onclick="openBedModal('${bld}','${rm}','${bed}','${st}','${(b.note||'').replace(/'/g,'')}')">✏️</button>`:''}
+          ${canEdit&&st!=='occupied'?`<button onclick="deleteBed('${bld}','${rm}','${bed}')" style="padding:2px 6px;font-size:11px;background:var(--red-l);color:var(--red);border:1px solid var(--red);border-radius:4px;cursor:pointer;margin-left:2px">🗑️</button>`:''}
         </div>`;
       }).join('')}
     </div>`;
@@ -2030,6 +2187,116 @@ async function saveBedStatus(){
     closeModal('m-bed');
     const br=await gasGet({action:'beds'});bedData=br.data||{};renderBeds();
   }catch(e){toast('❌ '+e.message);}
+}
+
+
+// ── 床位管理：新增/修改/刪除 ─────────────────────────────
+let _addRoomBld='', _editRoomData={};
+
+function openAddRoomModal(){
+  if(!hp('manage_beds')&&!hp('all')){toast('無權限');return;}
+  const sel=document.getElementById('ar-bld');
+  sel.innerHTML=BLDS.map(b=>`<option value="${b}">${bldLbl(b)}</option>`).join('');
+  sel.value=bedBld;
+  document.getElementById('ar-room').value='';
+  document.getElementById('ar-beds').value='4';
+  document.getElementById('ar-note').value='';
+  document.getElementById('m-add-room').classList.add('on');
+}
+
+async function submitAddRoom(){
+  const bld=document.getElementById('ar-bld').value;
+  const rm=document.getElementById('ar-room').value.trim();
+  const bedCount=parseInt(document.getElementById('ar-beds').value);
+  const note=document.getElementById('ar-note').value.trim();
+  if(!rm){toast('請輸入房號');return;}
+  const BEDS=['A','B','C','D','E','F'].slice(0,bedCount);
+  let ok=true;
+  for(const bed of BEDS){
+    const r=await gasPost({action:'save_bed',bld,r:rm,bed,status:'empty',note,by:user.display||user.username});
+    if(!r.ok){toast('❌ '+r.error);ok=false;break;}
+  }
+  if(ok){
+    toast(`✅ ${bldLbl(bld)} ${rm}號房新增完成（${bedCount}床）`);
+    closeModal('m-add-room');
+    const br=await gasGet({action:'beds'});bedData=br.data||{};renderBeds();
+  }
+}
+
+function openAddBedModal(){
+  if(!hp('manage_beds')&&!hp('all')){toast('無權限');return;}
+  document.getElementById('ab-title').textContent='🛏 新增床位';
+  document.getElementById('ab-info').textContent='請先從房間卡片的「＋床」按鈕新增';
+  document.getElementById('m-add-bed').classList.add('on');
+}
+
+function openAddBedForRoom(bld, rm){
+  if(!hp('manage_beds')&&!hp('all')){toast('無權限');return;}
+  _addRoomBld=bld; _editRoomData={bld,rm};
+  document.getElementById('ab-title').textContent=`🛏 ${rm}號房 新增床位`;
+  document.getElementById('ab-info').textContent=`${bldLbl(bld)} · ${rm} 號房`;
+  // 計算現有床位，預設下一個
+  const existing=Object.keys(bedData[bld]?.[rm]||{});
+  const next=['A','B','C','D','E','F'].find(b=>!existing.includes(b))||'A';
+  document.getElementById('ab-bed').value=next;
+  document.getElementById('ab-status').value='empty';
+  document.getElementById('ab-note').value='';
+  document.getElementById('m-add-bed').classList.add('on');
+}
+
+async function submitAddBed(){
+  const {bld,rm}=_editRoomData;
+  if(!bld||!rm){toast('請從房間卡片點「＋床」');return;}
+  const bed=document.getElementById('ab-bed').value;
+  const status=document.getElementById('ab-status').value;
+  const note=document.getElementById('ab-note').value;
+  const r=await gasPost({action:'save_bed',bld,r:rm,bed,status,note,by:user.display||user.username});
+  if(!r.ok){toast('❌ '+r.error);return;}
+  toast(`✅ ${rm}號房 ${bed}床已新增`);
+  closeModal('m-add-bed');
+  const br=await gasGet({action:'beds'});bedData=br.data||{};renderBeds();
+}
+
+async function deleteBed(bld, rm, bed){
+  if(!confirm(`確定要刪除 ${rm}號房 ${bed}床？`))return;
+  const r=await gasPost({action:'delete_bed',bld,r:rm,bed,by:user.display||user.username});
+  if(!r.ok){toast('❌ '+r.error);return;}
+  toast('✅ 已刪除');
+  const br=await gasGet({action:'beds'});bedData=br.data||{};renderBeds();
+}
+
+function openEditRoomModal(bld, rm){
+  if(!hp('manage_beds')&&!hp('all')){toast('無權限');return;}
+  _editRoomData={bld,rm};
+  document.getElementById('er-info').textContent=`${bldLbl(bld)} · ${rm} 號房`;
+  document.getElementById('er-newroom').value=rm;
+  document.getElementById('er-note').value='';
+  document.getElementById('m-edit-room').classList.add('on');
+}
+
+async function submitEditRoom(){
+  const {bld,rm}=_editRoomData;
+  const newRm=document.getElementById('er-newroom').value.trim();
+  if(!newRm){toast('請輸入新房號');return;}
+  if(newRm===rm){closeModal('m-edit-room');return;}
+  const r=await gasPost({action:'rename_room',bld,old_r:rm,new_r:newRm,by:user.display||user.username});
+  if(!r.ok){toast('❌ '+r.error);return;}
+  toast(`✅ 房號已更新：${rm} → ${newRm}`);
+  closeModal('m-edit-room');
+  const br=await gasGet({action:'beds'});bedData=br.data||{};renderBeds();
+}
+
+async function submitDeleteRoom(){
+  const {bld,rm}=_editRoomData;
+  const beds=bedData[bld]?.[rm]||{};
+  const hasOccupied=Object.values(beds).some(b=>b.status==='occupied');
+  if(hasOccupied){toast('❌ 此房間有學生入住，無法刪除');return;}
+  if(!confirm(`確定要刪除 ${bldLbl(bld)} ${rm}號房的所有床位？`))return;
+  const r=await gasPost({action:'delete_room',bld,r:rm,by:user.display||user.username});
+  if(!r.ok){toast('❌ '+r.error);return;}
+  toast(`✅ ${rm}號房已刪除`);
+  closeModal('m-edit-room');
+  const br=await gasGet({action:'beds'});bedData=br.data||{};renderBeds();
 }
 
 function openMoveModal(){document.getElementById('m-move').classList.add('on');document.getElementById('m-mv-q').value='';document.getElementById('m-mv-results').innerHTML='';document.getElementById('m-mv-form').style.display='none';document.getElementById('m-mv-save').style.display='none';mvStuId=null;}
@@ -2657,4 +2924,3 @@ function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e
 </script>
 </body>
 </html>
-
