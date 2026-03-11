@@ -2863,18 +2863,6 @@ function openEditAcc(username,display,role,active,cls){
   document.getElementById('eacc-role').value    = role||'teacher';
   document.getElementById('eacc-cls').value     = cls||'';
   document.getElementById('m-edit-acc').classList.add('on');
-  return; // 以下舊程式碼不執行
-  const newDisplay=prompt(\`職務名稱（目前：\${display}）\`,display);
-  if(newDisplay===null)return;
-  const roles=Object.keys(ROLE_OPT);
-  const roleStr=roles.map((r,i)=>`\${i+1}.\${ROLE_OPT[r]}`).join('  ');
-  const idx=prompt(\`角色（\${roleStr}）\n請輸入數字：\`,roles.indexOf(role)+1);
-  if(idx===null)return;
-  const newRole=roles[parseInt(idx)-1]||role;
-  gasPost({action:'update_account',username,display:newDisplay,role:newRole}).then(r=>{
-    if(!r.ok){toast('❌ '+r.error);return;}
-    toast('✅ 已更新');loadAccounts();
-  }).catch(e=>toast('❌ '+e.message));
 }
 
 
