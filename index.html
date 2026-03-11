@@ -254,6 +254,7 @@ textarea.fi{resize:vertical;min-height:70px}
         <div class="ni"     data-pg="beds"        onclick="navTo('beds')">     <span class="ico">🛏️</span>床位管理</div>
         <div class="ni"     data-pg="violations"  onclick="navTo('violations')"><span class="ico">🚨</span>違規通報<span class="nbadge" id="nb-vio">0</span></div>
         <div class="ni"     data-pg="accounts"    onclick="navTo('accounts')"> <span class="ico">👤</span>帳號管理</div>
+        <div class="ni"     data-pg="sysconfig"   onclick="navTo('sysconfig')" id="nav-sysconfig"> <span class="ico">⚙️</span>系統設定</div>
       </nav>
       <div class="sb-ft">
         <div class="sync-row"><span class="sdot" id="sdot"></span><span class="stxt" id="stxt">連線中…</span></div>
@@ -519,6 +520,45 @@ textarea.fi{resize:vertical;min-height:70px}
                 <div class="fr"><label class="flbl">確認新密碼</label><input class="fi" type="password" id="pwd-cfm" placeholder="再輸入一次"></div>
               </div>
               <div style="margin-top:14px"><button class="btn bp" onclick="changeOwnPwd()">🔑 確認修改</button></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 系統設定 -->
+        <div class="pg" id="pg-sysconfig">
+          <!-- 帳號權限管理 -->
+          <div class="card" style="margin-bottom:14px">
+            <div class="chd">
+              <span class="ctitle">🔐 帳號權限管理</span>
+              <button class="btn bgh bsm" onclick="loadAccPerms()">🔄 重新整理</button>
+            </div>
+            <div class="cbody" id="perm-list"><div class="loading"><div class="spin"></div>載入中…</div></div>
+          </div>
+          <!-- 准假流程設定 -->
+          <div class="card" style="margin-bottom:14px">
+            <div class="chd"><span class="ctitle">📋 假單流程設定</span></div>
+            <div class="cbody">
+              <div style="font-size:12px;color:var(--slat-l);margin-bottom:12px">設定各假別需要哪些單位審核（可多選，順序為審核順序）</div>
+              <div id="flow-settings"></div>
+              <div style="margin-top:14px"><button class="btn bp" onclick="saveFlowSettings()">💾 儲存流程設定</button></div>
+            </div>
+          </div>
+          <!-- 准假天數上限 -->
+          <div class="card" style="margin-bottom:14px">
+            <div class="chd"><span class="ctitle">📅 准假天數上限</span></div>
+            <div class="cbody">
+              <div style="font-size:12px;color:var(--slat-l);margin-bottom:12px">設定各假別單次申請最多幾天（0 = 不限制）</div>
+              <div id="maxdays-settings" class="fg"></div>
+              <div style="margin-top:14px"><button class="btn bp" onclick="saveMaxDays()">💾 儲存天數設定</button></div>
+            </div>
+          </div>
+          <!-- 班級導師對應 -->
+          <div class="card">
+            <div class="chd"><span class="ctitle">🏫 班級導師對應</span></div>
+            <div class="cbody">
+              <div style="font-size:12px;color:var(--slat-l);margin-bottom:10px">設定每個班級對應的導師帳號（導師只能看到自己班級的假單）</div>
+              <div id="cls-teacher-map"></div>
+              <div style="margin-top:14px"><button class="btn bp" onclick="saveClsTeacher()">💾 儲存對應設定</button></div>
             </div>
           </div>
         </div>
@@ -851,6 +891,38 @@ textarea.fi{resize:vertical;min-height:70px}
   </div>
 </div>
 
+
+<!-- Modal: 編輯帳號（管理員） -->
+<div class="modal-ov" id="m-edit-acc">
+  <div class="modal" style="max-width:440px">
+    <div class="mhd"><span class="mtit">✏️ 編輯帳號</span><button class="mcl" onclick="closeModal('m-edit-acc')">✕</button></div>
+    <div class="mbody">
+      <div id="eacc-info" style="background:var(--pri-l);border-radius:8px;padding:8px 14px;margin-bottom:14px;font-size:13px;font-weight:700;color:var(--pri-d)"></div>
+      <div class="fg">
+        <div class="fr"><label class="flbl">職務名稱</label>
+          <input class="fi" id="eacc-display"></div>
+        <div class="fr"><label class="flbl">角　色</label>
+          <select class="fi" id="eacc-role">
+            <option value="admin">系統管理員</option>
+            <option value="warden">生輔組舍監</option>
+            <option value="teacher">導師</option>
+            <option value="academic">學務處</option>
+            <option value="intern">實習處</option>
+            <option value="recruit">招生中心</option>
+          </select>
+        </div>
+        <div class="fr"><label class="flbl">班　級<small style="color:var(--slat-l)">（導師適用）</small></label>
+          <input class="fi" id="eacc-cls" placeholder="如 114A，可留空"></div>
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:var(--slat-l)">💡 細部權限調整請至「系統設定」頁面</div>
+    </div>
+    <div class="mft">
+      <button class="btn bp" onclick="submitEditAcc()">💾 儲存</button>
+      <button class="btn bgh" onclick="closeModal('m-edit-acc')">取消</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -902,7 +974,7 @@ const ROLE_PERMS  = {
   recruit:  ['leave_approve_3','view_students','view_leaves','view_dash'],
 };
 
-const PG_TITLES = {dash:'儀表板',roll:'點名作業',students:'僑生管理',leaves:'請假管理',score:'內務評分',beds:'床位管理',violations:'違規通報',accounts:'帳號管理'};
+const PG_TITLES = {dash:'儀表板',roll:'點名作業',students:'僑生管理',leaves:'請假管理',score:'內務評分',beds:'床位管理',violations:'違規通報',accounts:'帳號管理',sysconfig:'系統設定'};
 
 const ST_BADGE = {'待學務處核章':'bpend','待實習處核章':'bpend','待招生中心核章':'bout','請假中':'bact','已返舍':'bret','已駁回':'brej'};
 
@@ -962,6 +1034,9 @@ async function startApp(){
   if(!hp('score')&&!hp('view_score')) qs('[data-pg=score]').style.display='none';
   if(!hp('manage_beds')&&!hp('all')) qs('[data-pg=beds]').style.display='none';
   if(!hp('view_violations')&&!hp('report_violation')&&!hp('all')) qs('[data-pg=violations]').style.display='none';
+  // 系統設定只有 admin
+  const nsc = document.getElementById('nav-sysconfig');
+  if(nsc) nsc.style.display = hp('all') ? '' : 'none';
   // 帳號管理：所有人都可看到（修改自己密碼），但新增/編輯只有 admin
   if(!hp('all')) { document.getElementById('acc-create-card').style.display='none'; }
 
@@ -2477,6 +2552,258 @@ function exportViosPDF(){
     <tr style="background:#1e3a8a;color:#fff"><th>編號</th><th>班級</th><th>學生</th><th>類別</th><th>嚴重度</th><th>描述</th><th>狀態</th><th>通報人</th><th>時間</th></tr>${rows}</table>`);
 }
 
+
+// ════════════════════════════════════════════════════════
+// 系統設定
+// ════════════════════════════════════════════════════════
+
+// 所有可開放的權限 key → 說明
+const ALL_PERMS = {
+  apply_leave   : '📝 申請假單',
+  view_leave    : '📋 查看假單',
+  approve_leave : '✅ 審核假單',
+  roll          : '📢 點名作業',
+  score         : '🏆 內務評分',
+  view_score    : '👁 查看評分（唯讀）',
+  manage_beds   : '🛏 床位管理',
+  report_vio    : '🚨 通報違規',
+  handle_vio    : '⚖️ 處理違規',
+  edit_students : '✏️ 編輯學生資料',
+  view_students : '👁 查看學生資料',
+};
+
+// 每個角色的預設權限（不可取消）
+const ROLE_DEFAULT_PERMS = {
+  admin    : Object.keys(ALL_PERMS),          // 全部
+  warden   : ['roll','score','manage_beds','report_vio','handle_vio','edit_students','view_students','view_leave','approve_leave'],
+  teacher  : ['apply_leave','view_leave','view_score','view_students'],
+  academic : ['approve_leave','view_leave'],
+  intern   : ['approve_leave','view_leave'],
+  recruit  : ['approve_leave','view_leave'],
+};
+
+// 假別標籤
+const LEAVE_TYPES = {
+  lateout:'晚歸', offcampus:'外宿', hometown:'返鄉',
+  sick:'病假', work:'工讀/打工', other:'其它'
+};
+// 流程審核單位
+const FLOW_UNITS = [
+  {k:'academic', l:'學務處'},
+  {k:'intern',   l:'實習處'},
+  {k:'recruit',  l:'招生中心'},
+  {k:'warden',   l:'舍監'},
+];
+
+let _sysSettings = {};
+let _accList = [];
+
+async function initSysConfig() {
+  if(!hp('all')){toast('❌ 僅系統管理員可進入');navTo('dash');return;}
+  await Promise.all([loadAccPerms(), loadSysSettings()]);
+}
+
+// ── 帳號權限管理 ──────────────────────────────────────
+async function loadAccPerms() {
+  const c = document.getElementById('perm-list');
+  c.innerHTML = '<div class="loading"><div class="spin"></div>載入中…</div>';
+  const r = await gasGet({action:'accounts'});
+  _accList = r.data || [];
+  renderAccPerms();
+}
+
+function renderAccPerms() {
+  const c = document.getElementById('perm-list');
+  if(!_accList.length){c.innerHTML='<div class="empty"><p>無帳號資料</p></div>';return;}
+  c.innerHTML = _accList.map(a=>{
+    const roleName = ROLE_OPT[a.role]||a.role;
+    const active   = String(a.active)==='1';
+    const defaultP = ROLE_DEFAULT_PERMS[a.role]||[];
+    const extraArr = String(a.extra_perms||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const isAdmin  = a.role==='admin';
+    return `<div style="border:1.5px solid var(--bdr);border-radius:10px;padding:12px 14px;margin-bottom:10px;background:${active?'#fff':'#f8fafc'}">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+        <span style="font-weight:800;font-size:14px">${a.display||a.username}</span>
+        <span style="font-family:var(--mo);font-size:11px;color:var(--slat-l)">${a.username}</span>
+        <span style="background:var(--pri-l);color:var(--pri);padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700">${roleName}</span>
+        <span style="background:${active?'var(--grn-l)':'var(--red-l)'};color:${active?'var(--grn)':'var(--red)'};padding:2px 9px;border-radius:99px;font-size:11px">${active?'啟用':'停用'}</span>
+        ${isAdmin?'<span style="background:#fef3c7;color:#92400e;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700">👑 最高權限</span>':''}
+      </div>
+      ${isAdmin ? `<div style="font-size:12px;color:var(--slat-l)">系統管理員擁有所有權限，無法修改。</div>` : `
+      <div style="font-size:12px;font-weight:700;color:var(--slat);margin-bottom:6px">額外開放權限（職務預設以外）：</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+        ${Object.entries(ALL_PERMS).map(([k,l])=>{
+          const isDefault = defaultP.includes(k);
+          const isExtra   = extraArr.includes(k);
+          const checked   = isDefault || isExtra;
+          const disabled  = isDefault ? 'disabled' : '';
+          return `<label style="display:flex;align-items:center;gap:4px;font-size:12px;padding:3px 10px;border-radius:99px;border:1.5px solid ${isDefault?'var(--pri)':isExtra?'var(--grn)':'var(--bdr)'};background:${isDefault?'var(--pri-l)':isExtra?'var(--grn-l)':'#fff'};color:${isDefault?'var(--pri-d)':isExtra?'var(--grn)':'var(--slat)'};cursor:${isDefault?'default':'pointer'}" title="${isDefault?'職務預設，不可取消':''}">
+            <input type="checkbox" data-u="${a.username}" data-k="${k}" ${checked?'checked':''} ${disabled} onchange="toggleExtraPerm('${a.username}','${k}',this.checked)" style="accent-color:var(--grn)">
+            ${l}${isDefault?' <small style=opacity:.6>(預設)</small>':''}
+          </label>`;
+        }).join('')}
+      </div>
+      <button class="btn bp bsm" onclick="saveExtraPerms('${a.username}')">💾 儲存此帳號權限</button>
+      `}
+    </div>`;
+  }).join('');
+}
+
+// 暫存勾選變更
+const _extraPermChanges = {};
+function toggleExtraPerm(username, permKey, checked) {
+  if(!_extraPermChanges[username]) {
+    const acc = _accList.find(a=>a.username===username);
+    const cur = String(acc?.extra_perms||'').split(',').map(s=>s.trim()).filter(Boolean);
+    _extraPermChanges[username] = new Set(cur);
+  }
+  if(checked) _extraPermChanges[username].add(permKey);
+  else _extraPermChanges[username].delete(permKey);
+}
+
+async function saveExtraPerms(username) {
+  const acc = _accList.find(a=>a.username===username);
+  if(!acc){toast('找不到帳號');return;}
+  const defaultP = ROLE_DEFAULT_PERMS[acc.role]||[];
+  // 只存「非預設」的額外權限
+  let extras;
+  if(_extraPermChanges[username]) {
+    extras = [..._extraPermChanges[username]].filter(k=>!defaultP.includes(k));
+  } else {
+    extras = String(acc.extra_perms||'').split(',').map(s=>s.trim()).filter(p=>p&&!defaultP.includes(p));
+  }
+  const r = await gasPost({action:'update_account', username, extra_perms: extras.join(',')});
+  if(!r.ok){toast('❌ '+r.error);return;}
+  toast(`✅ ${acc.display||username} 權限已儲存`);
+  loadAccPerms();
+}
+
+// ── 系統設定載入 ──────────────────────────────────────
+async function loadSysSettings() {
+  const r = await gasGet({action:'get_settings'});
+  _sysSettings = r.data || {};
+  renderFlowSettings();
+  renderMaxDays();
+  renderClsTeacher();
+}
+
+// ── 准假流程設定 ──────────────────────────────────────
+function renderFlowSettings() {
+  const c = document.getElementById('flow-settings');
+  c.innerHTML = Object.entries(LEAVE_TYPES).map(([type, label])=>{
+    const flowVal = _sysSettings['flow_'+type] || '';
+    const selected = flowVal.split(',').map(s=>s.trim()).filter(Boolean);
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr);flex-wrap:wrap">
+      <div style="min-width:80px;font-size:13px;font-weight:700">${label}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${FLOW_UNITS.map(u=>{
+          const checked = selected.includes(u.k);
+          return `<label style="display:flex;align-items:center;gap:4px;font-size:12px;padding:3px 10px;border-radius:99px;border:1.5px solid ${checked?'var(--pri)':'var(--bdr)'};background:${checked?'var(--pri-l)':'#fff'};color:${checked?'var(--pri-d)':'var(--slat)'};cursor:pointer">
+            <input type="checkbox" data-flow="${type}" data-unit="${u.k}" ${checked?'checked':''} style="accent-color:var(--pri)" onchange="updateFlowLabel(this,'${type}','${u.k}')">
+            ${u.l}
+          </label>`;
+        }).join('')}
+      </div>
+      <div style="font-size:11px;color:var(--slat-l)">目前：<span id="flow-lbl-${type}">${selected.length?selected.map(k=>FLOW_UNITS.find(u=>u.k===k)?.l||k).join('→'):'（未設定）'}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function updateFlowLabel(el, type, unit) {
+  const allChk = document.querySelectorAll(`input[data-flow="${type}"]`);
+  const sel = [...allChk].filter(c=>c.checked).map(c=>c.dataset.unit);
+  const lbl = document.getElementById('flow-lbl-'+type);
+  if(lbl) lbl.textContent = sel.length ? sel.map(k=>FLOW_UNITS.find(u=>u.k===k)?.l||k).join('→') : '（未設定）';
+  el.parentElement.style.borderColor = el.checked ? 'var(--pri)' : 'var(--bdr)';
+  el.parentElement.style.background  = el.checked ? 'var(--pri-l)' : '#fff';
+  el.parentElement.style.color       = el.checked ? 'var(--pri-d)' : 'var(--slat)';
+}
+
+async function saveFlowSettings() {
+  const payload = {action:'save_settings'};
+  Object.keys(LEAVE_TYPES).forEach(type=>{
+    const allChk = document.querySelectorAll(`input[data-flow="${type}"]`);
+    const sel = [...allChk].filter(c=>c.checked).map(c=>c.dataset.unit);
+    payload['flow_'+type] = sel.join(',');
+  });
+  const r = await gasPost(payload);
+  if(!r.ok){toast('❌ '+r.error);return;}
+  toast('✅ 流程設定已儲存');
+  loadSysSettings();
+}
+
+// ── 准假天數上限 ──────────────────────────────────────
+function renderMaxDays() {
+  const c = document.getElementById('maxdays-settings');
+  c.innerHTML = Object.entries(LEAVE_TYPES).map(([type, label])=>{
+    const val = _sysSettings['max_days_'+type] ?? 0;
+    return `<div class="fr">
+      <label class="flbl">${label}</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="number" id="maxd-${type}" class="fi" min="0" max="365" value="${val}" style="width:80px">
+        <span style="font-size:12px;color:var(--slat-l)">天（0＝不限）</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function saveMaxDays() {
+  const payload = {action:'save_settings'};
+  Object.keys(LEAVE_TYPES).forEach(type=>{
+    const el = document.getElementById('maxd-'+type);
+    if(el) payload['max_days_'+type] = parseInt(el.value)||0;
+  });
+  const r = await gasPost(payload);
+  if(!r.ok){toast('❌ '+r.error);return;}
+  toast('✅ 天數設定已儲存');
+}
+
+// ── 班級導師對應 ──────────────────────────────────────
+function renderClsTeacher() {
+  const c = document.getElementById('cls-teacher-map');
+  // 取所有班級（從學生資料）
+  const classes = [...new Set(students.map(s=>s.cls).filter(Boolean))].sort();
+  // 取所有 teacher 帳號
+  const teachers = _accList.filter(a=>a.role==='teacher'&&String(a.active)==='1');
+  // 解析目前對應
+  const mapStr = _sysSettings['cls_teacher_map']||'';
+  const mapObj = {};
+  mapStr.split(',').forEach(pair=>{
+    const [cls,uname] = pair.split(':').map(s=>s.trim());
+    if(cls&&uname) mapObj[cls]=uname;
+  });
+
+  if(!classes.length){
+    c.innerHTML='<div style="font-size:13px;color:var(--slat-l)">無班級資料（請先確認僑生資料有填寫班級）</div>';
+    return;
+  }
+
+  c.innerHTML = `<div class="fg">${classes.map(cls=>{
+    const curTeacher = mapObj[cls]||'';
+    return `<div class="fr">
+      <label class="flbl">${cls}</label>
+      <select class="fi" id="clsmap-${cls}">
+        <option value="">— 未指定 —</option>
+        ${teachers.map(t=>`<option value="${t.username}" ${curTeacher===t.username?'selected':''}>${t.display||t.username}</option>`).join('')}
+      </select>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+async function saveClsTeacher() {
+  const classes = [...new Set(students.map(s=>s.cls).filter(Boolean))].sort();
+  const pairs = [];
+  classes.forEach(cls=>{
+    const sel = document.getElementById('clsmap-'+cls);
+    if(sel&&sel.value) pairs.push(cls+':'+sel.value);
+  });
+  const r = await gasPost({action:'save_settings', cls_teacher_map: pairs.join(',')});
+  if(!r.ok){toast('❌ '+r.error);return;}
+  toast('✅ 班級導師對應已儲存');
+  loadSysSettings();
+}
+// ── end sysconfig ────────────────────────────────────
+
 // ── 帳號管理 ─────────────────────────────────────────
 const ROLE_OPT = {admin:'系統管理員',warden:'生輔組舍監',teacher:'導師',academic:'學務處',intern:'實習處',recruit:'招生中心'};
 
@@ -2498,7 +2825,7 @@ async function loadAccounts(){
           <td><span style="background:var(--pri-l);color:var(--pri);padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700">${ROLE_OPT[a.role]||a.role}</span></td>
           <td><span style="background:${active?'var(--grn-l)':'var(--red-l)'};color:${active?'var(--grn)':'var(--red)'};padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700">${active?'啟用':'停用'}</span></td>
           ${isAdmin?`<td><div style="display:flex;gap:5px">
-            <button class="btn bgh bsm" onclick="openEditAcc('${a.username}','${a.display}','${a.role}','${a.active}')">✏️ 編輯</button>
+            <button class="btn bgh bsm" onclick="openEditAcc('${a.username}','${a.display}','${a.role}','${a.active}','${a.cls||''}')">✏️ 編輯</button>
             <button class="btn br  bsm" onclick="resetPwd('${a.username}')">🔑 重設密碼</button>
             <button class="btn ${active?'br':'bg'} bsm" onclick="toggleActive('${a.username}','"+(active?'0':'1')+"')">${active?'停用':'啟用'}</button>
           </div></td>`:''}
@@ -2529,14 +2856,19 @@ async function createAccount(){
 
 // 開啟編輯 Modal（管理員）
 let _editAcc=null;
-function openEditAcc(username,display,role,active){
+function openEditAcc(username,display,role,active,cls){
   _editAcc=username;
-  // 用 prompt 快速完成（避免額外 Modal）
-  const newDisplay=prompt(`職務名稱（目前：${display}）`,display);
+  document.getElementById('eacc-info').textContent = username+' — '+(display||'');
+  document.getElementById('eacc-display').value = display||'';
+  document.getElementById('eacc-role').value    = role||'teacher';
+  document.getElementById('eacc-cls').value     = cls||'';
+  document.getElementById('m-edit-acc').classList.add('on');
+  return; // 以下舊程式碼不執行
+  const newDisplay=prompt(\`職務名稱（目前：\${display}）\`,display);
   if(newDisplay===null)return;
   const roles=Object.keys(ROLE_OPT);
-  const roleStr=roles.map((r,i)=>`${i+1}.${ROLE_OPT[r]}`).join('  ');
-  const idx=prompt(`角色（${roleStr}）\n請輸入數字：`,roles.indexOf(role)+1);
+  const roleStr=roles.map((r,i)=>`\${i+1}.\${ROLE_OPT[r]}`).join('  ');
+  const idx=prompt(\`角色（\${roleStr}）\n請輸入數字：\`,roles.indexOf(role)+1);
   if(idx===null)return;
   const newRole=roles[parseInt(idx)-1]||role;
   gasPost({action:'update_account',username,display:newDisplay,role:newRole}).then(r=>{
@@ -2545,6 +2877,19 @@ function openEditAcc(username,display,role,active){
   }).catch(e=>toast('❌ '+e.message));
 }
 
+
+async function submitEditAcc(){
+  if(!_editAcc){closeModal('m-edit-acc');return;}
+  const display = document.getElementById('eacc-display').value.trim();
+  const role    = document.getElementById('eacc-role').value;
+  const cls     = document.getElementById('eacc-cls').value.trim();
+  if(!display){toast('請填寫職務名稱');return;}
+  const r = await gasPost({action:'update_account', username:_editAcc, display, role, cls});
+  if(!r.ok){toast('❌ '+r.error);return;}
+  toast('✅ 已更新帳號資料');
+  closeModal('m-edit-acc');
+  loadAccounts();
+}
 async function resetPwd(username){
   if(!confirm(`確定要重設「${username}」的密碼為 Welcome@1234？`))return;
   try{
