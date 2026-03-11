@@ -1662,17 +1662,25 @@ function renderScCard(rm, bld){
         placeholder="整體備註（選填）">
     </div>
     <!-- 照片上傳 -->
-    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <label style="display:flex;align-items:center;gap:4px;padding:5px 12px;background:#f1f5f9;border:1.5px dashed #94a3b8;border-radius:6px;cursor:pointer;font-size:12px;color:var(--slat)">
-        📷 照片${photoCount?' ('+photoCount+'張)':''}
+    <div>
+      <label style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;background:#f1f5f9;border:1.5px dashed #94a3b8;border-radius:6px;cursor:pointer;font-size:12px;color:var(--slat);margin-bottom:6px">
+        📷 新增照片
         <input type="file" accept="image/*" multiple style="display:none" onchange="addScPhoto('${rm}',this.files)">
       </label>
-      <div id="sc-photos-${rm}" style="display:flex;gap:4px;flex-wrap:wrap">
-        ${(scRoomPhoto[rm]||[]).map((f,i)=>`
-          <div style="position:relative">
-            <img src="${URL.createObjectURL(f)}" style="width:48px;height:48px;object-fit:cover;border-radius:4px;border:1px solid var(--bdr)">
-            <button onclick="rmScPhoto('${rm}',${i})" style="position:absolute;top:-4px;right:-4px;background:#dc2626;color:#fff;border:none;border-radius:99px;width:16px;height:16px;font-size:10px;cursor:pointer;line-height:16px;text-align:center">✕</button>
-          </div>`).join('')}
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${(scRoomPhoto[rm]||[]).map((f,i)=>{
+          const uploaded = (scRoomPhotoUploaded[rm]||[])[i];
+          const thumb = uploaded ? uploaded.imgUrl : URL.createObjectURL(f);
+          const link  = uploaded ? uploaded.viewUrl : '#';
+          return `<div style="position:relative">
+            <a href="${link}" target="_blank">
+              <img src="${thumb}" style="width:56px;height:56px;object-fit:cover;border-radius:6px;border:2px solid ${uploaded?'#86efac':'#cbd5e1'}">
+            </a>
+            ${uploaded?'<span style="position:absolute;bottom:-2px;right:-2px;font-size:9px;background:#16a34a;color:#fff;border-radius:99px;padding:1px 4px">✓</span>':'<span style="position:absolute;bottom:-2px;right:-2px;font-size:9px;background:#94a3b8;color:#fff;border-radius:99px;padding:1px 4px">⏳</span>'}
+            <button onclick="rmScPhoto('${rm}',${i})" style="position:absolute;top:-5px;right:-5px;background:#dc2626;color:#fff;border:none;border-radius:99px;width:17px;height:17px;font-size:10px;cursor:pointer;line-height:17px;text-align:center">✕</button>
+          </div>`;
+        }).join('')}
+        ${!(scRoomPhoto[rm]||[]).length?'<span style="font-size:11px;color:var(--slat-l);padding:4px 0">尚未上傳照片</span>':''}
       </div>
     </div>
   </div>`;
@@ -1688,19 +1696,54 @@ function setScItem(rm, val){
   updateScSummary([...new Set(students.filter(s=>s.b===scBld&&s.st==='入住').map(s=>String(s.r)).filter(Boolean))].sort());
 }
 
+// scRoomPhotoUploaded[rm] = [{fileId, viewUrl, imgUrl, filename}, ...]
+let scRoomPhotoUploaded = {};
+
 function addScPhoto(rm, files){
   if(!scRoomPhoto[rm]) scRoomPhoto[rm]=[];
-  Array.from(files).forEach(f=>{ if(f.size<5*1024*1024) scRoomPhoto[rm].push(f); else toast('照片超過5MB'); });
-  const div=document.getElementById('sc-photos-'+rm);
-  if(div) div.innerHTML=scRoomPhoto[rm].map((f,i)=>`
-    <div style="position:relative;display:inline-block">
-      <img src="${URL.createObjectURL(f)}" style="width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid var(--bdr)">
-      <button onclick="rmScPhoto('${rm}',${i})" style="position:absolute;top:-4px;right:-4px;background:#dc2626;color:#fff;border:none;border-radius:99px;width:16px;height:16px;font-size:10px;cursor:pointer;line-height:16px;text-align:center">✕</button>
-    </div>`).join('');
+  if(!scRoomPhotoUploaded[rm]) scRoomPhotoUploaded[rm]=[];
+  Array.from(files).forEach(f=>{
+    if(f.size > 8*1024*1024){ toast('照片超過8MB，請壓縮後再試'); return; }
+    scRoomPhoto[rm].push(f);
+    uploadPhotoToDrive(rm, f);
+  });
+  // 重新渲染卡片讓縮圖出現
+  const card = document.getElementById('sc-card-'+rm);
+  if(card) card.outerHTML = renderScCard(rm, scBld);
+}
+
+async function uploadPhotoToDrive(rm, file){
+  const date = document.getElementById('sc-date')?.value || new Date().toISOString().slice(0,10);
+  toast('📷 上傳中：'+file.name);
+  try {
+    // 把 File 轉 base64
+    const b64 = await new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.onload = () => res(reader.result.split(',')[1]);
+      reader.onerror = () => rej(new Error('讀取失敗'));
+      reader.readAsDataURL(file);
+    });
+    const r = await gasPost({
+      action: 'upload_photo',
+      b: scBld, r: rm, date,
+      filename: file.name,
+      mimeType: file.type || 'image/jpeg',
+      data: b64
+    });
+    if(!r.ok){ toast('❌ 上傳失敗：'+r.error); return; }
+    if(!scRoomPhotoUploaded[rm]) scRoomPhotoUploaded[rm]=[];
+    scRoomPhotoUploaded[rm].push(r);
+    toast('✅ 照片已上傳 Drive');
+    // 更新卡片顯示 Drive 連結
+    const card = document.getElementById('sc-card-'+rm);
+    if(card) card.outerHTML = renderScCard(rm, scBld);
+  } catch(e){ toast('❌ '+e.message); }
 }
 
 function rmScPhoto(rm, idx){
   scRoomPhoto[rm].splice(idx,1);
+  // uploaded 也一起移除（若還沒上傳完就只移本地）
+  if(scRoomPhotoUploaded[rm]?.length > idx) scRoomPhotoUploaded[rm].splice(idx,1);
   const card=document.getElementById('sc-card-'+rm);
   if(card) card.outerHTML=renderScCard(rm, scBld);
 }
@@ -1731,7 +1774,9 @@ async function saveScRoom(rm){
   const stLabel = {ok:'合格', ng:'不合格', other:'其它'}[overall] || overall;
   const tot = overall==='ok' ? 100 : overall==='other' ? 70 : 0;
   const gr  = tot>=90?'A':tot>=75?'B':tot>=60?'C':'D';
-  const fullNote = (stLabel!=='合格'&&desc ? stLabel+'：'+desc+' ' : stLabel==='合格'?'' : stLabel+' ') + note;
+  // 加入 Drive 照片連結到備註
+  const photoLinks = (scRoomPhotoUploaded[rm]||[]).map(p=>p.viewUrl).join(' ');
+  const fullNote = (stLabel!=='合格'&&desc ? stLabel+'：'+desc+' ' : stLabel==='合格'?'' : stLabel+' ') + note + (photoLinks?' 📷:'+photoLinks:'');
   const body={action:'submit_score',b:bld,r:rm,ins,note:fullNote,date,
     fl:overall==='ok'?20:0, dk:overall==='ok'?20:0, bd:overall==='ok'?20:0,
     tr:overall==='ok'?3:0,  cl:overall==='ok'?10:0, bt:overall==='ok'?10:0,
