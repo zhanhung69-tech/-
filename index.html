@@ -1594,12 +1594,9 @@ function renderScRooms(){
 
   // 初始化未有狀態的房間
   rooms.forEach(rm=>{
-    if(!scRoomState[rm]) scRoomState[rm]={};
-    if(!scRoomNote[rm])  scRoomNote[rm]={};
+    if(!scRoomState[rm]) scRoomState[rm]={overall:'ok'};
+    if(!scRoomNote[rm])  scRoomNote[rm]={overall:''};
     if(!scRoomPhoto[rm]) scRoomPhoto[rm]=[];
-    SC_ITEMS_NEW.forEach(it=>{
-      if(!scRoomState[rm][it.k]) scRoomState[rm][it.k]='ok'; // 預設合格
-    });
   });
 
   grid.innerHTML=rooms.map(rm=>renderScCard(rm,bld)).join('');
@@ -1609,65 +1606,85 @@ function renderScRooms(){
 }
 
 function renderScCard(rm, bld){
-  const stus=students.filter(s=>s.b===bld&&String(s.r)===rm&&s.st==='入住');
-  const stuNames=stus.map(s=>s.name).join('、');
-  const ngItems=SC_ITEMS_NEW.filter(it=>scRoomState[rm]?.[it.k]==='ng');
-  const allOk=ngItems.length===0&&SC_ITEMS_NEW.every(it=>scRoomState[rm]?.[it.k]!=='other');
-  const hasIssue=ngItems.length>0||SC_ITEMS_NEW.some(it=>scRoomState[rm]?.[it.k]==='other');
-  const border=allOk?'#86efac':hasIssue?'#fca5a5':'#fcd34d';
-  const bg=allOk?'#f0fdf4':hasIssue?'#fff1f2':'#fffbeb';
+  const stus = students.filter(s=>s.b===bld&&String(s.r)===rm&&s.st==='入住');
+  const stuNames = stus.map(s=>s.name).join('、');
+  // 房間整體只有一個狀態：ok / ng / other
+  const st = scRoomState[rm]?.overall || 'ok';
+  const note = scRoomNote[rm]?.overall || '';
+  const photoCount = (scRoomPhoto[rm]||[]).length;
 
-  const itemsHtml=SC_ITEMS_NEW.map(it=>{
-    const st=scRoomState[rm]?.[it.k]||'ok';
-    const note=scRoomNote[rm]?.[it.k]||'';
-    return `<div style="margin-bottom:6px">
-      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-        <span style="font-size:12px;font-weight:700;width:72px;color:#1e293b">${it.l}</span>
-        <div style="display:flex;gap:4px">
-          <button onclick="setScItem('${rm}','${it.k}','ok')" style="padding:3px 10px;border-radius:99px;border:1.5px solid ${st==='ok'?'#16a34a':'#cbd5e1'};background:${st==='ok'?'#dcfce7':'#fff'};color:${st==='ok'?'#15803d':'#64748b'};font-size:11px;font-weight:700;cursor:pointer">✅ 合格</button>
-          <button onclick="setScItem('${rm}','${it.k}','ng')" style="padding:3px 10px;border-radius:99px;border:1.5px solid ${st==='ng'?'#dc2626':'#cbd5e1'};background:${st==='ng'?'#fee2e2':'#fff'};color:${st==='ng'?'#dc2626':'#64748b'};font-size:11px;font-weight:700;cursor:pointer">❌ 不合格</button>
-          <button onclick="setScItem('${rm}','${it.k}','other')" style="padding:3px 10px;border-radius:99px;border:1.5px solid ${st==='other'?'#d97706':'#cbd5e1'};background:${st==='other'?'#fef3c7':'#fff'};color:${st==='other'?'#92400e':'#64748b'};font-size:11px;font-weight:700;cursor:pointer">📝 其它</button>
-        </div>
-      </div>
-      ${st==='ng'||st==='other'?`<input style="width:100%;margin-top:4px;border:1px solid var(--bdr);border-radius:4px;padding:3px 8px;font-size:11px" placeholder="${st==='ng'?'不合格說明':'其它說明（必填）'}" value="${note.replace(/"/g,'&quot;')}" oninput="scRoomNote['${rm}']['${it.k}']=this.value">`:''}
-    </div>`;
-  }).join('');
+  const isOk = st==='ok', isNg = st==='ng', isOt = st==='other';
+  const border = isOk?'#86efac':isNg?'#fca5a5':'#fcd34d';
+  const bg     = isOk?'#f0fdf4':isNg?'#fff1f2':'#fffbeb';
+  const badge  = isOk
+    ? '<span style="font-size:11px;background:#dcfce7;color:#15803d;border-radius:99px;padding:2px 10px;font-weight:700">✅ 合格</span>'
+    : isNg
+    ? '<span style="font-size:11px;background:#fee2e2;color:#dc2626;border-radius:99px;padding:2px 10px;font-weight:700">❌ 不合格</span>'
+    : '<span style="font-size:11px;background:#fef3c7;color:#92400e;border-radius:99px;padding:2px 10px;font-weight:700">📝 其它</span>';
 
-  const photoCount=(scRoomPhoto[rm]||[]).length;
   return `<div id="sc-card-${rm}" style="border:2px solid ${border};background:${bg};border-radius:10px;padding:14px">
+    <!-- 標題列 -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <div>
-        <div style="font-size:13px;font-weight:800;color:var(--pri-d)">🚪 ${rm} 號房</div>
-        <div style="font-size:11px;color:var(--slat-l);margin-top:1px">${stuNames||'（空房）'}</div>
+        <div style="font-size:14px;font-weight:800;color:var(--pri-d)">🚪 ${rm} 號房</div>
+        <div style="font-size:11px;color:var(--slat-l);margin-top:2px">${stuNames||'（空房）'}</div>
       </div>
       <div style="display:flex;gap:6px;align-items:center">
-        ${allOk?'<span style="font-size:11px;background:#dcfce7;color:#15803d;border-radius:99px;padding:2px 10px;font-weight:700">✅ 全合格</span>':''}
-        ${hasIssue?`<span style="font-size:11px;background:#fee2e2;color:#dc2626;border-radius:99px;padding:2px 10px;font-weight:700">⚠️ ${ngItems.length}項不合格</span>`:''}
-        <button onclick="saveScRoom('${rm}')" style="padding:4px 12px;background:var(--pri);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">💾 儲存</button>
+        ${badge}
+        <button onclick="saveScRoom('${rm}')" style="padding:5px 12px;background:var(--pri);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">💾</button>
       </div>
     </div>
-    <div style="margin-bottom:10px">${itemsHtml}</div>
+    <!-- 三個按鈕 -->
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button onclick="setScItem('${rm}','ok')"
+        style="flex:1;padding:8px;border-radius:8px;border:2px solid ${isOk?'#16a34a':'#cbd5e1'};background:${isOk?'#dcfce7':'#fff'};color:${isOk?'#15803d':'#64748b'};font-size:13px;font-weight:800;cursor:pointer">
+        ✅ 合格
+      </button>
+      <button onclick="setScItem('${rm}','ng')"
+        style="flex:1;padding:8px;border-radius:8px;border:2px solid ${isNg?'#dc2626':'#cbd5e1'};background:${isNg?'#fee2e2':'#fff'};color:${isNg?'#dc2626':'#64748b'};font-size:13px;font-weight:800;cursor:pointer">
+        ❌ 不合格
+      </button>
+      <button onclick="setScItem('${rm}','other')"
+        style="flex:1;padding:8px;border-radius:8px;border:2px solid ${isOt?'#d97706':'#cbd5e1'};background:${isOt?'#fef3c7':'#fff'};color:${isOt?'#92400e':'#64748b'};font-size:13px;font-weight:800;cursor:pointer">
+        📝 其它
+      </button>
+    </div>
+    <!-- 說明文字（不合格或其它才顯示） -->
+    ${isNg||isOt?`<div style="margin-bottom:8px">
+      <input id="sc-desc-${rm}" style="width:100%;border:1.5px solid ${isNg?'#fca5a5':'#fcd34d'};border-radius:6px;padding:6px 10px;font-size:12px;box-sizing:border-box;background:#fff"
+        placeholder="${isNg?'請說明不合格原因…':'請說明其它情況…'}"
+        value="${note.replace(/"/g,'&quot;')}"
+        oninput="scRoomNote['${rm}'] = scRoomNote['${rm}']||{}; scRoomNote['${rm}'].overall=this.value">
+    </div>`:''}
     <!-- 備註 -->
     <div style="margin-bottom:8px">
-      <input id="sc-note-${rm}" style="width:100%;border:1px solid var(--bdr);border-radius:4px;padding:4px 8px;font-size:12px;box-sizing:border-box" placeholder="整體備註（選填）">
+      <input id="sc-note-${rm}" style="width:100%;border:1px solid var(--bdr);border-radius:6px;padding:5px 10px;font-size:12px;box-sizing:border-box;background:#fff"
+        placeholder="整體備註（選填）">
     </div>
     <!-- 照片上傳 -->
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <label style="display:flex;align-items:center;gap:4px;padding:5px 12px;background:#f1f5f9;border:1.5px dashed #94a3b8;border-radius:6px;cursor:pointer;font-size:12px;color:var(--slat)">
-        📷 上傳照片${photoCount?` (${photoCount}張)`:''}
+        📷 照片${photoCount?' ('+photoCount+'張)':''}
         <input type="file" accept="image/*" multiple style="display:none" onchange="addScPhoto('${rm}',this.files)">
       </label>
-      <div id="sc-photos-${rm}" style="display:flex;gap:4px;flex-wrap:wrap"></div>
+      <div id="sc-photos-${rm}" style="display:flex;gap:4px;flex-wrap:wrap">
+        ${(scRoomPhoto[rm]||[]).map((f,i)=>`
+          <div style="position:relative">
+            <img src="${URL.createObjectURL(f)}" style="width:48px;height:48px;object-fit:cover;border-radius:4px;border:1px solid var(--bdr)">
+            <button onclick="rmScPhoto('${rm}',${i})" style="position:absolute;top:-4px;right:-4px;background:#dc2626;color:#fff;border:none;border-radius:99px;width:16px;height:16px;font-size:10px;cursor:pointer;line-height:16px;text-align:center">✕</button>
+          </div>`).join('')}
+      </div>
     </div>
   </div>`;
 }
 
-function setScItem(rm, key, val){
+function setScItem(rm, val){
   if(!scRoomState[rm]) scRoomState[rm]={};
-  scRoomState[rm][key]=val;
-  // 重新渲染此房間卡片
-  const card=document.getElementById('sc-card-'+rm);
-  if(card) card.outerHTML=renderScCard(rm, scBld);
+  scRoomState[rm].overall = val;
+  if(val==='ok') { if(!scRoomNote[rm]) scRoomNote[rm]={}; scRoomNote[rm].overall=''; }
+  // 重新渲染此卡片
+  const card = document.getElementById('sc-card-'+rm);
+  if(card) card.outerHTML = renderScCard(rm, scBld);
   updateScSummary([...new Set(students.filter(s=>s.b===scBld&&s.st==='入住').map(s=>String(s.r)).filter(Boolean))].sort());
 }
 
@@ -1691,9 +1708,8 @@ function rmScPhoto(rm, idx){
 function updateScSummary(rooms){
   let okN=0,ngN=0,otN=0;
   rooms.forEach(rm=>{
-    const hasNg=SC_ITEMS_NEW.some(it=>scRoomState[rm]?.[it.k]==='ng');
-    const hasOt=SC_ITEMS_NEW.some(it=>scRoomState[rm]?.[it.k]==='other');
-    if(hasNg) ngN++; else if(hasOt) otN++; else okN++;
+    const st = scRoomState[rm]?.overall||'ok';
+    if(st==='ng') ngN++; else if(st==='other') otN++; else okN++;
   });
   const el=document.getElementById('sc-summary');
   if(el) el.innerHTML=`
@@ -1709,25 +1725,17 @@ async function saveScRoom(rm){
   const date=document.getElementById('sc-date')?.value||new Date().toISOString().slice(0,10);
   const ins=document.getElementById('sc-ins')?.value||user?.display||'';
   const note=document.getElementById('sc-note-'+rm)?.value||'';
-  // 組合不合格項目文字
-  const issues=SC_ITEMS_NEW.filter(it=>scRoomState[rm]?.[it.k]!=='ok').map(it=>{
-    const st=scRoomState[rm][it.k];
-    const n=scRoomNote[rm]?.[it.k]||'';
-    return it.l+'：'+(st==='ng'?'不合格':'其它')+(n?' ('+n+')':'');
-  }).join('；');
-  const ngCount=SC_ITEMS_NEW.filter(it=>scRoomState[rm]?.[it.k]==='ng').length;
-  const tot=Math.round(100 - ngCount*(100/SC_ITEMS_NEW.length));
-  const gr=tot>=90?'A':tot>=75?'B':tot>=60?'C':'D';
-  // 壓縮成舊格式（all ok=max, ng=0）發送給後端
-  const body={action:'submit_score',b:bld,r:rm,ins,note:(issues?issues+' ':'')+note,date,
-    fl: scRoomState[rm]?.fl==='ok'?20:0,
-    dk: scRoomState[rm]?.dk==='ok'?20:0,
-    bd: scRoomState[rm]?.bd==='ok'?20:0,
-    tr: scRoomState[rm]?.tr==='ok'?3:0,
-    cl: scRoomState[rm]?.cl==='ok'?10:0,
-    bt: scRoomState[rm]?.bt==='ok'?10:0,
-    cm: scRoomState[rm]?.cm==='ok'?3:0,
-    pn: 0
+  // 取得房間整體狀態
+  const overall = scRoomState[rm]?.overall || 'ok';
+  const desc    = scRoomNote[rm]?.overall || '';
+  const stLabel = {ok:'合格', ng:'不合格', other:'其它'}[overall] || overall;
+  const tot = overall==='ok' ? 100 : overall==='other' ? 70 : 0;
+  const gr  = tot>=90?'A':tot>=75?'B':tot>=60?'C':'D';
+  const fullNote = (stLabel!=='合格'&&desc ? stLabel+'：'+desc+' ' : stLabel==='合格'?'' : stLabel+' ') + note;
+  const body={action:'submit_score',b:bld,r:rm,ins,note:fullNote,date,
+    fl:overall==='ok'?20:0, dk:overall==='ok'?20:0, bd:overall==='ok'?20:0,
+    tr:overall==='ok'?3:0,  cl:overall==='ok'?10:0, bt:overall==='ok'?10:0,
+    cm:overall==='ok'?3:0,  pn:0
   };
   try{
     const r=await gasPost(body);
