@@ -334,8 +334,10 @@ textarea.fi{resize:vertical;min-height:70px}
                     <option>病假</option><option>其它</option>
                   </select>
                 </div>
-                <div class="fr"><label class="flbl">開始時間</label><input class="fi" type="datetime-local" id="lv-st"></div>
-                <div class="fr"><label class="flbl">結束時間</label><input class="fi" type="datetime-local" id="lv-et"></div>
+                <div class="fr"><label class="flbl">開始日期</label><input class="fi" type="date" id="lv-sd"></div>
+                <div class="fr"><label class="flbl">開始時間</label><input class="fi" type="time" id="lv-st" step="60"></div>
+                <div class="fr"><label class="flbl">結束日期</label><input class="fi" type="date" id="lv-ed"></div>
+                <div class="fr"><label class="flbl">結束時間</label><input class="fi" type="time" id="lv-et" step="60"></div>
               </div>
               <div id="lv-hint" style="margin-top:10px;padding:8px 12px;background:var(--pri-l);border-radius:var(--rs);font-size:12px;color:var(--pri-d);font-weight:600"></div>
               <div class="fr" style="margin-top:12px">
@@ -371,33 +373,33 @@ textarea.fi{resize:vertical;min-height:70px}
           </div>
         </div>
 
-        <!-- 評分 -->
+        <!-- 環境衛生評核 -->
         <div class="pg" id="pg-score">
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px">
-            <div class="card">
-              <div class="chd"><span class="ctitle">🏆 內務評分</span></div>
-              <div class="cbody">
-                <div class="fg" style="margin-bottom:14px">
-                  <div class="fr"><label class="flbl">棟別</label><select class="fi" id="sc-b" onchange="loadScRooms()"></select></div>
-                  <div class="fr"><label class="flbl">房號</label><select class="fi" id="sc-r"></select></div>
-                  <div class="fr" style="grid-column:1/-1"><label class="flbl">評分人員</label><input class="fi" id="sc-ins"></div>
-                </div>
-                <div class="sc-rows" id="sc-rows"></div>
-                <div class="sc-tot">
-                  <div>
-                    <div style="font-size:11px;color:var(--slat-l);font-weight:600;margin-bottom:2px">總　分</div>
-                    <div class="sc-num ssA" id="sc-tot">100</div>
-                    <div id="sc-gl" style="font-size:12px;margin-top:3px;font-weight:600">⭐ 優良</div>
-                  </div>
-                  <div style="display:flex;flex-direction:column;gap:8px">
-                    <button class="btn bp"   onclick="submitScore()">💾 儲存</button>
-                    <button class="btn bpdf" onclick="openPrintModal('score')">🖨️ 列印</button>
-                  </div>
-                </div>
-                <div class="fr"><label class="flbl">備　註</label><input class="fi" id="sc-note" placeholder="選填"></div>
+          <!-- 頂部操作列 -->
+          <div class="card" style="margin-bottom:12px">
+            <div class="chd">
+              <span class="ctitle">🏆 環境衛生評核</span>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+                <select class="fi bsm" id="sc-date" style="width:130px"></select>
+                <input class="fi bsm" id="sc-ins" placeholder="評核人員" style="width:110px" value="">
+                <button class="btn bp bsm" onclick="submitAllScores()">💾 全部儲存</button>
+                <button class="btn bpdf bsm" onclick="openPrintModal('score')">🖨️ 列印</button>
               </div>
             </div>
-            <div class="card"><div class="chd"><span class="ctitle">📊 評分紀錄</span></div><div class="cbody" id="sc-hist"></div></div>
+            <div class="cbody" style="padding-top:8px">
+              <div id="sc-blds" class="btabs"></div>
+              <!-- 統計列 -->
+              <div id="sc-summary" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;font-size:12px"></div>
+            </div>
+          </div>
+          <!-- 房間卡片區 -->
+          <div id="sc-rooms-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px"></div>
+          <!-- 評核紀錄 -->
+          <div class="card" style="margin-top:12px">
+            <div class="chd"><span class="ctitle">📊 評核紀錄</span>
+              <button class="btn bgh bsm" onclick="renderScHist()">🔄 重整</button>
+            </div>
+            <div class="cbody" id="sc-hist"></div>
           </div>
         </div>
 
@@ -699,12 +701,98 @@ textarea.fi{resize:vertical;min-height:70px}
   </div>
 </div>
 
+
+<!-- Modal: 假單修改 -->
+<div class="modal-ov" id="m-edit-lv">
+  <div class="modal" style="max-width:480px">
+    <div class="mhd"><span class="mtit">✏️ 修改假單</span><button class="mcl" onclick="closeModal('m-edit-lv')">✕</button></div>
+    <div class="mbody">
+      <div id="m-elv-info" style="background:var(--pri-l);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-size:13px;font-weight:700;color:var(--pri-d)"></div>
+      <div class="fg">
+        <div class="fr"><label class="flbl">開始日期</label><input class="fi" type="date" id="elv-sd"></div>
+        <div class="fr"><label class="flbl">開始時間</label><input class="fi" type="time" id="elv-st" step="60"></div>
+        <div class="fr"><label class="flbl">結束日期</label><input class="fi" type="date" id="elv-ed"></div>
+        <div class="fr"><label class="flbl">結束時間</label><input class="fi" type="time" id="elv-et" step="60"></div>
+        <div class="fr" style="grid-column:1/-1"><label class="flbl">假別類型</label>
+          <select class="fi" id="elv-type">
+            <option>打工</option><option>職場實習</option><option>工讀</option>
+            <option>晚歸</option><option>外宿</option><option>返鄉</option><option>病假</option><option>其它</option>
+          </select>
+        </div>
+        <div class="fr" style="grid-column:1/-1"><label class="flbl">事　由</label><input class="fi" id="elv-reason" placeholder="事由說明"></div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn bp" onclick="saveEditLv()">💾 儲存</button>
+      <button class="btn bgh" onclick="closeModal('m-edit-lv')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: 違規修改 -->
+<div class="modal-ov" id="m-edit-vio">
+  <div class="modal" style="max-width:480px">
+    <div class="mhd"><span class="mtit">✏️ 修改違規通報</span><button class="mcl" onclick="closeModal('m-edit-vio')">✕</button></div>
+    <div class="mbody">
+      <div id="m-evio-info" style="background:var(--red-l);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-size:13px;font-weight:700;color:var(--red)"></div>
+      <div class="fg">
+        <div class="fr"><label class="flbl">違規類別</label>
+          <select class="fi" id="evio-cat">
+            <option>違禁物品（菸酒等）</option><option>宵禁違規</option><option>打架鬥毆</option>
+            <option>財物損毀</option><option>衛生不合格</option><option>其它</option>
+          </select>
+        </div>
+        <div class="fr"><label class="flbl">嚴重程度</label>
+          <select class="fi" id="evio-lvl">
+            <option value="minor">🟡 輕微</option>
+            <option value="normal">🟠 一般</option>
+            <option value="serious">🔴 嚴重</option>
+          </select>
+        </div>
+        <div class="fr" style="grid-column:1/-1"><label class="flbl">違規描述</label><textarea class="fi" id="evio-desc" rows="3"></textarea></div>
+        <div class="fr" style="grid-column:1/-1"><label class="flbl">處理狀態</label>
+          <select class="fi" id="evio-st">
+            <option value="待處理">待處理</option><option value="已處理">已處理</option>
+            <option value="記過">記過</option><option value="警告">警告</option>
+            <option value="申誡">申誡</option><option value="移送學務處">移送學務處</option>
+          </select>
+        </div>
+        <div class="fr" style="grid-column:1/-1"><label class="flbl">處理說明</label><input class="fi" id="evio-note" placeholder="選填"></div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn bp" onclick="saveEditVio()">💾 儲存</button>
+      <button class="btn bgh" onclick="closeModal('m-edit-vio')">取消</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbw4Wlq3t5SO12e7Cs8bNgZyWgmvag1V6IB4t-RqMtJY9r0YbudMPAdHvqj-tZXrjac/exec';
 
 const BLDS   = ['F1','F2','F3','M1','M2','M3'];
+
+// 時間格式清理：統一輸出 yyyy/MM/dd HH:mm
+function fmtDT(v) {
+  if(!v) return '';
+  const s = String(v).trim();
+  // 已是 yyyy/MM/dd 或 yyyy-MM-dd 格式 → 直接清理
+  if(/^\d{4}[\/\-]\d{2}[\/\-]\d{2}/.test(s))
+    return s.slice(0,16).replace('T',' ').replace(/-/g,'/');
+  // 英文 Date 字串 → 解析後重新格式化
+  try {
+    const d = new Date(s);
+    if(!isNaN(d.getTime())) {
+      const pad = n => String(n).padStart(2,'0');
+      const ymd = d.getFullYear()+'/'+pad(d.getMonth()+1)+'/'+pad(d.getDate());
+      const hm  = pad(d.getHours())+':'+pad(d.getMinutes());
+      return (d.getHours()||d.getMinutes()) ? ymd+' '+hm : ymd;
+    }
+  } catch(e){}
+  return s.slice(0,16);
+}
 const BFLOOR = {F1:'12F',F2:'11F',F3:'10F',M1:'9F',M2:'8F',M3:'6F'};
 const bldLbl = b => (b[0]==='F'?'女':'男')+BFLOOR[b];
 const isFem  = b => b[0]==='F';
@@ -868,7 +956,7 @@ function renderDash(){
   const pend=leaves.filter(l=>['待學務處核章','待實習處核章','待招生中心核章'].includes(l.status)).slice(0,5);
   const pd=document.getElementById('dash-pend');
   if(!pend.length){pd.innerHTML='<div class="empty"><div class="empty-ico">✅</div><p>無待審假單</p></div>';}
-  else pd.innerHTML=`<div class="lv-list">${pend.map(l=>`<div class="lv-card"><div class="lv-hd"><span class="lv-id">${l.id}</span><span class="lv-type">${l.type}</span><span class="badge ${ST_BADGE[l.status]||'bpend'}" style="margin-left:auto">${l.status}</span></div><div class="lv-det" style="font-size:12px">🏫${l.cls}·👤${l.names}<br>📅${l.start}～${l.end}</div></div>`).join('')}</div>`;
+  else pd.innerHTML=`<div class="lv-list">${pend.map(l=>`<div class="lv-card"><div class="lv-hd"><span class="lv-id">${l.id}</span><span class="lv-type">${l.type}</span><span class="badge ${ST_BADGE[l.status]||'bpend'}" style="margin-left:auto">${l.status}</span></div><div class="lv-det" style="font-size:12px">🏫${l.cls}·👤${l.names}<br>📅${fmtDT(l.start)}～${fmtDT(l.end)}</div></div>`).join('')}</div>`;
 
   const viopend=violations.filter(v=>v.status==='待處理').slice(0,4);
   const vd=document.getElementById('dash-vio');
@@ -919,7 +1007,7 @@ function renderRoll(){
     String(lv.stu_ids||'').split(',').map(s=>s.trim()).filter(Boolean).forEach(sid=>{
       if(bstus.find(s=>s.id===sid)) autoLv[sid]={
           status:'lv', type:lv.type, id:lv.id,
-          reason:lv.reason||'', start:String(lv.start||'').slice(0,10), end:String(lv.end||'').slice(0,10),
+          reason:lv.reason||'', start:fmtDT(lv.start).slice(0,10), end:fmtDT(lv.end).slice(0,10),
           note:lv.type+'（'+lv.id+'）'
         };
     });
@@ -998,7 +1086,7 @@ function renderRoomCard(rm,stus,autoLv){
     let lvInfoBlock = '';
     if(auto){
       const reason = auto.reason && auto.reason!=='—' ? auto.reason : '';
-      const period = (auto.start&&auto.end) ? auto.start.slice(5)+'～'+auto.end.slice(5) : '';
+      const period = (auto.start&&auto.end) ? fmtDT(auto.start).slice(5,10)+'～'+fmtDT(auto.end).slice(5,10) : '';
       lvInfoBlock = `
         <div style="background:${lvStyle.chipBg};border-radius:6px;padding:6px 9px;margin-bottom:7px;font-size:11px">
           <div style="font-weight:800;color:${lvStyle.chip};margin-bottom:2px">${lvStyle.icon} ${auto.type}${period?' · '+period:''}</div>
@@ -1065,7 +1153,7 @@ function setRollCard(id,st,rm){
     String(lv.stu_ids||'').split(',').map(s=>s.trim()).filter(Boolean).forEach(sid=>{
       if(bstus.find(s=>s.id===sid)) autoLv[sid]={
           status:'lv', type:lv.type, id:lv.id,
-          reason:lv.reason||'', start:String(lv.start||'').slice(0,10), end:String(lv.end||'').slice(0,10),
+          reason:lv.reason||'', start:fmtDT(lv.start).slice(0,10), end:fmtDT(lv.end).slice(0,10),
           note:lv.type+'（'+lv.id+'）'
         };
     });
@@ -1273,17 +1361,19 @@ async function submitLeave(){
   if(!hp('leave_apply')){toast('無申請假單權限');return;}
   const cls=document.getElementById('lv-cls').value, type=document.getElementById('lv-type').value;
   const ids=Array.from(document.querySelectorAll('#lv-checks input:checked')).map(cb=>cb.value);
-  const st=document.getElementById('lv-st').value, et=document.getElementById('lv-et').value;
+  const sd=document.getElementById('lv-sd').value, st=document.getElementById('lv-st').value;
+  const ed=document.getElementById('lv-ed').value, et=document.getElementById('lv-et').value;
   const reason=document.getElementById('lv-reason').value||'—';
   if(!ids.length){toast('請勾選學生');return;}
-  if(!st||!et){toast('請填寫時間');return;}
-  if(st>=et){toast('結束時間需晚於開始');return;}
-  const fmt=v=>v.replace('T',' ');
+  if(!sd||!st||!ed||!et){toast('請填寫完整日期與時間');return;}
+  const startStr = sd+' '+st, endStr = ed+' '+et;
+  if(startStr>=endStr){toast('結束時間需晚於開始');return;}
   try{
-    const r=await gasPost({action:'apply_leave',cls,type,stu_ids:ids,start:fmt(st),end:fmt(et),reason,by:user.display||user.username});
+    const r=await gasPost({action:'apply_leave',cls,type,stu_ids:ids,start:startStr,end:endStr,reason,by:user.display||user.username});
     if(!r.ok){toast('❌ '+r.error);return;}
     toast(`✅ 假單已提交：${r.names}`);
-    document.getElementById('lv-st').value=''; document.getElementById('lv-et').value='';
+    document.getElementById('lv-sd').value=''; document.getElementById('lv-st').value='';
+    document.getElementById('lv-ed').value=''; document.getElementById('lv-et').value='';
     document.getElementById('lv-reason').value=''; lvNone();
     await refreshLeaves();
   }catch(e){toast('❌ '+e.message);}
@@ -1318,13 +1408,15 @@ function renderLeaves(){
     const aCls=ca3?'bv':caA&&!ca1&&!ca2&&!ca3?'bgh':'bg';
     return `<div class="lv-card">
       <div class="lv-hd"><span class="lv-id">${l.id}</span><span class="lv-type">${l.type}</span><span class="badge ${ST_BADGE[l.status]||'bpend'}" style="margin-left:auto">${l.status}</span></div>
-      <div class="lv-det">🏫 <strong>${l.cls}</strong> &nbsp;👤 ${l.names}<br>📅 ${l.start} ～ ${l.end}<br>📝 ${l.reason}${l.by?`<br>👨‍🏫 ${l.by}`:''}${l.ret&&l.ret!=='—'?`<br>🔙 ${l.ret}`:''}${l.reject_reason?`<br>❌ ${l.reject_reason}`:''}</div>
+      <div class="lv-det">🏫 <strong>${l.cls}</strong> &nbsp;👤 ${l.names}<br>📅 ${fmtDT(l.start)} ～ ${fmtDT(l.end)}<br>📝 ${l.reason}${l.by?`<br>👨‍🏫 ${l.by}`:''}${l.ret&&l.ret!=='—'?`<br>🔙 ${l.ret}`:''}${l.reject_reason?`<br>❌ ${l.reject_reason}`:''}</div>
       <div class="chips">${chips}</div>
       <div class="lv-act">
         ${(ca1||ca2||ca3||caA)?`<button class="btn ${aCls} bsm" onclick="approveLv('${l.id}','${role}')">${aLbl}</button>`:''}
         ${(ca1||ca2||ca3||caA)?`<button class="btn br bsm" onclick="rejectLv('${l.id}')">✗ 駁回</button>`:''}
         ${(hp('roll')||hp('all'))&&l.status==='請假中'?`<button class="btn bo bsm" onclick="markRet('${l.id}')">🔙 返舍</button>`:''}
         <button class="btn bpdf bsm" onclick="printLeavePDF('${l.id}')">🖨️ 假單</button>
+        ${hp('all')?`<button class="btn bgh bsm" onclick="openEditLv('${l.id}')">✏️ 修改</button>`:''}
+        ${hp('all')?`<button class="btn br bsm" onclick="deleteLv('${l.id}')">🗑️ 刪除</button>`:''}
       </div>
     </div>`;
   }).join('')}</div>`;
@@ -1340,6 +1432,73 @@ async function rejectLv(id){
 async function markRet(id){
   try{const r=await gasPost({action:'mark_return',leave_id:id,by:user.display||user.username});if(!r.ok){toast('❌ '+r.error);return;}toast('✅ 已返舍');await refreshLeaves();}catch(e){toast('❌ '+e.message);}
 }
+async function deleteLv(id){
+  if(!confirm('確定要刪除這張假單？')) return;
+  try{const r=await gasPost({action:'delete_leave',id});if(!r.ok){toast('❌ '+r.error);return;}toast('✅ 已刪除');await refreshLeaves();}catch(e){toast('❌ '+e.message);}
+}
+
+// ── 假單修改 ──────────────────────────────────────────
+let _editLvId = null;
+function openEditLv(id){
+  _editLvId = id;
+  const l = leaves.find(x=>x.id===id); if(!l) return;
+  document.getElementById('m-elv-info').textContent = l.id+' · '+l.cls+' · '+l.names;
+  // 解析日期時間
+  const sd = fmtDT(l.start), ed = fmtDT(l.end);
+  document.getElementById('elv-sd').value = sd.slice(0,10).replace(/\//g,'-');
+  document.getElementById('elv-st').value = sd.length>10 ? sd.slice(11,16) : '00:00';
+  document.getElementById('elv-ed').value = ed.slice(0,10).replace(/\//g,'-');
+  document.getElementById('elv-et').value = ed.length>10 ? ed.slice(11,16) : '00:00';
+  document.getElementById('elv-type').value = l.type||'其它';
+  document.getElementById('elv-reason').value = l.reason||'';
+  document.getElementById('m-edit-lv').classList.add('on');
+}
+async function saveEditLv(){
+  const sd=document.getElementById('elv-sd').value, st=document.getElementById('elv-st').value;
+  const ed=document.getElementById('elv-ed').value, et=document.getElementById('elv-et').value;
+  if(!sd||!st||!ed||!et){toast('請填寫完整日期時間');return;}
+  const startStr=sd+' '+st, endStr=ed+' '+et;
+  if(startStr>=endStr){toast('結束時間需晚於開始');return;}
+  try{
+    const r=await gasPost({action:'update_leave',id:_editLvId,start:startStr,end:endStr,
+      type:document.getElementById('elv-type').value,
+      reason:document.getElementById('elv-reason').value||'—'});
+    if(!r.ok){toast('❌ '+r.error);return;}
+    toast('✅ 假單已更新');
+    closeModal('m-edit-lv');
+    await refreshLeaves();
+  }catch(e){toast('❌ '+e.message);}
+}
+
+// ── 違規修改 ──────────────────────────────────────────
+let _editVioId = null;
+function openEditVio(id){
+  _editVioId = id;
+  const v = violations.find(x=>x.id===id); if(!v) return;
+  document.getElementById('m-evio-info').textContent = v.names+' · '+v.created_at;
+  document.getElementById('evio-cat').value  = v.category||'其它';
+  document.getElementById('evio-lvl').value  = v.level||'normal';
+  document.getElementById('evio-desc').value = v.description||'';
+  document.getElementById('evio-st').value   = v.status||'待處理';
+  document.getElementById('evio-note').value = v.handle_note||'';
+  document.getElementById('m-edit-vio').classList.add('on');
+}
+async function saveEditVio(){
+  try{
+    const r=await gasPost({action:'update_violation',id:_editVioId,
+      category:document.getElementById('evio-cat').value,
+      level:document.getElementById('evio-lvl').value,
+      description:document.getElementById('evio-desc').value,
+      status:document.getElementById('evio-st').value,
+      handle_note:document.getElementById('evio-note').value,
+      handled_by:user.display||user.username});
+    if(!r.ok){toast('❌ '+r.error);return;}
+    toast('✅ 違規通報已更新');
+    closeModal('m-edit-vio');
+    await refreshViolations();
+  }catch(e){toast('❌ '+e.message);}
+}
+
 async function refreshLeaves(){
   try{const r=await gasGet({action:'leaves'});leaves=r.data||[];renderLvTabs();renderLeaves();renderDash();}catch(e){}
 }
@@ -1347,7 +1506,7 @@ async function refreshLeaves(){
 async function showTodayModal(){
   try{
     const r=await gasGet({action:'today_leaves'});
-    const mk=(l,badge)=>`<div class="lv-card" style="margin-bottom:6px"><div class="lv-hd"><span class="lv-id">${l.id}</span><span class="lv-type">${l.type}</span><span class="badge ${badge}" style="margin-left:auto">${l.status}</span></div><div class="lv-det" style="font-size:12px">🏫${l.cls}·👤${l.names}<br>📅${l.start}～${l.end}</div></div>`;
+    const mk=(l,badge)=>`<div class="lv-card" style="margin-bottom:6px"><div class="lv-hd"><span class="lv-id">${l.id}</span><span class="lv-type">${l.type}</span><span class="badge ${badge}" style="margin-left:auto">${l.status}</span></div><div class="lv-det" style="font-size:12px">🏫${l.cls}·👤${l.names}<br>📅${fmtDT(l.start)}～${fmtDT(l.end)}</div></div>`;
     document.getElementById('m-today-body').innerHTML=`
       <p style="font-size:11px;color:var(--slat-l);margin-bottom:14px">產生時間：${r.generated_at}</p>
       <h3 style="font-size:14px;font-weight:700;margin-bottom:10px">📍 請假中（${r.active_count}人）</h3>
@@ -1370,8 +1529,8 @@ function printLeavePDF(id){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin-bottom:16px">
       <div><div style="font-size:11px;color:#94a3b8;font-weight:600">班級</div><div style="font-weight:700">${l.cls}</div></div>
       <div><div style="font-size:11px;color:#94a3b8;font-weight:600">請假類別</div><div style="font-weight:700">${l.type}</div></div>
-      <div><div style="font-size:11px;color:#94a3b8;font-weight:600">開始</div><div style="font-weight:700">${l.start}</div></div>
-      <div><div style="font-size:11px;color:#94a3b8;font-weight:600">結束</div><div style="font-weight:700">${l.end}</div></div>
+      <div><div style="font-size:11px;color:#94a3b8;font-weight:600">開始</div><div style="font-weight:700">${fmtDT(l.start)}</div></div>
+      <div><div style="font-size:11px;color:#94a3b8;font-weight:600">結束</div><div style="font-weight:700">${fmtDT(l.end)}</div></div>
       <div style="grid-column:1/-1"><div style="font-size:11px;color:#94a3b8;font-weight:600">事由</div><div style="font-weight:700">${l.reason}</div></div>
       <div style="grid-column:1/-1"><div style="font-size:11px;color:#94a3b8;font-weight:600">申請人</div><div style="font-weight:700">${l.by||'—'}</div></div>
     </div>
@@ -1383,55 +1542,245 @@ function printLeavePDF(id){
 function exportLeavesPDF(){
   const list=lvFilter==='all'?leaves:leaves.filter(l=>l.status===lvFilter);
   if(!list.length){toast('無假單可列印');return;}
-  const rows=list.map(l=>`<tr><td>${l.id}</td><td>${l.cls}</td><td>${l.names}</td><td>${l.type}</td><td>${l.start}<br>～${l.end}</td><td>${l.reason}</td><td>${l.status}</td></tr>`).join('');
+  const rows=list.map(l=>`<tr><td>${l.id}</td><td>${l.cls}</td><td>${l.names}</td><td>${l.type}</td><td>${fmtDT(l.start)}<br>～${fmtDT(l.end)}</td><td>${l.reason}</td><td>${l.status}</td></tr>`).join('');
   printHTML(`假單總表`,`<p style="color:#64748b;font-size:12px;margin-bottom:10px">共${list.length}筆</p>
     <table border="1" cellpadding="7" style="border-collapse:collapse;width:100%;font-size:12px">
     <tr style="background:#1e3a8a;color:#fff"><th>單號</th><th>班級</th><th>姓名</th><th>類別</th><th>期間</th><th>事由</th><th>狀態</th></tr>${rows}</table>`);
 }
 
 // ── 評分 ─────────────────────────────────────────────
-function initScSliders(){
-  document.getElementById('sc-rows').innerHTML=SC_ITEMS.map(it=>`
-    <div class="sc-row"><span class="sc-lbl">${it.l}</span>
-    <input type="range" min="0" max="${it.max}" value="${scVals[it.k]}" oninput="updSc('${it.k}',this.value)">
-    <span class="sc-val" id="sv-${it.k}">${scVals[it.k]}</span></div>`).join('');
-}
-function updSc(k,v){
-  scVals[k]=parseInt(v); document.getElementById('sv-'+k).textContent=v;
-  const t=Math.max(0,scVals.fl+scVals.dk+scVals.bd+scVals.tr+scVals.cl+scVals.bt+scVals.cm-scVals.pn*20);
-  const g=t>=90?'A':t>=75?'B':t>=60?'C':'D';
-  const el=document.getElementById('sc-tot'); el.textContent=t; el.className='sc-num ss'+g;
-  document.getElementById('sc-gl').textContent={A:'⭐ 優良（90+）',B:'✅ 良好（75-89）',C:'📋 普通（60-74）',D:'⚠️ 待改善（59以下）'}[g];
-}
+// ── 環境衛生評核（新模式）────────────────────────────────
+const SC_ITEMS_NEW = [
+  {k:'fl', l:'地板清潔'},
+  {k:'dk', l:'書桌整潔'},
+  {k:'bd', l:'床鋪整齊'},
+  {k:'tr', l:'垃圾清理'},
+  {k:'cl', l:'衣物收納'},
+  {k:'bt', l:'浴廁衛生'},
+  {k:'cm', l:'公共區域'},
+];
+// scRoomState[rm][item] = 'ok'|'ng'|'other'
+// scRoomNote[rm][item] = '文字說明'
+// scRoomPhoto[rm] = [File,...]
+let scRoomState={}, scRoomNote={}, scRoomPhoto={}, scBld='F1';
+
 function initScForm(){
-  document.getElementById('sc-b').innerHTML=BLDS.map(b=>`<option value="${b}">${bldLbl(b)}</option>`).join('');
-  loadScRooms();
-  const ins=document.getElementById('sc-ins');if(!ins.value) ins.value=user?.display||'';
+  // 初始化日期選單（今天）
+  const today = new Date().toISOString().slice(0,10);
+  const sd = document.getElementById('sc-date');
+  if(sd && !sd.innerHTML){
+    const dates=[today];
+    for(let i=1;i<=6;i++){const d=new Date();d.setDate(d.getDate()-i);dates.push(d.toISOString().slice(0,10));}
+    sd.innerHTML=dates.map(d=>`<option value="${d}">${d}</option>`).join('');
+  }
+  const ins=document.getElementById('sc-ins');
+  if(ins&&!ins.value) ins.value=user?.display||'';
+  // 建立棟別 tabs
+  if(!document.getElementById('sc-blds').innerHTML){
+    buildBldTabs('sc-blds', scBld, switchScBld);
+    BLD_SWITCH_MAP['sc-blds']=b=>{scBld=b;renderScRooms();};
+  }
+  renderScRooms();
+  renderScHist();
 }
-function loadScRooms(){
-  const b=document.getElementById('sc-b').value;
-  const rooms=[...new Set(students.filter(s=>s.b===b&&s.st==='入住').map(s=>String(s.r)).filter(Boolean))].sort();
-  document.getElementById('sc-r').innerHTML=rooms.map(r=>`<option value="${r}">${r}</option>`).join('');
+
+function switchScBld(b){bldSwitch('sc-blds',b);}
+
+function renderScRooms(){
+  const bld=scBld;
+  const rooms=[...new Set(students.filter(s=>s.b===bld&&s.st==='入住').map(s=>String(s.r)).filter(Boolean))].sort();
+  const grid=document.getElementById('sc-rooms-grid');
+  if(!rooms.length){grid.innerHTML='<div class="empty"><div class="empty-ico">🏠</div><p>本棟暫無入住學生</p></div>';return;}
+
+  // 初始化未有狀態的房間
+  rooms.forEach(rm=>{
+    if(!scRoomState[rm]) scRoomState[rm]={};
+    if(!scRoomNote[rm])  scRoomNote[rm]={};
+    if(!scRoomPhoto[rm]) scRoomPhoto[rm]=[];
+    SC_ITEMS_NEW.forEach(it=>{
+      if(!scRoomState[rm][it.k]) scRoomState[rm][it.k]='ok'; // 預設合格
+    });
+  });
+
+  grid.innerHTML=rooms.map(rm=>renderScCard(rm,bld)).join('');
+
+  // 更新統計
+  updateScSummary(rooms);
 }
-async function submitScore(){
+
+function renderScCard(rm, bld){
+  const stus=students.filter(s=>s.b===bld&&String(s.r)===rm&&s.st==='入住');
+  const stuNames=stus.map(s=>s.name).join('、');
+  const ngItems=SC_ITEMS_NEW.filter(it=>scRoomState[rm]?.[it.k]==='ng');
+  const allOk=ngItems.length===0&&SC_ITEMS_NEW.every(it=>scRoomState[rm]?.[it.k]!=='other');
+  const hasIssue=ngItems.length>0||SC_ITEMS_NEW.some(it=>scRoomState[rm]?.[it.k]==='other');
+  const border=allOk?'#86efac':hasIssue?'#fca5a5':'#fcd34d';
+  const bg=allOk?'#f0fdf4':hasIssue?'#fff1f2':'#fffbeb';
+
+  const itemsHtml=SC_ITEMS_NEW.map(it=>{
+    const st=scRoomState[rm]?.[it.k]||'ok';
+    const note=scRoomNote[rm]?.[it.k]||'';
+    return `<div style="margin-bottom:6px">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <span style="font-size:12px;font-weight:700;width:72px;color:#1e293b">${it.l}</span>
+        <div style="display:flex;gap:4px">
+          <button onclick="setScItem('${rm}','${it.k}','ok')" style="padding:3px 10px;border-radius:99px;border:1.5px solid ${st==='ok'?'#16a34a':'#cbd5e1'};background:${st==='ok'?'#dcfce7':'#fff'};color:${st==='ok'?'#15803d':'#64748b'};font-size:11px;font-weight:700;cursor:pointer">✅ 合格</button>
+          <button onclick="setScItem('${rm}','${it.k}','ng')" style="padding:3px 10px;border-radius:99px;border:1.5px solid ${st==='ng'?'#dc2626':'#cbd5e1'};background:${st==='ng'?'#fee2e2':'#fff'};color:${st==='ng'?'#dc2626':'#64748b'};font-size:11px;font-weight:700;cursor:pointer">❌ 不合格</button>
+          <button onclick="setScItem('${rm}','${it.k}','other')" style="padding:3px 10px;border-radius:99px;border:1.5px solid ${st==='other'?'#d97706':'#cbd5e1'};background:${st==='other'?'#fef3c7':'#fff'};color:${st==='other'?'#92400e':'#64748b'};font-size:11px;font-weight:700;cursor:pointer">📝 其它</button>
+        </div>
+      </div>
+      ${st==='ng'||st==='other'?`<input style="width:100%;margin-top:4px;border:1px solid var(--bdr);border-radius:4px;padding:3px 8px;font-size:11px" placeholder="${st==='ng'?'不合格說明':'其它說明（必填）'}" value="${note.replace(/"/g,'&quot;')}" oninput="scRoomNote['${rm}']['${it.k}']=this.value">`:''}
+    </div>`;
+  }).join('');
+
+  const photoCount=(scRoomPhoto[rm]||[]).length;
+  return `<div id="sc-card-${rm}" style="border:2px solid ${border};background:${bg};border-radius:10px;padding:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div>
+        <div style="font-size:13px;font-weight:800;color:var(--pri-d)">🚪 ${rm} 號房</div>
+        <div style="font-size:11px;color:var(--slat-l);margin-top:1px">${stuNames||'（空房）'}</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        ${allOk?'<span style="font-size:11px;background:#dcfce7;color:#15803d;border-radius:99px;padding:2px 10px;font-weight:700">✅ 全合格</span>':''}
+        ${hasIssue?`<span style="font-size:11px;background:#fee2e2;color:#dc2626;border-radius:99px;padding:2px 10px;font-weight:700">⚠️ ${ngItems.length}項不合格</span>`:''}
+        <button onclick="saveScRoom('${rm}')" style="padding:4px 12px;background:var(--pri);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">💾 儲存</button>
+      </div>
+    </div>
+    <div style="margin-bottom:10px">${itemsHtml}</div>
+    <!-- 備註 -->
+    <div style="margin-bottom:8px">
+      <input id="sc-note-${rm}" style="width:100%;border:1px solid var(--bdr);border-radius:4px;padding:4px 8px;font-size:12px;box-sizing:border-box" placeholder="整體備註（選填）">
+    </div>
+    <!-- 照片上傳 -->
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <label style="display:flex;align-items:center;gap:4px;padding:5px 12px;background:#f1f5f9;border:1.5px dashed #94a3b8;border-radius:6px;cursor:pointer;font-size:12px;color:var(--slat)">
+        📷 上傳照片${photoCount?` (${photoCount}張)`:''}
+        <input type="file" accept="image/*" multiple style="display:none" onchange="addScPhoto('${rm}',this.files)">
+      </label>
+      <div id="sc-photos-${rm}" style="display:flex;gap:4px;flex-wrap:wrap"></div>
+    </div>
+  </div>`;
+}
+
+function setScItem(rm, key, val){
+  if(!scRoomState[rm]) scRoomState[rm]={};
+  scRoomState[rm][key]=val;
+  // 重新渲染此房間卡片
+  const card=document.getElementById('sc-card-'+rm);
+  if(card) card.outerHTML=renderScCard(rm, scBld);
+  updateScSummary([...new Set(students.filter(s=>s.b===scBld&&s.st==='入住').map(s=>String(s.r)).filter(Boolean))].sort());
+}
+
+function addScPhoto(rm, files){
+  if(!scRoomPhoto[rm]) scRoomPhoto[rm]=[];
+  Array.from(files).forEach(f=>{ if(f.size<5*1024*1024) scRoomPhoto[rm].push(f); else toast('照片超過5MB'); });
+  const div=document.getElementById('sc-photos-'+rm);
+  if(div) div.innerHTML=scRoomPhoto[rm].map((f,i)=>`
+    <div style="position:relative;display:inline-block">
+      <img src="${URL.createObjectURL(f)}" style="width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid var(--bdr)">
+      <button onclick="rmScPhoto('${rm}',${i})" style="position:absolute;top:-4px;right:-4px;background:#dc2626;color:#fff;border:none;border-radius:99px;width:16px;height:16px;font-size:10px;cursor:pointer;line-height:16px;text-align:center">✕</button>
+    </div>`).join('');
+}
+
+function rmScPhoto(rm, idx){
+  scRoomPhoto[rm].splice(idx,1);
+  const card=document.getElementById('sc-card-'+rm);
+  if(card) card.outerHTML=renderScCard(rm, scBld);
+}
+
+function updateScSummary(rooms){
+  let okN=0,ngN=0,otN=0;
+  rooms.forEach(rm=>{
+    const hasNg=SC_ITEMS_NEW.some(it=>scRoomState[rm]?.[it.k]==='ng');
+    const hasOt=SC_ITEMS_NEW.some(it=>scRoomState[rm]?.[it.k]==='other');
+    if(hasNg) ngN++; else if(hasOt) otN++; else okN++;
+  });
+  const el=document.getElementById('sc-summary');
+  if(el) el.innerHTML=`
+    <span style="background:#dcfce7;color:#15803d;padding:4px 12px;border-radius:99px;font-weight:700">✅ 全合格 ${okN} 間</span>
+    ${ngN?`<span style="background:#fee2e2;color:#dc2626;padding:4px 12px;border-radius:99px;font-weight:700">❌ 不合格 ${ngN} 間</span>`:''}
+    ${otN?`<span style="background:#fef3c7;color:#92400e;padding:4px 12px;border-radius:99px;font-weight:700">📝 其它 ${otN} 間</span>`:''}
+    <span style="color:var(--slat-l);font-size:11px">共 ${rooms.length} 間</span>`;
+}
+
+async function saveScRoom(rm){
   if(!hp('score')){toast('無評分權限');return;}
-  const body={action:'submit_score',b:document.getElementById('sc-b').value,r:document.getElementById('sc-r').value,ins:document.getElementById('sc-ins').value||user.display,note:document.getElementById('sc-note').value||'',...scVals};
-  try{const r=await gasPost(body);if(!r.ok){toast('❌ '+r.error);return;}toast(`✅ 已儲存：${r.tot}分（${r.gr}）`);const r2=await gasGet({action:'scores'});scores=r2.data||[];renderScHist();}catch(e){toast('❌ '+e.message);}
+  const bld=scBld;
+  const date=document.getElementById('sc-date')?.value||new Date().toISOString().slice(0,10);
+  const ins=document.getElementById('sc-ins')?.value||user?.display||'';
+  const note=document.getElementById('sc-note-'+rm)?.value||'';
+  // 組合不合格項目文字
+  const issues=SC_ITEMS_NEW.filter(it=>scRoomState[rm]?.[it.k]!=='ok').map(it=>{
+    const st=scRoomState[rm][it.k];
+    const n=scRoomNote[rm]?.[it.k]||'';
+    return it.l+'：'+(st==='ng'?'不合格':'其它')+(n?' ('+n+')':'');
+  }).join('；');
+  const ngCount=SC_ITEMS_NEW.filter(it=>scRoomState[rm]?.[it.k]==='ng').length;
+  const tot=Math.round(100 - ngCount*(100/SC_ITEMS_NEW.length));
+  const gr=tot>=90?'A':tot>=75?'B':tot>=60?'C':'D';
+  // 壓縮成舊格式（all ok=max, ng=0）發送給後端
+  const body={action:'submit_score',b:bld,r:rm,ins,note:(issues?issues+' ':'')+note,date,
+    fl: scRoomState[rm]?.fl==='ok'?20:0,
+    dk: scRoomState[rm]?.dk==='ok'?20:0,
+    bd: scRoomState[rm]?.bd==='ok'?20:0,
+    tr: scRoomState[rm]?.tr==='ok'?3:0,
+    cl: scRoomState[rm]?.cl==='ok'?10:0,
+    bt: scRoomState[rm]?.bt==='ok'?10:0,
+    cm: scRoomState[rm]?.cm==='ok'?3:0,
+    pn: 0
+  };
+  try{
+    const r=await gasPost(body);
+    if(!r.ok){toast('❌ '+r.error);return;}
+    toast(`✅ ${rm}號房已儲存`);
+    const r2=await gasGet({action:'scores'});scores=r2.data||[];renderScHist();
+  }catch(e){toast('❌ '+e.message);}
 }
+
+async function submitAllScores(){
+  const rooms=[...new Set(students.filter(s=>s.b===scBld&&s.st==='入住').map(s=>String(s.r)).filter(Boolean))].sort();
+  if(!rooms.length){toast('無房間資料');return;}
+  toast('⏳ 儲存中…');
+  for(const rm of rooms){ await saveScRoom(rm); }
+  toast(`✅ 已儲存 ${rooms.length} 間房`);
+}
+
+function initScSliders(){ /* 舊版相容，不再使用 */ }
+function updSc(){ /* 舊版相容 */ }
+function loadScRooms(){ /* 舊版相容 */ }
+async function submitScore(){ await saveScRoom(document.getElementById('sc-r')?.value||''); }
+
 function renderScHist(){
   const c=document.getElementById('sc-hist');
   if(!scores.length){c.innerHTML='<div class="empty"><div class="empty-ico">📊</div><p>尚無紀錄</p></div>';return;}
   const gi={A:'⭐',B:'✅',C:'📋',D:'⚠️'};
-  c.innerHTML=`<div style="display:flex;flex-direction:column;gap:8px">${scores.slice(0,20).map(s=>`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--sf2);border-radius:var(--rs);border:1px solid var(--bdr)">
-      <div><div style="font-size:13px;font-weight:700">${bldLbl(s.b)} · ${s.r}</div><div style="font-size:11px;color:var(--slat-l)">${s.date} · ${s.ins}</div></div>
-      <div style="text-align:right"><div style="font-size:20px;font-weight:800;font-family:var(--mo);color:var(--pri-d)">${s.tot}</div><div style="font-size:11px">${gi[s.gr]||''} ${s.gr}</div></div>
-    </div>`).join('')}</div>`;
+  const canEdit=hp('score')||hp('all');
+  c.innerHTML=`<div style="overflow-x:auto"><table class="rt">
+    <thead><tr><th>日期</th><th>棟別</th><th>房號</th><th>評核人</th><th>結果</th><th>備註</th>${canEdit?'<th>操作</th>':''}</tr></thead>
+    <tbody>${scores.slice(0,50).map(s=>`<tr>
+      <td style="font-size:12px">${String(s.date||'').slice(0,10)}</td>
+      <td>${bldLbl(s.b)}</td><td>${s.r}</td><td>${s.ins}</td>
+      <td><span style="font-weight:800;color:${s.gr==='A'?'#16a34a':s.gr==='B'?'#2563eb':s.gr==='C'?'#d97706':'#dc2626'}">${gi[s.gr]||''} ${s.gr}（${s.tot}分）</span></td>
+      <td style="font-size:12px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.note||'—'}</td>
+      ${canEdit?`<td><button class="btn br bsm" onclick="deleteScore('${s.id||s.date+'|'+s.b+'|'+s.r}')">🗑️</button></td>`:''}
+    </tr>`).join('')}
+    </tbody></table></div>`;
 }
+
+async function deleteScore(id){
+  if(!confirm('確定要刪除這筆評核紀錄？')) return;
+  try{
+    const r=await gasPost({action:'delete_score',id});
+    if(!r.ok){toast('❌ '+r.error);return;}
+    toast('✅ 已刪除');
+    const r2=await gasGet({action:'scores'});scores=r2.data||[];renderScHist();
+  }catch(e){toast('❌ '+e.message);}
+}
+
 function exportScorePDF(){
-  const rows=scores.map(s=>`<tr><td>${s.date}</td><td>${bldLbl(s.b)}</td><td>${s.r}</td><td>${s.ins}</td><td>${s.fl}</td><td>${s.dk}</td><td>${s.bd}</td><td>${s.tr}</td><td>${s.cl}</td><td>${s.bt}</td><td>${s.cm}</td><td>${s.pn}</td><td style="font-weight:700">${s.tot}</td><td>${s.gr}</td><td>${s.note||''}</td></tr>`).join('');
-  printHTML('內務評分紀錄',`<table border="1" cellpadding="7" style="border-collapse:collapse;width:100%;font-size:12px">
-    <tr style="background:#1e3a8a;color:#fff"><th>日期</th><th>棟</th><th>房</th><th>人員</th><th>地面</th><th>書桌</th><th>棉被</th><th>垃圾</th><th>衣物</th><th>浴廁</th><th>公共</th><th>扣分</th><th>總分</th><th>等級</th><th>備註</th></tr>${rows}</table>`);
+  const rows=scores.map(s=>`<tr><td>${String(s.date||'').slice(0,10)}</td><td>${bldLbl(s.b)}</td><td>${s.r}</td><td>${s.ins}</td><td style="font-weight:700">${s.tot}分（${s.gr}）</td><td>${s.note||''}</td></tr>`).join('');
+  printHTML('環境衛生評核紀錄',`<table border="1" cellpadding="7" style="border-collapse:collapse;width:100%;font-size:12px">
+    <tr style="background:#1e3a8a;color:#fff"><th>日期</th><th>棟別</th><th>房號</th><th>評核人</th><th>結果</th><th>備註/問題</th></tr>${rows}</table>`);
 }
 
 // ── 床位管理 ──────────────────────────────────────────
@@ -1600,6 +1949,8 @@ function renderViolations(){
       <div class="vio-act">
         ${canHandle?`<button class="btn bg bsm" onclick="openHandleModal('${v.id}')">✅ 處理</button>`:''}
         <button class="btn bpdf bsm" onclick="printVioPDF('${v.id}')">🖨️ 列印</button>
+        ${hp('all')||hp('roll')?`<button class="btn bgh bsm" onclick="openEditVio('${v.id}')">✏️ 修改</button>`:''}
+        ${hp('all')?`<button class="btn br bsm" onclick="deleteVio('${v.id}')">🗑️ 刪除</button>`:''}
       </div>
     </div>`;
   }).join('');
@@ -1626,6 +1977,10 @@ async function saveHandle(){
 
 async function refreshViolations(){
   try{const r=await gasGet({action:'violations'});violations=r.data||[];renderVioTabs();renderViolations();renderDash();}catch(e){}
+}
+async function deleteVio(id){
+  if(!confirm('確定要刪除這筆違規通報？')) return;
+  try{const r=await gasPost({action:'delete_violation',id});if(!r.ok){toast('❌ '+r.error);return;}toast('✅ 已刪除');await refreshViolations();}catch(e){toast('❌ '+e.message);}
 }
 
 function printVioPDF(id){
@@ -1789,10 +2144,11 @@ function openPrintModal(type){
         <div class="fr" style="grid-column:1/-1">
           <label class="flbl">列印內容</label>
           <select class="fi" id="pr-roll-mode">
-            <option value="absent">⚠️ 僅列印未到＋請假人員</option>
-            <option value="leave">🟡 僅列印請假人員</option>
-            <option value="ab_only">❌ 僅列印未到人員</option>
-            <option value="all">📋 全部人員（含在宿）</option>
+            <option value="absent">⚠️ 未到＋請假人員</option>
+            <option value="leave">🟡 僅請假人員</option>
+            <option value="ab_only">❌ 僅未到人員</option>
+            <option value="all">📋 本棟全部人員</option>
+            <option value="all_blds">🏠 全宿舍所有住宿人員</option>
           </select>
         </div>
         <div class="fr" style="grid-column:1/-1">
@@ -1898,33 +2254,65 @@ function doPrint(){
 function doPrintRoll(){
   const mode = document.getElementById('pr-roll-mode')?.value || 'absent';
   const note = document.getElementById('pr-roll-note')?.value || '';
+  const stLabel = {in:'✅ 在宿', lv:'🟡 請假', ab:'❌ 未到'};
+  const stColor = {in:'#16a34a', lv:'#d97706', ab:'#dc2626'};
+
+  const makeRows = (stuList) => stuList
+    .sort((a,b)=>String(a.b||'').localeCompare(String(b.b||''))||String(a.r||'').localeCompare(String(b.r||''))||String(a.bed||'').localeCompare(String(b.bed||'')))
+    .map(s=>{
+      const st = rollState[s.id]||'in';
+      const lvAuto = (() => { const a=Object.values(window._lastAutoLv||{}); return null; })();
+      const lvNote = rollState[s.id+'_note']||'';
+      return `<tr>
+        <td>${bldLbl(s.b)}</td><td>${s.r||''}</td><td>${s.bed||''}</td>
+        <td style="font-weight:700">${s.name}</td><td>${s.eng||''}</td><td>${s.cls||''}</td>
+        <td style="color:${stColor[st]||'#000'};font-weight:700">${stLabel[st]||st}</td>
+        <td>${lvNote}</td>
+        <td style="width:70px">&nbsp;</td></tr>`;
+    }).join('');
+
+  if(mode === 'all_blds'){
+    // 全宿舍所有入住學生，依棟別分組列印
+    const allStus = students.filter(s=>s.st==='入住');
+    if(!allStus.length){ toast('無住宿學生資料'); return; }
+    let sectionsHtml = '';
+    BLDS.forEach(bld=>{
+      const bstus = allStus.filter(s=>s.b===bld);
+      if(!bstus.length) return;
+      sectionsHtml += `
+        <h3 style="color:#1e3a8a;margin:18px 0 6px;border-bottom:2px solid #1e3a8a;padding-bottom:4px">${bldLbl(bld)}（${bstus.length} 人）</h3>
+        <table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;font-size:12px;margin-bottom:8px">
+          <tr style="background:#1e3a8a;color:#fff"><th>棟別</th><th>房號</th><th>床位</th><th>姓名</th><th>英文姓名</th><th>班級</th><th>狀態</th><th>備註</th><th>簽名</th></tr>
+          ${makeRows(bstus)}
+        </table>`;
+    });
+    printHTML(`全宿舍住宿名冊`,`
+      ${note?`<div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;padding:8px 14px;margin-bottom:16px">📝 ${note}</div>`:''}
+      <div style="display:flex;gap:16px;margin-bottom:14px;font-size:13px">
+        <span>總人數：<strong>${allStus.length} 人</strong></span>
+        <span>日期：<strong>${new Date().toLocaleDateString('zh-TW')}</strong></span>
+      </div>
+      ${sectionsHtml}`);
+    return;
+  }
+
   const bstus = students.filter(s=>s.b===rollBld&&s.st==='入住');
   let list = bstus;
   if(mode==='absent')   list = bstus.filter(s=>{ const st=rollState[s.id]||'in'; return st==='ab'||st==='lv'; });
   else if(mode==='leave')   list = bstus.filter(s=>(rollState[s.id]||'in')==='lv');
   else if(mode==='ab_only') list = bstus.filter(s=>(rollState[s.id]||'in')==='ab');
   if(!list.length){ toast('無符合條件的人員'); return; }
-  const stLabel = {in:'✅ 在宿', lv:'🟡 請假', ab:'❌ 未到'};
-  const stColor = {in:'#16a34a', lv:'#d97706', ab:'#dc2626'};
-  const rows = list.sort((a,b)=>String(a.r||'').localeCompare(String(b.r||''))||String(a.bed||'').localeCompare(String(b.bed||'')))
-    .map(s=>{
-      const st = rollState[s.id]||'in';
-      return `<tr><td>${s.r||''}</td><td>${s.bed||''}</td><td style="font-weight:700">${s.name}</td><td>${s.eng||''}</td><td>${s.cls||''}</td>
-        <td style="color:${stColor[st]||'#000'};font-weight:700">${stLabel[st]||st}</td>
-        <td>${rollState[s.id+'_note']||''}</td>
-        <td style="width:80px;border-bottom:1px solid #ccc">&nbsp;</td></tr>`;
-    }).join('');
-  const modeLabel = {absent:'未到＋請假人員', leave:'請假人員', ab_only:'未到人員', all:'全部人員'}[mode]||'';
+  const modeLabel = {absent:'未到＋請假人員', leave:'請假人員', ab_only:'未到人員', all:'全部人員', all_blds:'全宿舍'}[mode]||'';
   printHTML(`點名單 — ${bldLbl(rollBld)} · ${modeLabel}`,`
-    ${note?`<div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;padding:8px 14px;margin-bottom:16px;font-size:13px">📝 ${note}</div>`:''}
+    ${note?`<div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;padding:8px 14px;margin-bottom:16px">📝 ${note}</div>`:''}
     <div style="display:flex;gap:16px;margin-bottom:14px;font-size:13px">
       <span>棟別：<strong>${bldLbl(rollBld)}</strong></span>
       <span>人數：<strong>${list.length} 人</strong></span>
       <span>日期：<strong>${new Date().toLocaleDateString('zh-TW')}</strong></span>
     </div>
-    <table border="1" cellpadding="8" style="border-collapse:collapse;width:100%;font-size:13px">
-      <tr style="background:#1e3a8a;color:#fff"><th>房號</th><th>床位</th><th>姓名</th><th>英文姓名</th><th>班級</th><th>狀態</th><th>備註</th><th>簽名確認</th></tr>
-      ${rows}
+    <table border="1" cellpadding="7" style="border-collapse:collapse;width:100%;font-size:12px">
+      <tr style="background:#1e3a8a;color:#fff"><th>棟別</th><th>房號</th><th>床位</th><th>姓名</th><th>英文姓名</th><th>班級</th><th>狀態</th><th>備註</th><th>簽名確認</th></tr>
+      ${makeRows(list)}
     </table>`);
 }
 
@@ -2029,14 +2417,40 @@ function doPrintViolations(){
 
 // ── 工具 ─────────────────────────────────────────────
 function printHTML(title,body){
-  const w=window.open('','_blank','width=1050,height=750');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title>
-  <style>body{font-family:'微軟正黑體','Noto Sans TC',sans-serif;padding:24px;color:#1e293b}.np{margin-bottom:16px;display:flex;gap:8px}@media print{.np{display:none}}</style></head><body>
-  <div class="np"><button onclick="window.print()" style="padding:8px 18px;background:#1d4ed8;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px">🖨️ 列印 / 另存PDF</button><button onclick="window.close()" style="padding:8px 14px;background:#e2e8f0;border:none;border-radius:6px;cursor:pointer;font-size:13px">✕ 關閉</button></div>
-  <h2 style="color:#1e3a8a;margin-bottom:6px">樹人家商僑生宿舍 · ${title}</h2>
-  <p style="color:#64748b;font-size:12px;margin-bottom:18px">列印時間：${new Date().toLocaleString('zh-TW')}</p>
-  ${body}</body></html>`);
-  w.document.close();
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${title}</title>
+  <style>
+    body{font-family:'微軟正黑體','Noto Sans TC',sans-serif;padding:20px;color:#1e293b;font-size:13px}
+    table{border-collapse:collapse;width:100%}
+    th,td{border:1px solid #cbd5e1;padding:6px 9px;text-align:left}
+    th{background:#1e3a8a;color:#fff}
+    tr:nth-child(even){background:#f8fafc}
+    .np{margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap}
+    .pbtn{padding:10px 20px;background:#1d4ed8;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:700}
+    .cbtn{padding:10px 16px;background:#e2e8f0;border:none;border-radius:6px;cursor:pointer;font-size:14px}
+    @media print{.np{display:none}body{padding:8px}th{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+    @media(max-width:600px){table{font-size:11px}th,td{padding:4px 6px}}
+  </style></head><body>
+  <div class="np">
+    <button class="pbtn" onclick="window.print()">🖨️ 列印 / 另存PDF</button>
+    <button class="cbtn" onclick="window.close()">✕ 關閉</button>
+  </div>
+  <h2 style="color:#1e3a8a;margin:0 0 4px">樹人家商僑生宿舍 · ${title}</h2>
+  <p style="color:#64748b;font-size:11px;margin:0 0 16px">列印時間：${new Date().toLocaleString('zh-TW')}</p>
+  ${body}</body></html>`;
+  // 手機相容：用 Blob 建立可開啟的 URL
+  try{
+    const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.target='_blank'; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),5000);
+  }catch(e){
+    const w=window.open('','_blank');
+    if(w){w.document.write(html);w.document.close();}
+    else toast('請允許彈出視窗以檢視列印');
+  }
 }
 function printElem(id,title){printHTML(title,document.getElementById(id).innerHTML);}
 function closeModal(id){document.getElementById(id).classList.remove('on');}
