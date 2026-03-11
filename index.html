@@ -382,7 +382,7 @@ textarea.fi{resize:vertical;min-height:70px}
               <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
                 <select class="fi bsm" id="sc-date" style="width:130px"></select>
                 <input class="fi bsm" id="sc-ins" placeholder="評核人員" style="width:110px" value="">
-                <button class="btn bp bsm" onclick="submitAllScores()">💾 全部儲存</button>
+                <span id="sc-save-btn"></span>
                 <button class="btn bpdf bsm" onclick="openPrintModal('score')">🖨️ 列印</button>
               </div>
             </div>
@@ -875,7 +875,7 @@ async function startApp(){
   document.getElementById('u-rl').textContent=ROLE_LABELS[user.role]||user.role;
 
   if(!hp('roll'))        qs('[data-pg=roll]').style.display='none';
-  if(!hp('score'))       qs('[data-pg=score]').style.display='none';
+  if(!hp('score')&&!hp('view_score')) qs('[data-pg=score]').style.display='none';
   if(!hp('manage_beds')&&!hp('all')) qs('[data-pg=beds]').style.display='none';
   if(!hp('view_violations')&&!hp('report_violation')&&!hp('all')) qs('[data-pg=violations]').style.display='none';
   // 帳號管理：所有人都可看到（修改自己密碼），但新增/編輯只有 admin
@@ -1575,6 +1575,8 @@ function initScForm(){
   }
   const ins=document.getElementById('sc-ins');
   if(ins&&!ins.value) ins.value=user?.display||'';
+  const saveBtn=document.getElementById('sc-save-btn');
+  if(saveBtn) saveBtn.innerHTML=(hp('score')||hp('all'))?'<button class="btn bp bsm" onclick="submitAllScores()">💾 全部儲存</button>':'';
   // 建立棟別 tabs
   if(!document.getElementById('sc-blds').innerHTML){
     buildBldTabs('sc-blds', scBld, switchScBld);
@@ -1586,33 +1588,110 @@ function initScForm(){
 
 function switchScBld(b){bldSwitch('sc-blds',b);}
 
-function renderScRooms(){
-  const bld=scBld;
-  const rooms=[...new Set(students.filter(s=>s.b===bld&&s.st==='入住').map(s=>String(s.r)).filter(Boolean))].sort();
-  const grid=document.getElementById('sc-rooms-grid');
-  if(!rooms.length){grid.innerHTML='<div class="empty"><div class="empty-ico">🏠</div><p>本棟暫無入住學生</p></div>';return;}
+// 每樓層公共空間（男女棟相同）
+const PUBLIC_SPACE_DEFS = [
+  {k:'toilet',  l:'🚻 廁　所'},
+  {k:'shower',  l:'🚿 浴　室'},
+  {k:'common',  l:'🏠 公共空間'},
+  {k:'laundry', l:'👔 曬衣間'},
+];
+const MALE_BLDS = ['M1','M2','M3'];
 
-  // 初始化未有狀態的房間
-  rooms.forEach(rm=>{
-    if(!scRoomState[rm]) scRoomState[rm]={overall:'ok'};
-    if(!scRoomNote[rm])  scRoomNote[rm]={overall:''};
-    if(!scRoomPhoto[rm]) scRoomPhoto[rm]=[];
-  });
-
-  grid.innerHTML=rooms.map(rm=>renderScCard(rm,bld)).join('');
-
-  // 更新統計
-  updateScSummary(rooms);
+// 從房號取樓層前綴（取前兩碼數字，如 1201→"12"，906→"90" 不對 → 改取去掉末兩碼）
+function floorFromRoom(rm){
+  const s = String(rm).replace(/\D/g,'');  // 只留數字
+  return s.length > 2 ? s.slice(0, s.length-2) : s;
+}
+function floorsOfBld(bld){
+  const rms = students.filter(s=>s.b===bld&&s.st==='入住').map(s=>String(s.r)).filter(Boolean);
+  const floors = [...new Set(rms.map(floorFromRoom).filter(Boolean))];
+  floors.sort((a,b)=>Number(a)-Number(b));
+  return floors;
 }
 
-function renderScCard(rm, bld){
-  const stus = students.filter(s=>s.b===bld&&String(s.r)===rm&&s.st==='入住');
+function renderScRooms(){
+  const bld = scBld;
+  const isMale = MALE_BLDS.includes(bld);
+  const spaceDefs = PUBLIC_SPACE_DEFS;
+  const rooms = [...new Set(students.filter(s=>s.b===bld&&s.st==='入住').map(s=>String(s.r)).filter(Boolean))].sort();
+  const grid = document.getElementById('sc-rooms-grid');
+  if(!rooms.length){grid.innerHTML='<div class="empty"><div class="empty-ico">🏠</div><p>本棟暫無入住學生</p></div>';return;}
+
+  // 取昨日不合格房間
+  const yesterday = (()=>{ const d=new Date(); d.setDate(d.getDate()-1);
+    return d.toISOString().slice(0,10).replace(/-/g,'/'); })();
+  const prevNgRooms = new Set(
+    scores.filter(s=>s.b===bld && String(s.date||'').slice(0,10).replace(/-/g,'/')===yesterday && s.gr==='D')
+          .map(s=>String(s.r))
+  );
+  // 昨日公共空間不合格
+  const prevNgPub = new Set(
+    scores.filter(s=>s.b===bld && String(s.date||'').slice(0,10).replace(/-/g,'/')===yesterday && s.gr==='D' && String(s.r).startsWith('pub_'))
+          .map(s=>String(s.r))
+  );
+
+  // 依樓層分組
+  const floorMap = {};
+  rooms.forEach(rm=>{
+    const fl = floorFromRoom(rm) || '?';
+    if(!floorMap[fl]) floorMap[fl]=[];
+    floorMap[fl].push(rm);
+  });
+  const floors = Object.keys(floorMap).sort((a,b)=>Number(a)-Number(b));
+
+  // 初始化所有狀態
+  const allKeys = [...rooms];
+  floors.forEach(fl=>{
+    spaceDefs.forEach(sp=>{
+      allKeys.push('pub_'+fl+'_'+sp.k);
+    });
+  });
+  allKeys.forEach(k=>{
+    if(!scRoomState[k]) scRoomState[k]={overall:'ok'};
+    if(!scRoomNote[k])  scRoomNote[k]={overall:''};
+    if(!scRoomPhoto[k]) scRoomPhoto[k]=[];
+  });
+
+  // 建立每個樓層的 HTML
+  let html = '';
+  floors.forEach(fl=>{
+    const flRooms = floorMap[fl];
+    // 樓層標題
+    html += `<div style="grid-column:1/-1;margin-top:12px">
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--pri-d);color:#fff;border-radius:8px 8px 0 0">
+        <span style="font-size:14px;font-weight:800">🏢 ${fl} 樓</span>
+        <span style="font-size:11px;opacity:.8">${flRooms.length} 間房</span>
+      </div>
+    </div>`;
+
+    // 公共空間卡片
+    spaceDefs.forEach(sp=>{
+      const key = 'pub_'+fl+'_'+sp.k;
+      const label = fl+'樓 '+sp.l;
+      html += renderScCard(key, bld, label, prevNgPub.has(key));
+    });
+
+    // 房間卡片
+    flRooms.forEach(rm=>{
+      html += renderScCard(rm, bld, null, prevNgRooms.has(rm));
+    });
+  });
+
+  grid.innerHTML = html;
+  updateScSummary(allKeys);
+}
+
+function renderScCard(rm, bld, customLabel, isPrevNg){
+  // 判斷是否公共空間
+  const isPublic = rm.startsWith('public_');
+  const spInfo = isPublic ? PUBLIC_SPACES.find(s=>'public_'+s.k===rm) : null;
+  const cardLabel = customLabel || (isPublic ? spInfo?.l : `🚪 ${rm} 號房`);
+  const stus = isPublic ? [] : students.filter(s=>s.b===bld&&String(s.r)===rm&&s.st==='入住');
   const stuNames = stus.map(s=>s.name).join('、');
-  // 房間整體只有一個狀態：ok / ng / other
+
   const st = scRoomState[rm]?.overall || 'ok';
   const note = scRoomNote[rm]?.overall || '';
   const photoCount = (scRoomPhoto[rm]||[]).length;
-
   const isOk = st==='ok', isNg = st==='ng', isOt = st==='other';
   const border = isOk?'#86efac':isNg?'#fca5a5':'#fcd34d';
   const bg     = isOk?'#f0fdf4':isNg?'#fff1f2':'#fffbeb';
@@ -1622,18 +1701,31 @@ function renderScCard(rm, bld){
     ? '<span style="font-size:11px;background:#fee2e2;color:#dc2626;border-radius:99px;padding:2px 10px;font-weight:700">❌ 不合格</span>'
     : '<span style="font-size:11px;background:#fef3c7;color:#92400e;border-radius:99px;padding:2px 10px;font-weight:700">📝 其它</span>';
 
+  // 複查狀態（從 scRoomState[rm].recheck 取得）
+  const recheck = scRoomState[rm]?.recheck || '';
+  const recheckHtml = isPrevNg ? `
+    <div style="background:#fef3c7;border:1.5px solid #fcd34d;border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px">
+      <div style="font-weight:800;color:#92400e;margin-bottom:6px">⚠️ 昨日不合格 — 缺失複查</div>
+      <div style="display:flex;gap:6px">
+        <button onclick="setRecheck('${rm}','done')" style="flex:1;padding:5px;border-radius:6px;border:2px solid ${recheck==='done'?'#16a34a':'#cbd5e1'};background:${recheck==='done'?'#dcfce7':'#fff'};color:${recheck==='done'?'#15803d':'#64748b'};font-size:12px;font-weight:800;cursor:pointer">✅ 已改善</button>
+        <button onclick="setRecheck('${rm}','fail')" style="flex:1;padding:5px;border-radius:6px;border:2px solid ${recheck==='fail'?'#dc2626':'#cbd5e1'};background:${recheck==='fail'?'#fee2e2':'#fff'};color:${recheck==='fail'?'#dc2626':'#64748b'};font-size:12px;font-weight:800;cursor:pointer">❌ 未改善</button>
+      </div>
+      ${recheck?`<div style="margin-top:5px;font-size:11px;color:${recheck==='done'?'#15803d':'#dc2626'};font-weight:700">${recheck==='done'?'✅ 複查完成：已改善':'❌ 複查完成：未改善'}</div>`:'<div style="margin-top:4px;font-size:11px;color:#94a3b8">尚未複查</div>'}
+    </div>` : '';
+
   return `<div id="sc-card-${rm}" style="border:2px solid ${border};background:${bg};border-radius:10px;padding:14px">
     <!-- 標題列 -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <div>
-        <div style="font-size:14px;font-weight:800;color:var(--pri-d)">🚪 ${rm} 號房</div>
-        <div style="font-size:11px;color:var(--slat-l);margin-top:2px">${stuNames||'（空房）'}</div>
+        <div style="font-size:14px;font-weight:800;color:var(--pri-d)">${cardLabel}</div>
+        ${!isPublic?`<div style="font-size:11px;color:var(--slat-l);margin-top:2px">${stuNames||'（空房）'}</div>`:''}
       </div>
       <div style="display:flex;gap:6px;align-items:center">
         ${badge}
         <button onclick="saveScRoom('${rm}')" style="padding:5px 12px;background:var(--pri);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">💾</button>
       </div>
     </div>
+    ${recheckHtml}
     <!-- 三個按鈕 -->
     <div style="display:flex;gap:8px;margin-bottom:10px">
       <button onclick="setScItem('${rm}','ok')"
@@ -1690,10 +1782,26 @@ function setScItem(rm, val){
   if(!scRoomState[rm]) scRoomState[rm]={};
   scRoomState[rm].overall = val;
   if(val==='ok') { if(!scRoomNote[rm]) scRoomNote[rm]={}; scRoomNote[rm].overall=''; }
-  // 重新渲染此卡片
   const card = document.getElementById('sc-card-'+rm);
   if(card) card.outerHTML = renderScCard(rm, scBld);
   updateScSummary([...new Set(students.filter(s=>s.b===scBld&&s.st==='入住').map(s=>String(s.r)).filter(Boolean))].sort());
+}
+
+function setRecheck(rm, val){
+  if(!scRoomState[rm]) scRoomState[rm]={};
+  scRoomState[rm].recheck = val;
+  const yesterday = (()=>{ const d=new Date(); d.setDate(d.getDate()-1); return d.toISOString().slice(0,10).replace(/-/g,'/'); })();
+  const prevNgRooms = new Set(
+    scores.filter(s=>s.b===scBld && String(s.date||'').slice(0,10).replace(/-/g,'/')===yesterday && s.gr==='D')
+          .map(s=>String(s.r))
+  );
+  const prevNgPub = new Set(
+    scores.filter(s=>s.b===scBld && String(s.date||'').slice(0,10).replace(/-/g,'/')===yesterday && s.gr==='D' && String(s.r).startsWith('pub_'))
+          .map(s=>String(s.r))
+  );
+  const isPrevNg = rm.startsWith('pub_') ? prevNgPub.has(rm) : prevNgRooms.has(rm);
+  const card = document.getElementById('sc-card-'+rm);
+  if(card) card.outerHTML = renderScCard(rm, scBld, null, isPrevNg);
 }
 
 // scRoomPhotoUploaded[rm] = [{fileId, viewUrl, imgUrl, filename}, ...]
@@ -1714,30 +1822,47 @@ function addScPhoto(rm, files){
 
 async function uploadPhotoToDrive(rm, file){
   const date = document.getElementById('sc-date')?.value || new Date().toISOString().slice(0,10);
-  toast('📷 上傳中：'+file.name);
+  toast('📷 壓縮並上傳中…');
   try {
-    // 把 File 轉 base64
-    const b64 = await new Promise((res, rej) => {
-      const reader = new FileReader();
-      reader.onload = () => res(reader.result.split(',')[1]);
-      reader.onerror = () => rej(new Error('讀取失敗'));
-      reader.readAsDataURL(file);
-    });
+    // 壓縮圖片到最大 800px 寬，品質 0.7，避免超過 GAS 限制
+    const b64 = await compressImage(file, 800, 0.72);
+    const ext  = file.name.split('.').pop() || 'jpg';
+    const fname = `${scBld}_${rm}_${date}_${Date.now()}.${ext}`;
     const r = await gasPost({
       action: 'upload_photo',
       b: scBld, r: rm, date,
-      filename: file.name,
-      mimeType: file.type || 'image/jpeg',
+      filename: fname,
+      mimeType: 'image/jpeg',
       data: b64
     });
     if(!r.ok){ toast('❌ 上傳失敗：'+r.error); return; }
     if(!scRoomPhotoUploaded[rm]) scRoomPhotoUploaded[rm]=[];
     scRoomPhotoUploaded[rm].push(r);
     toast('✅ 照片已上傳 Drive');
-    // 更新卡片顯示 Drive 連結
     const card = document.getElementById('sc-card-'+rm);
     if(card) card.outerHTML = renderScCard(rm, scBld);
-  } catch(e){ toast('❌ '+e.message); }
+  } catch(e){ toast('❌ 上傳錯誤：'+e.message); }
+}
+
+// 壓縮圖片為 base64，maxW=最大寬度，quality=品質 0~1
+function compressImage(file, maxW, quality){
+  return new Promise((res, rej) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, maxW / img.width);
+      const w = Math.round(img.width  * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      // 取得 base64（去掉 data:image/jpeg;base64, 前綴）
+      res(canvas.toDataURL('image/jpeg', quality).split(',')[1]);
+    };
+    img.onerror = () => rej(new Error('圖片載入失敗'));
+    img.src = url;
+  });
 }
 
 function rmScPhoto(rm, idx){
@@ -1748,18 +1873,19 @@ function rmScPhoto(rm, idx){
   if(card) card.outerHTML=renderScCard(rm, scBld);
 }
 
-function updateScSummary(rooms){
-  let okN=0,ngN=0,otN=0;
-  rooms.forEach(rm=>{
-    const st = scRoomState[rm]?.overall||'ok';
+function updateScSummary(keys){
+  let okN=0,ngN=0,otN=0,rmN=0,pubN=0;
+  keys.forEach(k=>{
+    const st = scRoomState[k]?.overall||'ok';
+    if(String(k).startsWith('pub_')) pubN++; else rmN++;
     if(st==='ng') ngN++; else if(st==='other') otN++; else okN++;
   });
   const el=document.getElementById('sc-summary');
   if(el) el.innerHTML=`
-    <span style="background:#dcfce7;color:#15803d;padding:4px 12px;border-radius:99px;font-weight:700">✅ 全合格 ${okN} 間</span>
-    ${ngN?`<span style="background:#fee2e2;color:#dc2626;padding:4px 12px;border-radius:99px;font-weight:700">❌ 不合格 ${ngN} 間</span>`:''}
-    ${otN?`<span style="background:#fef3c7;color:#92400e;padding:4px 12px;border-radius:99px;font-weight:700">📝 其它 ${otN} 間</span>`:''}
-    <span style="color:var(--slat-l);font-size:11px">共 ${rooms.length} 間</span>`;
+    <span style="background:#dcfce7;color:#15803d;padding:4px 12px;border-radius:99px;font-weight:700">✅ 合格 ${okN}</span>
+    ${ngN?`<span style="background:#fee2e2;color:#dc2626;padding:4px 12px;border-radius:99px;font-weight:700">❌ 不合格 ${ngN}</span>`:''}
+    ${otN?`<span style="background:#fef3c7;color:#92400e;padding:4px 12px;border-radius:99px;font-weight:700">📝 其它 ${otN}</span>`:''}
+    <span style="color:var(--slat-l);font-size:11px">房間 ${rmN} 間・公共空間 ${pubN} 處</span>`;
 }
 
 async function saveScRoom(rm){
@@ -1768,6 +1894,8 @@ async function saveScRoom(rm){
   const date=document.getElementById('sc-date')?.value||new Date().toISOString().slice(0,10);
   const ins=document.getElementById('sc-ins')?.value||user?.display||'';
   const note=document.getElementById('sc-note-'+rm)?.value||'';
+  // pub_ 開頭的 key 轉為可讀房號存入 Sheets
+  const saveR = rm.startsWith('pub_') ? rm : rm;
   // 取得房間整體狀態
   const overall = scRoomState[rm]?.overall || 'ok';
   const desc    = scRoomNote[rm]?.overall || '';
@@ -1776,7 +1904,14 @@ async function saveScRoom(rm){
   const gr  = tot>=90?'A':tot>=75?'B':tot>=60?'C':'D';
   // 加入 Drive 照片連結到備註
   const photoLinks = (scRoomPhotoUploaded[rm]||[]).map(p=>p.viewUrl).join(' ');
-  const fullNote = (stLabel!=='合格'&&desc ? stLabel+'：'+desc+' ' : stLabel==='合格'?'' : stLabel+' ') + note + (photoLinks?' 📷:'+photoLinks:'');
+  const recheck = scRoomState[rm]?.recheck || '';
+  const recheckLabel = recheck==='done'?'複查✅已改善':recheck==='fail'?'複查❌未改善':'';
+  const fullNote = [
+    stLabel!=='合格'&&desc ? stLabel+'：'+desc : (stLabel!=='合格'?stLabel:''),
+    recheckLabel,
+    note,
+    photoLinks ? '📷:'+photoLinks : ''
+  ].filter(Boolean).join(' · ');
   const body={action:'submit_score',b:bld,r:rm,ins,note:fullNote,date,
     fl:overall==='ok'?20:0, dk:overall==='ok'?20:0, bd:overall==='ok'?20:0,
     tr:overall==='ok'?3:0,  cl:overall==='ok'?10:0, bt:overall==='ok'?10:0,
@@ -1791,11 +1926,18 @@ async function saveScRoom(rm){
 }
 
 async function submitAllScores(){
+  if(!hp('score')){toast('無評分權限');return;}
   const rooms=[...new Set(students.filter(s=>s.b===scBld&&s.st==='入住').map(s=>String(s.r)).filter(Boolean))].sort();
-  if(!rooms.length){toast('無房間資料');return;}
+  // 加入公共空間 key
+  const isMale = MALE_BLDS.includes(scBld);
+  const spaceDefs = PUBLIC_SPACE_DEFS;
+  const floors = [...new Set(rooms.map(floorFromRoom).filter(Boolean))];
+  const pubKeys = floors.flatMap(fl=>spaceDefs.map(sp=>'pub_'+fl+'_'+sp.k));
+  const allKeys = [...rooms, ...pubKeys];
+  if(!allKeys.length){toast('無房間資料');return;}
   toast('⏳ 儲存中…');
-  for(const rm of rooms){ await saveScRoom(rm); }
-  toast(`✅ 已儲存 ${rooms.length} 間房`);
+  for(const k of allKeys){ await saveScRoom(k); }
+  toast('✅ 已儲存 '+(rooms.length)+'間房・'+(pubKeys.length)+'個公共空間');
 }
 
 function initScSliders(){ /* 舊版相容，不再使用 */ }
