@@ -255,6 +255,7 @@ textarea.fi{resize:vertical;min-height:70px}
         <div class="ni"     data-pg="violations"  onclick="navTo('violations')"><span class="ico">🚨</span>違規通報<span class="nbadge" id="nb-vio">0</span></div>
         <div class="ni"     data-pg="accounts"    onclick="navTo('accounts')"> <span class="ico">👤</span>帳號管理</div>
         <div class="ni"     data-pg="sysconfig"   onclick="navTo('sysconfig')" id="nav-sysconfig"> <span class="ico">⚙️</span>系統設定</div>
+        <div class="ni"     data-pg="report"      onclick="navTo('report')"    id="nav-report">    <span class="ico">📢</span>報告訊息</div>
       </nav>
       <div class="sb-ft">
         <div class="sync-row"><span class="sdot" id="sdot"></span><span class="stxt" id="stxt">連線中…</span></div>
@@ -271,6 +272,18 @@ textarea.fi{resize:vertical;min-height:70px}
 
         <!-- 儀表板 -->
         <div class="pg on" id="pg-dash">
+          <!-- 公告欄 -->
+          <div id="announce-card" style="display:none;margin-bottom:14px">
+            <div style="background:linear-gradient(135deg,#1e3a8a,#2563eb);border-radius:12px;padding:14px 18px;color:#fff;position:relative">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <span style="font-size:16px">📢</span>
+                <span style="font-weight:800;font-size:14px">宿舍公告</span>
+                <span id="announce-date" style="font-size:11px;opacity:.7;margin-left:auto"></span>
+                <button id="announce-edit-btn" onclick="openAnnounceEdit()" style="display:none;background:rgba(255,255,255,.2);border:none;color:#fff;padding:3px 10px;border-radius:99px;font-size:11px;cursor:pointer">✏️ 編輯</button>
+              </div>
+              <div id="announce-content" style="font-size:13px;line-height:1.7;white-space:pre-wrap"></div>
+            </div>
+          </div>
           <div id="dash-sg" class="sg"></div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px">
             <div class="card"><div class="chd"><span class="ctitle">🏢 各棟入住率</span></div><div class="cbody"><div id="dash-pb" class="pb-wrap"></div></div></div>
@@ -286,6 +299,7 @@ textarea.fi{resize:vertical;min-height:70px}
               <span class="ctitle">📋 點名作業</span>
               <div style="display:flex;gap:6px;flex-wrap:wrap">
                 <button class="btn bpdf bsm" onclick="openPrintModal('roll')">🖨️ 列印</button>
+                <button class="btn bg   bsm" onclick="openRptModal('roll')">📋 產生報告</button>
                 <button class="btn bp   bsm" onclick="submitRoll()">💾 儲存</button>
               </div>
             </div>
@@ -364,6 +378,7 @@ textarea.fi{resize:vertical;min-height:70px}
               <span class="ctitle">📄 假單列表</span>
               <div style="display:flex;gap:6px;flex-wrap:wrap">
                 <button class="btn btd  bsm" onclick="showTodayModal()">📅 今日名單</button>
+                <button class="btn bg   bsm" onclick="openRptModal('leave')">📋 產生報告</button>
                 <button class="btn bpdf bsm" onclick="openPrintModal('leaves')">🖨️ 列印篩選</button>
               </div>
             </div>
@@ -384,6 +399,7 @@ textarea.fi{resize:vertical;min-height:70px}
                 <select class="fi bsm" id="sc-date" style="width:130px"></select>
                 <input class="fi bsm" id="sc-ins" placeholder="評核人員" style="width:110px" value="">
                 <span id="sc-save-btn"></span>
+                <button class="btn bg   bsm" onclick="openRptModal('score')">📋 產生報告</button>
                 <button class="btn bpdf bsm" onclick="openPrintModal('score')">🖨️ 列印</button>
               </div>
             </div>
@@ -473,6 +489,7 @@ textarea.fi{resize:vertical;min-height:70px}
             <div class="chd">
               <span class="ctitle">📋 違規紀錄</span>
               <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="btn bg   bsm" onclick="openRptModal('vio')">📋 產生報告</button>
                 <button class="btn bpdf bsm" onclick="openPrintModal('violations')">🖨️ 列印篩選</button>
               </div>
             </div>
@@ -561,6 +578,65 @@ textarea.fi{resize:vertical;min-height:70px}
               <div style="margin-top:14px"><button class="btn bp" onclick="saveClsTeacher()">💾 儲存對應設定</button></div>
             </div>
           </div>
+
+        <!-- 報告訊息 -->
+        <div class="pg" id="pg-report">
+          <div class="card" style="margin-bottom:14px">
+            <div class="chd">
+              <span class="ctitle">📢 一鍵報告訊息</span>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <label style="font-size:13px;font-weight:700">日期</label>
+                <input type="date" id="rpt-date" class="fi" style="width:150px" onchange="generateReports()">
+                <button class="btn bp bsm" onclick="generateReports()">🔄 重新產生</button>
+              </div>
+            </div>
+          </div>
+          <!-- 點名報告 -->
+          <div class="card" style="margin-bottom:14px" id="rpt-roll-card">
+            <div class="chd">
+              <span class="ctitle">📋 點名狀況報告</span>
+              <button class="btn bg bsm" onclick="copyReport('rpt-roll-txt')">📋 複製</button>
+            </div>
+            <div class="cbody">
+              <pre id="rpt-roll-txt" style="font-family:inherit;font-size:13px;line-height:1.8;white-space:pre-wrap;background:var(--pri-l);border-radius:8px;padding:14px;margin:0;color:var(--slat-d)">產生中…</pre>
+            </div>
+          </div>
+          <!-- 評核報告 -->
+          <div class="card" style="margin-bottom:14px" id="rpt-score-card">
+            <div class="chd">
+              <span class="ctitle">🏆 環境評核報告</span>
+              <button class="btn bg bsm" onclick="copyReport('rpt-score-txt')">📋 複製</button>
+            </div>
+            <div class="cbody">
+              <pre id="rpt-score-txt" style="font-family:inherit;font-size:13px;line-height:1.8;white-space:pre-wrap;background:var(--pri-l);border-radius:8px;padding:14px;margin:0;color:var(--slat-d)">產生中…</pre>
+            </div>
+          </div>
+          <!-- 請假報告 -->
+          <div class="card" style="margin-bottom:14px" id="rpt-leave-card">
+            <div class="chd">
+              <span class="ctitle">📝 請假人員報告</span>
+              <button class="btn bg bsm" onclick="copyReport('rpt-leave-txt')">📋 複製</button>
+            </div>
+            <div class="cbody">
+              <pre id="rpt-leave-txt" style="font-family:inherit;font-size:13px;line-height:1.8;white-space:pre-wrap;background:var(--pri-l);border-radius:8px;padding:14px;margin:0;color:var(--slat-d)">產生中…</pre>
+            </div>
+          </div>
+          <!-- 違規報告 -->
+          <div class="card" style="margin-bottom:14px" id="rpt-vio-card">
+            <div class="chd">
+              <span class="ctitle">🚨 違規通報報告</span>
+              <button class="btn bg bsm" onclick="copyReport('rpt-vio-txt')">📋 複製</button>
+            </div>
+            <div class="cbody">
+              <pre id="rpt-vio-txt" style="font-family:inherit;font-size:13px;line-height:1.8;white-space:pre-wrap;background:var(--pri-l);border-radius:8px;padding:14px;margin:0;color:var(--slat-d)">產生中…</pre>
+            </div>
+          </div>
+          <!-- 全部複製 -->
+          <div style="text-align:center;margin-top:4px">
+            <button class="btn bp" onclick="copyAllReports()" style="padding:10px 32px;font-size:14px">📋 複製全部報告</button>
+          </div>
+        </div>
+
         </div>
 
       </div>
@@ -923,6 +999,46 @@ textarea.fi{resize:vertical;min-height:70px}
   </div>
 </div>
 
+
+<!-- Modal: 公告編輯 -->
+<div class="modal-ov" id="m-announce">
+  <div class="modal" style="max-width:500px">
+    <div class="mhd"><span class="mtit">📢 編輯公告訊息</span><button class="mcl" onclick="closeModal('m-announce')">✕</button></div>
+    <div class="mbody">
+      <div style="font-size:12px;color:var(--slat-l);margin-bottom:8px">公告內容將顯示在所有人登入後的儀表板最上方</div>
+      <textarea id="announce-input" style="width:100%;height:160px;border:1.5px solid var(--bdr);border-radius:8px;padding:10px;font-size:13px;line-height:1.7;resize:vertical;box-sizing:border-box;font-family:inherit" placeholder="輸入公告內容，留空則不顯示公告…"></textarea>
+    </div>
+    <div class="mft">
+      <button class="btn bp" onclick="saveAnnounce()">💾 儲存公告</button>
+      <button class="btn br" onclick="clearAnnounce()">🗑️ 清除公告</button>
+      <button class="btn bgh" onclick="closeModal('m-announce')">取消</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal: 產生報告 -->
+<div class="modal-ov" id="m-report">
+  <div class="modal" style="max-width:600px">
+    <div class="mhd">
+      <span class="mtit" id="m-rpt-title">📋 產生報告</span>
+      <button class="mcl" onclick="closeModal('m-report')">✕</button>
+    </div>
+    <div class="mbody">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+        <label style="font-size:13px;font-weight:700">日期</label>
+        <input type="date" id="m-rpt-date" class="fi" style="width:150px">
+        <button class="btn bp bsm" onclick="refreshRptModal()">🔄 重新產生</button>
+      </div>
+      <pre id="m-rpt-content" style="font-family:inherit;font-size:13px;line-height:1.8;white-space:pre-wrap;background:var(--pri-l);border-radius:8px;padding:14px;margin:0;color:var(--slat-d);max-height:55vh;overflow-y:auto">產生中…</pre>
+    </div>
+    <div class="mft">
+      <button class="btn bg" onclick="copyRptModal()">📋 複製報告</button>
+      <button class="btn bgh" onclick="closeModal('m-report')">關閉</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -974,7 +1090,7 @@ const ROLE_PERMS  = {
   recruit:  ['leave_approve_3','view_students','view_leaves','view_dash'],
 };
 
-const PG_TITLES = {dash:'儀表板',roll:'點名作業',students:'僑生管理',leaves:'請假管理',score:'內務評分',beds:'床位管理',violations:'違規通報',accounts:'帳號管理',sysconfig:'系統設定'};
+const PG_TITLES = {dash:'儀表板',roll:'點名作業',students:'僑生管理',leaves:'請假管理',score:'內務評分',beds:'床位管理',violations:'違規通報',accounts:'帳號管理',sysconfig:'系統設定',report:'報告訊息'};
 
 const ST_BADGE = {'待學務處核章':'bpend','待實習處核章':'bpend','待招生中心核章':'bout','請假中':'bact','已返舍':'bret','已駁回':'brej'};
 
@@ -1034,6 +1150,8 @@ async function startApp(){
   if(!hp('score')&&!hp('view_score')) qs('[data-pg=score]').style.display='none';
   if(!hp('manage_beds')&&!hp('all')) qs('[data-pg=beds]').style.display='none';
   if(!hp('view_violations')&&!hp('report_violation')&&!hp('all')) qs('[data-pg=violations]').style.display='none';
+  // 公告
+  loadAnnounce();
   // 系統設定只有 admin
   const nsc = document.getElementById('nav-sysconfig');
   if(nsc) nsc.style.display = hp('all') ? '' : 'none';
@@ -2165,6 +2283,525 @@ async function submitScore(){ await saveScRoom(document.getElementById('sc-r')?.
 const PUB_KEY_LABELS = {
   toilet:'🚻 廁所', shower:'🚿 浴室', common:'🏠 公共空間', laundry:'👔 曬衣間'
 };
+
+// ════════════════════════════════════════════════════════
+// 📢 報告訊息
+// ════════════════════════════════════════════════════════
+
+// 日期工具
+function dateLabel(d){ // d = '2026/03/12' or '2026-03-12'
+  const s = String(d||'').replace(/-/g,'/').slice(0,10);
+  if(!s) return '';
+  const [y,m,dd] = s.split('/');
+  return m+'月'+parseInt(dd)+'日';
+}
+function fmtRptDate(d){
+  return String(d||'').replace(/-/g,'/').slice(0,10);
+}
+
+function initReport(){
+  const el = document.getElementById('rpt-date');
+  if(el && !el.value) el.value = new Date().toISOString().slice(0,10);
+  generateReports();
+}
+
+function generateReports(){
+  const d = document.getElementById('rpt-date')?.value || new Date().toISOString().slice(0,10);
+  genRollReport(d);
+  genScoreReport(d);
+  genLeaveReport(d);
+  genVioReport(d);
+}
+
+// ── 點名報告 ──────────────────────────────────────────
+function genRollReport(date){
+  const el = document.getElementById('rpt-roll-txt');
+  if(!el) return;
+  const dateStr = fmtRptDate(date);
+  const dayRoll = rollToday.filter(r => fmtRptDate(r.date) === dateStr);
+
+  if(!dayRoll.length){
+    el.textContent = dateLabel(date) + ' 點名狀況\n\n（本日無點名紀錄）';
+    return;
+  }
+
+  // 依棟分組
+  const bldOrder = ['F1','F2','F3','M1','M2','M3'];
+  const bldMap = {};
+  dayRoll.forEach(r=>{
+    const b = r.bld||'';
+    if(!bldMap[b]) bldMap[b]=[];
+    bldMap[b].push(r);
+  });
+
+  let lines = [`${dateLabel(date)} 點名狀況`, ''];
+  bldOrder.filter(b=>bldMap[b]).forEach(b=>{
+    const rows = bldMap[b];
+    lines.push(`【${bldLbl(b)}】`);
+    // 缺席/異常
+    const absent = rows.filter(r=>r.status&&r.status!=='在宿'&&r.status!=='請假');
+    const onLeave = rows.filter(r=>r.status==='請假');
+    const present = rows.filter(r=>r.status==='在宿');
+    if(absent.length){
+      lines.push('⚠️ 未到／異常：');
+      absent.forEach(r=>{
+        const stu = students.find(s=>String(s.id)===String(r.stu_id))||{};
+        const note = r.note ? `（${r.note}）` : '';
+        lines.push(`  ${r.room||stu.r||''} ${stu.cls||''} ${r.name||stu.name||''} ${r.status}${note}`);
+      });
+    }
+    if(onLeave.length){
+      lines.push('📝 請假中：');
+      onLeave.forEach(r=>{
+        const stu = students.find(s=>String(s.id)===String(r.stu_id))||{};
+        lines.push(`  ${r.room||stu.r||''} ${stu.cls||''} ${r.name||stu.name||''}`);
+      });
+    }
+    lines.push(`✅ 在宿：${present.length} 人`);
+    lines.push('');
+  });
+
+  el.textContent = lines.join('\n');
+}
+
+// ── 評核報告 ──────────────────────────────────────────
+function genScoreReport(date){
+  const el = document.getElementById('rpt-score-txt');
+  if(!el) return;
+  const dateStr = fmtRptDate(date);
+  const dayScores = scores.filter(s=> fmtRptDate(s.date) === dateStr);
+
+  if(!dayScores.length){
+    el.textContent = dateLabel(date) + ' 環境衛生評核狀況\n\n（本日無評核紀錄）';
+    return;
+  }
+
+  const bldOrder = ['F1','F2','F3','M1','M2','M3'];
+  // 依棟分組
+  const bldMap = {};
+  dayScores.forEach(s=>{
+    const b = s.b||'';
+    if(!bldMap[b]) bldMap[b]=[];
+    bldMap[b].push(s);
+  });
+
+  let lines = [`${dateLabel(date)} 環境衛生評核狀況`, ''];
+  bldOrder.filter(b=>bldMap[b]).forEach(b=>{
+    const rows = bldMap[b];
+    lines.push(`【${bldLbl(b)}】`);
+
+    // 不合格（D）
+    const ng = rows.filter(r=>r.gr==='D');
+    if(ng.length){
+      lines.push('❌ 不合格：');
+      ng.forEach(r=>{
+        const rmLabel = pubKeyLabel(r.r);
+        const stus = students.filter(s=>s.b===b&&String(s.r)===String(r.r)&&s.st==='入住');
+        const stuStr = stus.length ? '（'+stus.map(s=>s.cls+' '+s.name).join('、')+'）' : '';
+        // 找照片連結
+        const photoMatch = String(r.note||'').match(/https:\/\/drive\.google\.com\/\S+/g);
+        const photoStr = photoMatch ? ' '+photoMatch.map((u,i)=>'📷'+(i+1)+' '+u).join(' ') : '';
+        const desc = String(r.note||'').replace(/📷:?\s*https:\/\/\S+/g,'').replace(/https:\/\/\S+/g,'').trim();
+        lines.push(`  ${rmLabel}：${desc||'不合格'}${stuStr}${photoStr}`);
+      });
+    }
+
+    // 其它（C/other）
+    const other = rows.filter(r=>r.gr==='C');
+    if(other.length){
+      lines.push('📝 其它：');
+      other.forEach(r=>{
+        const rmLabel = pubKeyLabel(r.r);
+        const desc = String(r.note||'').replace(/📷:?\s*https:\/\/\S+/g,'').replace(/https:\/\/\S+/g,'').trim();
+        lines.push(`  ${rmLabel}：${desc||'其它情況'}`);
+      });
+    }
+
+    // 合格
+    const ok = rows.filter(r=>r.gr==='A'||r.gr==='B');
+    if(ok.length){
+      lines.push('✅ 合格：'+ok.map(r=>pubKeyLabel(r.r)).join('、'));
+    }
+    lines.push('');
+  });
+
+  el.textContent = lines.join('\n');
+}
+
+// ── 請假報告 ──────────────────────────────────────────
+function genLeaveReport(date){
+  const el = document.getElementById('rpt-leave-txt');
+  if(!el) return;
+  const dateStr = fmtRptDate(date);
+
+  // 找當天有效假單（start <= date <= end）
+  const activeLeaves = leaves.filter(lv=>{
+    if(lv.status==='rejected'||lv.status==='returned') return false;
+    const sd = fmtRptDate(lv.start);
+    const ed = fmtRptDate(lv.end||lv.start);
+    return sd <= dateStr && dateStr <= ed;
+  });
+
+  if(!activeLeaves.length){
+    el.textContent = dateLabel(date) + ' 請假人員\n\n（本日無請假紀錄）';
+    return;
+  }
+
+  const LV_TYPE = {lateout:'晚歸',offcampus:'外宿',hometown:'返鄉',sick:'病假',work:'工讀/打工',other:'其它'};
+  const bldOrder = ['F1','F2','F3','M1','M2','M3'];
+
+  // 依棟+房號分組
+  let lines = [`${dateLabel(date)} 請假人員`, ''];
+  bldOrder.forEach(b=>{
+    const bldLvs = activeLeaves.filter(lv=>{
+      const ids = String(lv.stu_ids||lv.stu_id||'').split(',');
+      return ids.some(id=>{
+        const stu = students.find(s=>String(s.id)===String(id).trim());
+        return stu && stu.b === b;
+      });
+    });
+    if(!bldLvs.length) return;
+    lines.push(`【${bldLbl(b)}】`);
+
+    // 依房號分組
+    const rmMap = {};
+    bldLvs.forEach(lv=>{
+      const ids = String(lv.stu_ids||lv.stu_id||'').split(',');
+      ids.forEach(id=>{
+        const stu = students.find(s=>String(s.id)===String(id).trim());
+        if(!stu||stu.b!==b) return;
+        const rm = String(stu.r||'？');
+        if(!rmMap[rm]) rmMap[rm]=[];
+        rmMap[rm].push({stu, lv});
+      });
+    });
+
+    Object.keys(rmMap).sort().forEach(rm=>{
+      lines.push(`  ${rm}號房：`);
+      rmMap[rm].forEach(({stu,lv})=>{
+        const typeLbl = LV_TYPE[lv.type]||lv.type||'假';
+        lines.push(`    ${stu.cls||''} ${stu.name}  【${typeLbl}】`);
+      });
+    });
+    lines.push('');
+  });
+
+  el.textContent = lines.join('\n');
+}
+
+// ── 違規報告 ──────────────────────────────────────────
+function genVioReport(date){
+  const el = document.getElementById('rpt-vio-txt');
+  if(!el) return;
+  const dateStr = fmtRptDate(date);
+  const dayVios = violations.filter(v=> fmtRptDate(v.date||v.created_at) === dateStr);
+
+  if(!dayVios.length){
+    el.textContent = dateLabel(date) + ' 違規通報\n\n（本日無違規紀錄）';
+    return;
+  }
+
+  const VIO_LVL = {minor:'輕微',normal:'一般',serious:'嚴重'};
+  let lines = [`${dateLabel(date)} 違規通報`, ''];
+  dayVios.forEach((v,i)=>{
+    lines.push(`${i+1}. ${v.name||''} ${v.cls?'('+v.cls+')':''}  ${v.category||''}  【${VIO_LVL[v.level]||v.level||'一般'}】`);
+    if(v.desc) lines.push(`   說明：${v.desc}`);
+    lines.push(`   狀態：${v.status==='resolved'?'✅ 已處理':'⏳ 待處理'}`);
+  });
+
+  el.textContent = lines.join('\n');
+}
+
+// ── 複製功能 ──────────────────────────────────────────
+function copyReport(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  navigator.clipboard.writeText(el.textContent).then(()=>toast('✅ 已複製到剪貼簿')).catch(()=>{
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = el.textContent;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('✅ 已複製');
+  });
+}
+
+function copyAllReports(){
+  const ids = ['rpt-roll-txt','rpt-score-txt','rpt-leave-txt','rpt-vio-txt'];
+  const all = ids.map(id=>document.getElementById(id)?.textContent||'').filter(t=>t&&!t.includes('產生中')).join('\n\n' + '─'.repeat(30) + '\n\n');
+  navigator.clipboard.writeText(all).then(()=>toast('✅ 全部報告已複製')).catch(()=>toast('❌ 複製失敗'));
+}
+
+// ════════════════════════════════════════════════════════
+// 📢 公告管理
+// ════════════════════════════════════════════════════════
+async function loadAnnounce(){
+  try{
+    const r = await gasGet({action:'get_settings'});
+    const data = r.data||{};
+    const txt  = data.announce_text||'';
+    const at   = data.announce_at||'';
+    const card = document.getElementById('announce-card');
+    const editBtn = document.getElementById('announce-edit-btn');
+    if(editBtn) editBtn.style.display = hp('all') ? '' : 'none';
+    if(txt){
+      document.getElementById('announce-content').textContent = txt;
+      document.getElementById('announce-date').textContent = at ? '更新：'+at.slice(0,10) : '';
+      if(card) card.style.display = '';
+    } else {
+      if(card) card.style.display = hp('all') ? '' : 'none';
+      if(hp('all')){
+        document.getElementById('announce-content').textContent = '（尚無公告，點右上角編輯按鈕新增）';
+        document.getElementById('announce-date').textContent = '';
+        if(card) card.style.display = '';
+      }
+    }
+  }catch(e){}
+}
+
+function openAnnounceEdit(){
+  const cur = document.getElementById('announce-content')?.textContent||'';
+  const inp = document.getElementById('announce-input');
+  if(inp) inp.value = cur==='（尚無公告，點右上角編輯按鈕新增）' ? '' : cur;
+  document.getElementById('m-announce').classList.add('on');
+}
+
+async function saveAnnounce(){
+  const txt = document.getElementById('announce-input')?.value?.trim()||'';
+  const now = new Date().toISOString().slice(0,10).replace(/-/g,'/');
+  const r = await gasPost({action:'save_settings', announce_text: txt, announce_at: now});
+  if(!r.ok){toast('❌ '+r.error);return;}
+  toast('✅ 公告已儲存');
+  closeModal('m-announce');
+  loadAnnounce();
+}
+
+async function clearAnnounce(){
+  if(!confirm('確定要清除公告？')) return;
+  const r = await gasPost({action:'save_settings', announce_text:'', announce_at:''});
+  if(!r.ok){toast('❌ '+r.error);return;}
+  toast('✅ 公告已清除');
+  closeModal('m-announce');
+  document.getElementById('announce-card').style.display = hp('all') ? '' : 'none';
+  document.getElementById('announce-content').textContent = '（尚無公告，點右上角編輯按鈕新增）';
+}
+
+
+// ── 報告 Modal（各頁面共用）─────────────────────────
+let _rptType = 'roll';
+
+const RPT_TITLES = {
+  roll:  '📋 點名狀況報告',
+  leave: '📝 請假人員報告',
+  score: '🏆 環境評核報告',
+  vio:   '🚨 違規通報報告',
+};
+
+function openRptModal(type){
+  _rptType = type;
+  document.getElementById('m-rpt-title').textContent = RPT_TITLES[type]||'📋 報告';
+  const d = new Date().toISOString().slice(0,10);
+  const el = document.getElementById('m-rpt-date');
+  if(el && !el.value) el.value = d;
+  document.getElementById('m-report').classList.add('on');
+  refreshRptModal();
+}
+
+function refreshRptModal(){
+  const date = document.getElementById('m-rpt-date')?.value || new Date().toISOString().slice(0,10);
+  const el   = document.getElementById('m-rpt-content');
+  if(!el) return;
+  let txt = '';
+  if(_rptType==='roll')  txt = buildRollReport(date);
+  if(_rptType==='leave') txt = buildLeaveReport(date);
+  if(_rptType==='score') txt = buildScoreReport(date);
+  if(_rptType==='vio')   txt = buildVioReport(date);
+  el.textContent = txt;
+}
+
+function copyRptModal(){
+  const el = document.getElementById('m-rpt-content');
+  if(!el) return;
+  const txt = el.textContent;
+  navigator.clipboard.writeText(txt)
+    .then(()=>toast('✅ 已複製到剪貼簿'))
+    .catch(()=>{
+      const ta=document.createElement('textarea');
+      ta.value=txt; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy');
+      document.body.removeChild(ta);
+      toast('✅ 已複製');
+    });
+}
+
+// ── 報告產生器 ───────────────────────────────────────
+function fmtD(d){ return String(d||'').replace(/-/g,'/').slice(0,10); }
+function dateHdr(d){
+  const s = fmtD(d); if(!s) return '';
+  const [,m,dd] = s.split('/');
+  return parseInt(m)+'月'+parseInt(dd)+'日';
+}
+
+function buildRollReport(date){
+  const ds = fmtD(date);
+  const BLDS = ['F1','F2','F3','M1','M2','M3'];
+  // 用 rollToday（當日點名資料）
+  const dayRoll = (rollToday||[]).filter(r=>fmtD(r.date)===ds);
+
+  if(!dayRoll.length) return dateHdr(date)+' 點名狀況
+
+（本日無點名紀錄）';
+
+  const bldMap = {};
+  dayRoll.forEach(r=>{ const b=r.bld||''; if(!bldMap[b]) bldMap[b]=[]; bldMap[b].push(r); });
+
+  let lines = [dateHdr(date)+' 點名狀況', ''];
+  BLDS.filter(b=>bldMap[b]).forEach(b=>{
+    const rows = bldMap[b];
+    lines.push('【'+bldLbl(b)+'】');
+    const absent  = rows.filter(r=>r.status&&r.status!=='在宿'&&r.status!=='請假');
+    const onLeave = rows.filter(r=>r.status==='請假');
+    const present = rows.filter(r=>r.status==='在宿');
+    if(absent.length){
+      lines.push('⚠️ 未到／異常：');
+      absent.forEach(r=>{
+        const stu = students.find(s=>String(s.id)===String(r.stu_id))||{};
+        const note = r.note ? '（'+r.note+'）' : '';
+        lines.push('  '+[r.room||stu.r||'', stu.cls||'', r.name||stu.name||'', r.status+note].filter(Boolean).join(' '));
+      });
+    }
+    if(onLeave.length){
+      lines.push('📝 請假中：');
+      onLeave.forEach(r=>{
+        const stu = students.find(s=>String(s.id)===String(r.stu_id))||{};
+        lines.push('  '+(r.room||stu.r||'')+'號房 '+(stu.cls||'')+' '+(r.name||stu.name||''));
+      });
+    }
+    lines.push('✅ 在宿：'+present.length+' 人  共計：'+rows.length+' 人');
+    lines.push('');
+  });
+  return lines.join('
+');
+}
+
+function buildLeaveReport(date){
+  const ds = fmtD(date);
+  const LV_TYPE = {lateout:'晚歸',offcampus:'外宿',hometown:'返鄉',sick:'病假',work:'工讀/打工',other:'其它'};
+  const BLDS = ['F1','F2','F3','M1','M2','M3'];
+
+  // 當天有效假單
+  const active = (leaves||[]).filter(lv=>{
+    if(lv.status==='rejected'||lv.status==='returned') return false;
+    return fmtD(lv.start) <= ds && ds <= fmtD(lv.end||lv.start);
+  });
+
+  if(!active.length) return dateHdr(date)+' 請假人員
+
+（本日無請假紀錄）';
+
+  let lines = [dateHdr(date)+' 請假人員', ''];
+  BLDS.forEach(b=>{
+    const rmMap = {};
+    active.forEach(lv=>{
+      const ids = String(lv.stu_ids||lv.stu_id||'').split(',');
+      ids.forEach(id=>{
+        const stu = students.find(s=>String(s.id)===id.trim());
+        if(!stu||stu.b!==b) return;
+        const rm = String(stu.r||'?');
+        if(!rmMap[rm]) rmMap[rm]=[];
+        rmMap[rm].push({stu,lv});
+      });
+    });
+    if(!Object.keys(rmMap).length) return;
+    lines.push('【'+bldLbl(b)+'】');
+    Object.keys(rmMap).sort().forEach(rm=>{
+      lines.push('  '+rm+'號房：');
+      rmMap[rm].forEach(({stu,lv})=>{
+        lines.push('    '+(stu.cls||'')+' '+stu.name+'  【'+(LV_TYPE[lv.type]||lv.type||'假')+'】');
+      });
+    });
+    lines.push('');
+  });
+  return lines.join('
+');
+}
+
+function buildScoreReport(date){
+  const ds = fmtD(date);
+  const BLDS = ['F1','F2','F3','M1','M2','M3'];
+  const dayScores = (scores||[]).filter(s=>fmtD(s.date)===ds);
+
+  if(!dayScores.length) return dateHdr(date)+' 環境衛生評核狀況
+
+（本日無評核紀錄）';
+
+  const bldMap = {};
+  dayScores.forEach(s=>{ const b=s.b||''; if(!bldMap[b]) bldMap[b]=[]; bldMap[b].push(s); });
+
+  let lines = [dateHdr(date)+' 環境衛生評核狀況', ''];
+  BLDS.filter(b=>bldMap[b]).forEach(b=>{
+    const rows = bldMap[b];
+    lines.push('【'+bldLbl(b)+'】');
+
+    const ng = rows.filter(r=>r.gr==='D');
+    if(ng.length){
+      lines.push('❌ 不合格：');
+      ng.forEach(r=>{
+        const rmLbl = pubKeyLabel(r.r);
+        const stus  = !String(r.r).startsWith('pub_')
+          ? students.filter(s=>s.b===b&&String(s.r)===String(r.r)&&s.st==='入住')
+          : [];
+        const stuStr = stus.length ? '（'+stus.map(s=>(s.cls||'')+' '+s.name).join('、')+'）' : '';
+        const photos = (String(r.note||'').match(/https:\/\/drive\.google\.com\/[^\s]+/g)||[]);
+        const desc   = String(r.note||'').replace(/📷.*$/g,'').replace(/https:\/\/\S+/g,'').replace(/·\s*$/,'').trim();
+        const photoStr = photos.map((u,i)=>'
+      📷照片'+(i+1)+'：'+u).join('');
+        lines.push('  '+rmLbl+'：'+(desc||'不合格')+stuStr+photoStr);
+      });
+    }
+
+    const other = rows.filter(r=>r.gr==='C');
+    if(other.length){
+      lines.push('📝 其它情況：');
+      other.forEach(r=>{
+        const rmLbl = pubKeyLabel(r.r);
+        const desc  = String(r.note||'').replace(/📷.*$/g,'').replace(/https:\/\/\S+/g,'').trim();
+        lines.push('  '+rmLbl+'：'+(desc||'其它'));
+      });
+    }
+
+    const ok = rows.filter(r=>r.gr==='A'||r.gr==='B');
+    if(ok.length){
+      lines.push('✅ 合格：'+ok.map(r=>pubKeyLabel(r.r)).join('、'));
+    }
+    lines.push('');
+  });
+  return lines.join('
+');
+}
+
+function buildVioReport(date){
+  const ds = fmtD(date);
+  const VIO_LVL = {minor:'輕微',normal:'一般',serious:'嚴重'};
+  const dayVios = (violations||[]).filter(v=>fmtD(v.date||v.created_at)===ds);
+
+  if(!dayVios.length) return dateHdr(date)+' 違規通報
+
+（本日無違規紀錄）';
+
+  let lines = [dateHdr(date)+' 違規通報（共'+dayVios.length+'件）', ''];
+  dayVios.forEach((v,i)=>{
+    lines.push((i+1)+'. '+(v.name||'')+' '+(v.cls?'('+v.cls+')':'')+'  '+(v.category||'')+'  【'+(VIO_LVL[v.level]||v.level||'一般')+'】');
+    if(v.desc) lines.push('   說明：'+v.desc);
+    lines.push('   狀態：'+(v.status==='resolved'?'✅ 已處理':'⏳ 待處理'));
+    lines.push('');
+  });
+  return lines.join('
+');
+}
+
 
 function formatScNote(note){
   if(!note) return '—';
