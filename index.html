@@ -1169,11 +1169,10 @@ async function startApp(){
 
 async function loadAll(){
   try{
-    const today = new Date().toISOString().slice(0,10);
     const [sR,lR,scR,vR,bR,rR]=await Promise.all([
       gasGet({action:'students'}), gasGet({action:'leaves'}),
       gasGet({action:'scores'}),   gasGet({action:'violations'}),
-      gasGet({action:'beds'}),     gasGet({action:'roll_all', date:today}),
+      gasGet({action:'beds'}),     gasGet({action:'roll_all'}),
     ]);
     students  =(sR.data||[]).map(s=>({...s,id:String(s.id).split('.')[0]}));
     leaves    = lR.data||[];
@@ -1181,14 +1180,16 @@ async function loadAll(){
     violations= vR.data||[];
     bedData   = bR.data||{};
     rollAll   = rR.data||[];
-    // 從已儲存的點名紀錄還原 rollState
-    applyRollData(rollAll);
+    // 用今天的點名紀錄還原 rollState
+    const today = new Date().toISOString().slice(0,10).replace(/-/g,'/');
+    applyRollData(rollAll.filter(r=>r.date===today));
     setSyncOK(true);
   }catch(e){setSyncOK(false);toast('⚠️ 載入失敗：'+e.message);}
 }
 
 async function refreshAll(){
   toast('🔄 同步中…');
+  rollState = {};   // 清空舊狀態，讓 applyRollData 完整還原
   await loadAll();
   renderDash(); renderRoll(); renderStudents();
   renderLvTabs(); renderLeaves(); renderScHist();
@@ -2330,15 +2331,8 @@ function initReport(){
   generateReports();
 }
 
-async function generateReports(){
+function generateReports(){
   const d = document.getElementById('rpt-date')?.value || new Date().toISOString().slice(0,10);
-  // 先載入點名資料
-  const rollEl = document.getElementById('rpt-roll-txt');
-  if(rollEl) rollEl.textContent = '⏳ 載入中…';
-  try{
-    const r = await gasGet({action:'roll_all', date: d});
-    rollAll = r.data||[];
-  }catch(e){ rollAll=[]; }
   genRollReport(d);
   genScoreReport(d);
   genLeaveReport(d);
@@ -2640,19 +2634,12 @@ function openRptModal(type){
   refreshRptModal();
 }
 
-async function refreshRptModal(){
+function refreshRptModal(){
   const date = document.getElementById('m-rpt-date')?.value || new Date().toISOString().slice(0,10);
   const el   = document.getElementById('m-rpt-content');
   if(!el) return;
-  el.textContent = '⏳ 資料載入中…';
   let txt = '';
-  if(_rptType==='roll'){
-    try{
-      const r = await gasGet({action:'roll_all', date});
-      rollAll = r.data||[];
-    }catch(e){ rollAll=[]; }
-    txt = buildRollReport(date);
-  }
+  if(_rptType==='roll')  txt = buildRollReport(date);
   if(_rptType==='leave') txt = buildLeaveReport(date);
   if(_rptType==='score') txt = buildScoreReport(date);
   if(_rptType==='vio')   txt = buildVioReport(date);
@@ -2684,8 +2671,11 @@ function dateHdr(d){
 
 function buildRollReport(date){
   const BLDS = ['F1','F2','F3','M1','M2','M3'];
-  // rollAll 由 refreshRptModal async 載入，直接使用
-  const dayRoll = rollAll||[];
+  const ds = fmtD(date);
+  // 從全量 rollAll 篩當天，每個學生取最後一筆
+  const dayMap = {};
+  (rollAll||[]).filter(r=>fmtD(r.date)===ds).forEach(r=>{ dayMap[String(r.stu_id)]=r; });
+  const dayRoll = Object.values(dayMap);
 
   if(!dayRoll.length) return dateHdr(date)+' 點名狀況\n\n（本日無點名紀錄）';
 
