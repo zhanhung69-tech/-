@@ -494,7 +494,7 @@ textarea.fi{resize:vertical;min-height:70px}
                 <div class="fr"><label class="flbl">角　色</label>
                   <select class="fi" id="acc-role">
                     <option value="admin">系統管理員</option>
-                    <option value="warden">生輔組舍監</option>
+                    <option value="warden">舍監</option>
                     <option value="teacher" selected>導師</option>
                     <option value="academic">學務處</option>
                     <option value="intern">實習處</option>
@@ -904,7 +904,7 @@ textarea.fi{resize:vertical;min-height:70px}
         <div class="fr"><label class="flbl">角　色</label>
           <select class="fi" id="eacc-role">
             <option value="admin">系統管理員</option>
-            <option value="warden">生輔組舍監</option>
+            <option value="warden">舍監</option>
             <option value="teacher">導師</option>
             <option value="academic">學務處</option>
             <option value="intern">實習處</option>
@@ -964,7 +964,7 @@ const LEAVE_FLOW = {
   '其它':{'stages':['學務處','實習處','招生中心'],'label':'3關：學務處 → 實習處 → 招生中心'},
 };
 
-const ROLE_LABELS = {admin:'系統管理員',warden:'生輔組舍監',teacher:'導師',academic:'學務處',intern:'實習處',recruit:'招生中心'};
+const ROLE_LABELS = {admin:'系統管理員',warden:'舍監',teacher:'導師',academic:'學務處',intern:'實習處',recruit:'招生中心'};
 const ROLE_PERMS  = {
   admin:    ['all'],
   warden:   ['roll','score','view_students','view_leaves','view_dash','manage_beds','report_violation','view_violations'],
@@ -2539,7 +2539,7 @@ function printVioPDF(id){
     </table>
     <div style="margin-top:30px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
       <div style="text-align:center;border-top:1.5px solid #cbd5e1;padding-top:8px;font-size:12px">通報人簽章</div>
-      <div style="text-align:center;border-top:1.5px solid #cbd5e1;padding-top:8px;font-size:12px">生輔組舍監</div>
+      <div style="text-align:center;border-top:1.5px solid #cbd5e1;padding-top:8px;font-size:12px">舍監</div>
       <div style="text-align:center;border-top:1.5px solid #cbd5e1;padding-top:8px;font-size:12px">學務主任</div>
     </div>`);
 }
@@ -2805,7 +2805,7 @@ async function saveClsTeacher() {
 // ── end sysconfig ────────────────────────────────────
 
 // ── 帳號管理 ─────────────────────────────────────────
-const ROLE_OPT = {admin:'系統管理員',warden:'生輔組舍監',teacher:'導師',academic:'學務處',intern:'實習處',recruit:'招生中心'};
+const ROLE_OPT = {admin:'系統管理員',warden:'舍監',teacher:'導師',academic:'學務處',intern:'實習處',recruit:'招生中心'};
 
 async function loadAccounts(){
   const c=document.getElementById('acc-list');
@@ -3257,3 +3257,4 @@ function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e
 </script>
 </body>
 </html>
+
