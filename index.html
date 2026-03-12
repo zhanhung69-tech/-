@@ -2304,8 +2304,15 @@ function initReport(){
   generateReports();
 }
 
-function generateReports(){
+async function generateReports(){
   const d = document.getElementById('rpt-date')?.value || new Date().toISOString().slice(0,10);
+  // 先載入點名資料
+  const rollEl = document.getElementById('rpt-roll-txt');
+  if(rollEl) rollEl.textContent = '⏳ 載入中…';
+  try{
+    const r = await gasGet({action:'roll_all', date: d});
+    rollAll = r.data||[];
+  }catch(e){ rollAll=[]; }
   genRollReport(d);
   genScoreReport(d);
   genLeaveReport(d);
@@ -2316,8 +2323,8 @@ function generateReports(){
 function genRollReport(date){
   const el = document.getElementById('rpt-roll-txt');
   if(!el) return;
-  const dateStr = fmtRptDate(date);
-  const dayRoll = (rollAll||[]).filter(r => fmtRptDate(r.date||date) === dateStr);
+  // rollAll 已由 generateReports async 載入（對應 date），直接使用全部
+  const dayRoll = rollAll||[];
 
   if(!dayRoll.length){el.textContent = dateLabel(date) + ' 點名狀況\n\n（本日無點名紀錄）';return;}
 
@@ -2343,14 +2350,16 @@ function genRollReport(date){
       absent.forEach(r=>{
         const stu = students.find(s=>String(s.id)===String(r.stu_id))||{};
         const note = r.note ? `（${r.note}）` : '';
-        lines.push(`  ${r.room||stu.r||''} ${stu.cls||''} ${r.name||stu.name||''} ${r.status}${note}`);
+        const rmNo = r.room||stu.r||'';
+        lines.push('  '+(rmNo?rmNo+'號房 ':'')+( stu.cls||'')+' '+(r.name||stu.name||'')+' '+r.status+note);
       });
     }
     if(onLeave.length){
       lines.push('📝 請假中：');
       onLeave.forEach(r=>{
         const stu = students.find(s=>String(s.id)===String(r.stu_id))||{};
-        lines.push(`  ${r.room||stu.r||''} ${stu.cls||''} ${r.name||stu.name||''}`);
+        const lvRm = r.room||stu.r||'';
+        lines.push('  '+(lvRm?lvRm+'號房 ':'')+( stu.cls||'')+' '+(r.name||stu.name||''));
       });
     }
     lines.push(`✅ 在宿：${present.length} 人`);
@@ -2648,9 +2657,9 @@ function dateHdr(d){
 }
 
 function buildRollReport(date){
-  const ds = fmtD(date);
   const BLDS = ['F1','F2','F3','M1','M2','M3'];
-  const dayRoll = (rollAll||[]).filter(r=>fmtD(r.date||date)===ds||!r.date);
+  // rollAll 由 refreshRptModal async 載入，直接使用
+  const dayRoll = rollAll||[];
 
   if(!dayRoll.length) return dateHdr(date)+' 點名狀況\n\n（本日無點名紀錄）';
 
