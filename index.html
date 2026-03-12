@@ -2320,10 +2320,7 @@ function genRollReport(date){
   const dateStr = fmtRptDate(date);
   const dayRoll = rollToday.filter(r => fmtRptDate(r.date) === dateStr);
 
-  if(!dayRoll.length){
-    el.textContent = dateLabel(date) + ' 點名狀況\n\n（本日無點名紀錄）';
-    return;
-  }
+  if(!dayRoll.length){el.textContent = dateLabel(date) + ' 點名狀況\n\n（本日無點名紀錄）';return;}
 
   // 依棟分組
   const bldOrder = ['F1','F2','F3','M1','M2','M3'];
@@ -2650,9 +2647,7 @@ function buildRollReport(date){
   // 用 rollToday（當日點名資料）
   const dayRoll = (rollToday||[]).filter(r=>fmtD(r.date)===ds);
 
-  if(!dayRoll.length) return dateHdr(date)+' 點名狀況
-
-（本日無點名紀錄）';
+  if(!dayRoll.length) return dateHdr(date)+' 點名狀況\n\n（本日無點名紀錄）';
 
   const bldMap = {};
   dayRoll.forEach(r=>{ const b=r.bld||''; if(!bldMap[b]) bldMap[b]=[]; bldMap[b].push(r); });
@@ -2682,8 +2677,7 @@ function buildRollReport(date){
     lines.push('✅ 在宿：'+present.length+' 人  共計：'+rows.length+' 人');
     lines.push('');
   });
-  return lines.join('
-');
+  return lines.join('\n');
 }
 
 function buildLeaveReport(date){
@@ -2697,9 +2691,7 @@ function buildLeaveReport(date){
     return fmtD(lv.start) <= ds && ds <= fmtD(lv.end||lv.start);
   });
 
-  if(!active.length) return dateHdr(date)+' 請假人員
-
-（本日無請假紀錄）';
+  if(!active.length) return dateHdr(date)+' 請假人員\n\n（本日無請假紀錄）';
 
   let lines = [dateHdr(date)+' 請假人員', ''];
   BLDS.forEach(b=>{
@@ -2724,8 +2716,7 @@ function buildLeaveReport(date){
     });
     lines.push('');
   });
-  return lines.join('
-');
+  return lines.join('\n');
 }
 
 function buildScoreReport(date){
@@ -2733,9 +2724,7 @@ function buildScoreReport(date){
   const BLDS = ['F1','F2','F3','M1','M2','M3'];
   const dayScores = (scores||[]).filter(s=>fmtD(s.date)===ds);
 
-  if(!dayScores.length) return dateHdr(date)+' 環境衛生評核狀況
-
-（本日無評核紀錄）';
+  if(!dayScores.length) return dateHdr(date)+' 環境衛生評核狀況\n\n（本日無評核紀錄）';
 
   const bldMap = {};
   dayScores.forEach(s=>{ const b=s.b||''; if(!bldMap[b]) bldMap[b]=[]; bldMap[b].push(s); });
@@ -2756,8 +2745,7 @@ function buildScoreReport(date){
         const stuStr = stus.length ? '（'+stus.map(s=>(s.cls||'')+' '+s.name).join('、')+'）' : '';
         const photos = (String(r.note||'').match(/https:\/\/drive\.google\.com\/[^\s]+/g)||[]);
         const desc   = String(r.note||'').replace(/📷.*$/g,'').replace(/https:\/\/\S+/g,'').replace(/·\s*$/,'').trim();
-        const photoStr = photos.map((u,i)=>'
-      📷照片'+(i+1)+'：'+u).join('');
+        const photoStr = photos.map((u,i)=>'\n    📷照片'+(i+1)+'：'+u).join('');
         lines.push('  '+rmLbl+'：'+(desc||'不合格')+stuStr+photoStr);
       });
     }
@@ -2778,8 +2766,7 @@ function buildScoreReport(date){
     }
     lines.push('');
   });
-  return lines.join('
-');
+  return lines.join('\n');
 }
 
 function buildVioReport(date){
@@ -2787,9 +2774,7 @@ function buildVioReport(date){
   const VIO_LVL = {minor:'輕微',normal:'一般',serious:'嚴重'};
   const dayVios = (violations||[]).filter(v=>fmtD(v.date||v.created_at)===ds);
 
-  if(!dayVios.length) return dateHdr(date)+' 違規通報
-
-（本日無違規紀錄）';
+  if(!dayVios.length) return dateHdr(date)+' 違規通報\n\n（本日無違規紀錄）';
 
   let lines = [dateHdr(date)+' 違規通報（共'+dayVios.length+'件）', ''];
   dayVios.forEach((v,i)=>{
@@ -2798,8 +2783,7 @@ function buildVioReport(date){
     lines.push('   狀態：'+(v.status==='resolved'?'✅ 已處理':'⏳ 待處理'));
     lines.push('');
   });
-  return lines.join('
-');
+  return lines.join('\n');
 }
 
 
