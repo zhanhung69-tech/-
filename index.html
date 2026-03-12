@@ -1099,7 +1099,7 @@ const LV_FILTERS = [['all','全部'],['待學務處核章','待學務處'],['待
 const VIO_FILTERS = [['all','全部'],['待處理','待處理'],['已處理','已處理'],['記過','記過'],['警告','警告'],['申誡','申誡'],['移送學務處','移送']];
 
 let token='', user=null;
-let students=[], leaves=[], scores=[], violations=[], bedData={};
+let students=[], leaves=[], scores=[], violations=[], bedData={}, rollAll=[];
 let rollBld='F1', stuBld='ALL', bedBld='F1', lvFilter='all', vioFilter='all';
 let rollState={}, mvStuId=null, handleVioId=null, editBed=null;
 
@@ -1980,9 +1980,8 @@ function renderScRooms(){
 
 function renderScCard(rm, bld, customLabel, isPrevNg){
   // 判斷是否公共空間
-  const isPublic = rm.startsWith('public_');
-  const spInfo = isPublic ? PUBLIC_SPACES.find(s=>'public_'+s.k===rm) : null;
-  const cardLabel = customLabel || (isPublic ? spInfo?.l : `🚪 ${rm} 號房`);
+  const isPublic = rm.startsWith('pub_');
+  const cardLabel = customLabel || (isPublic ? pubKeyLabel(rm) : `🚪 ${rm} 號房`);
   const stus = isPublic ? [] : students.filter(s=>s.b===bld&&String(s.r)===rm&&s.st==='入住');
   const stuNames = stus.map(s=>s.name).join('、');
 
@@ -2318,7 +2317,7 @@ function genRollReport(date){
   const el = document.getElementById('rpt-roll-txt');
   if(!el) return;
   const dateStr = fmtRptDate(date);
-  const dayRoll = rollToday.filter(r => fmtRptDate(r.date) === dateStr);
+  const dayRoll = (rollAll||[]).filter(r => fmtRptDate(r.date||date) === dateStr);
 
   if(!dayRoll.length){el.textContent = dateLabel(date) + ' 點名狀況\n\n（本日無點名紀錄）';return;}
 
@@ -2606,12 +2605,19 @@ function openRptModal(type){
   refreshRptModal();
 }
 
-function refreshRptModal(){
+async function refreshRptModal(){
   const date = document.getElementById('m-rpt-date')?.value || new Date().toISOString().slice(0,10);
   const el   = document.getElementById('m-rpt-content');
   if(!el) return;
+  el.textContent = '⏳ 資料載入中…';
   let txt = '';
-  if(_rptType==='roll')  txt = buildRollReport(date);
+  if(_rptType==='roll'){
+    try{
+      const r = await gasGet({action:'roll_all', date});
+      rollAll = r.data||[];
+    }catch(e){ rollAll=[]; }
+    txt = buildRollReport(date);
+  }
   if(_rptType==='leave') txt = buildLeaveReport(date);
   if(_rptType==='score') txt = buildScoreReport(date);
   if(_rptType==='vio')   txt = buildVioReport(date);
@@ -2644,8 +2650,7 @@ function dateHdr(d){
 function buildRollReport(date){
   const ds = fmtD(date);
   const BLDS = ['F1','F2','F3','M1','M2','M3'];
-  // 用 rollToday（當日點名資料）
-  const dayRoll = (rollToday||[]).filter(r=>fmtD(r.date)===ds);
+  const dayRoll = (rollAll||[]).filter(r=>fmtD(r.date||date)===ds||!r.date);
 
   if(!dayRoll.length) return dateHdr(date)+' 點名狀況\n\n（本日無點名紀錄）';
 
