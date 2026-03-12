@@ -1169,16 +1169,20 @@ async function startApp(){
 
 async function loadAll(){
   try{
-    const [sR,lR,scR,vR,bR]=await Promise.all([
+    const today = new Date().toISOString().slice(0,10);
+    const [sR,lR,scR,vR,bR,rR]=await Promise.all([
       gasGet({action:'students'}), gasGet({action:'leaves'}),
       gasGet({action:'scores'}),   gasGet({action:'violations'}),
-      gasGet({action:'beds'}),
+      gasGet({action:'beds'}),     gasGet({action:'roll_all', date:today}),
     ]);
     students  =(sR.data||[]).map(s=>({...s,id:String(s.id).split('.')[0]}));
     leaves    = lR.data||[];
     scores    = scR.data||[];
     violations= vR.data||[];
     bedData   = bR.data||{};
+    rollAll   = rR.data||[];
+    // 從已儲存的點名紀錄還原 rollState
+    applyRollData(rollAll);
     setSyncOK(true);
   }catch(e){setSyncOK(false);toast('⚠️ 載入失敗：'+e.message);}
 }
@@ -1199,7 +1203,11 @@ function navTo(pg){
   qs(`[data-pg="${pg}"]`)?.classList.add('on');
   document.getElementById('tbtit').textContent=PG_TITLES[pg]||pg;
   closeSB();
-  if(pg==='roll')       renderRoll();
+  if(pg==='roll'){
+    // 確保 rollState 反映最新已儲存資料
+    if(rollAll.length) applyRollData(rollAll);
+    renderRoll();
+  }
   if(pg==='students')   renderStudents();
   if(pg==='leaves')     {renderLvTabs();renderLeaves();}
   if(pg==='score')      {renderScHist();initScForm();}
@@ -1271,6 +1279,24 @@ function switchStuBld(b){bldSwitch('stu-blds',b);}
 function switchBedBld(b){bldSwitch('bed-blds',b);}
 
 // ── 點名 ─────────────────────────────────────────────
+// 將下載的點名紀錄還原到 rollState（不覆蓋本次已手動操作的狀態）
+function applyRollData(rows){
+  // status 對應：在宿→in、請假→lv、未回/外出/異常→ab
+  const ST_MAP = {'在宿':'in','請假':'lv','lv':'lv','in':'in','ab':'ab',
+                  '未回':'ab','外出':'ab','異常':'ab'};
+  rows.forEach(r=>{
+    const sid = String(r.stu_id||'').split('.')[0];
+    if(!sid) return;
+    const st = ST_MAP[r.status] || 'ab';
+    rollState[sid] = st;
+    if(r.note) rollState[sid+'_note'] = r.note;
+    // 保留棟/房資訊供報告使用
+    rollState[sid+'_bld']  = r.bld||'';
+    rollState[sid+'_room'] = r.room||'';
+    rollState[sid+'_name'] = r.name||'';
+  });
+}
+
 function renderRoll(){
   if(!hp('roll')){document.getElementById('roll-content').innerHTML='<div class="empty"><div class="empty-ico">🔒</div><p>無點名權限</p></div>';return;}
   const bstus=students.filter(s=>s.b===rollBld&&s.st==='入住');
