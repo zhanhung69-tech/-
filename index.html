@@ -1158,8 +1158,13 @@ async function startApp(){
   // 帳號管理：所有人都可看到（修改自己密碼），但新增/編輯只有 admin
   if(!hp('all')) { document.getElementById('acc-create-card').style.display='none'; }
 
-  await loadAll();
-  buildBldTabs('roll-blds',rollBld,switchRollBld);
+await loadAll();
+// 登入後立即同步今日點名狀態
+if(rollAll.length) {
+  applyRollData(rollAll);
+  console.log('[啟動] 已載入今日點名', rollAll.length, '筆');
+}
+buildBldTabs('roll-blds',rollBld,switchRollBld);
   buildBldTabs('stu-blds',stuBld,switchStuBld,true);
   buildBldTabs('bed-blds',bedBld,switchBedBld);
   initScSliders(); initScForm(); initLvForm(); initVioForm();
@@ -1216,10 +1221,23 @@ function navTo(pg){
   qs(`[data-pg="${pg}"]`)?.classList.add('on');
   document.getElementById('tbtit').textContent=PG_TITLES[pg]||pg;
   closeSB();
-  if(pg==='roll'){
-    // 確保 rollState 反映最新已儲存資料
+if(pg==='roll'){
+  toast('🔄 同步點名資料…');
+  gasGet({action:'roll_today', bld:''}).then(rR=>{
+    rollAll = (rR.data||[]).map(r=>({
+      ...r,
+      bld:    r.bld ? normBldFE(r.bld) : '',
+      status: ({'在宿':'in','請假':'lv','未到':'ab','in':'in','lv':'lv','ab':'ab'})[r.status]||r.status,
+      date:   new Date().toISOString().slice(0,10).replace(/-/g,'/'),
+    }));
+    applyRollData(rollAll);
+    renderRoll();
+    toast('✅ 點名資料已同步');
+  }).catch(()=>{
     if(rollAll.length) applyRollData(rollAll);
     renderRoll();
+  });
+}
   }
   if(pg==='students')   renderStudents();
   if(pg==='leaves')     {renderLvTabs();renderLeaves();}
@@ -3997,3 +4015,4 @@ function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e
 </script>
 </body>
 </html>
+
