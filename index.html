@@ -1283,8 +1283,8 @@ function switchBedBld(b){bldSwitch('bed-blds',b);}
 // 將下載的點名紀錄還原到 rollState（不覆蓋本次已手動操作的狀態）
 function applyRollData(rows){
   // status 對應：在宿→in、請假→lv、未回/外出/異常→ab
-  const ST_MAP = {'在宿':'in','請假':'lv','lv':'lv','in':'in','ab':'ab',
-                  '未回':'ab','外出':'ab','異常':'ab'};
+  const ST_MAP = {'在宿':'in','請假':'lv','未到':'ab','未回':'ab','外出':'ab','異常':'ab',
+                  'in':'in','lv':'lv','ab':'ab'};
   rows.forEach(r=>{
     const sid = String(r.stu_id||'').split('.')[0];
     if(!sid) return;
@@ -1488,7 +1488,13 @@ async function submitRoll(){
   const entries=bstus.map(s=>({stu_id:s.id,name:s.name,room:String(s.r||''),bed:String(s.bed||''),status:rollState[s.id]||'in',note:rollState[s.id+'_note']||''}));
   try{
     const r=await gasPost({action:'submit_roll',bld:rollBld,entries,by:user.display||user.username});
-    toast(`✅ 已儲存 ${r.count} 筆點名`);
+    toast('✅ 已儲存 '+r.count+' 筆點名');
+    // 即時更新 rollAll（移除舊的同棟今日紀錄，加入新的）
+    const today=new Date().toISOString().slice(0,10).replace(/-/g,'/');
+    rollAll=rollAll.filter(row=>!(row.bld===rollBld&&row.date===today));
+    entries.forEach(e=>{
+      rollAll.push({...e, bld:rollBld, date:today});
+    });
   }catch(e){toast('❌ '+e.message);}
 }
 
@@ -2362,9 +2368,9 @@ function genRollReport(date){
     const rows = bldMap[b];
     lines.push(`【${bldLbl(b)}】`);
     // 缺席/異常
-    const absent = rows.filter(r=>r.status&&r.status!=='在宿'&&r.status!=='請假');
-    const onLeave = rows.filter(r=>r.status==='請假');
-    const present = rows.filter(r=>r.status==='在宿');
+    const absent  = rows.filter(r=>r.status==='ab');
+    const onLeave = rows.filter(r=>r.status==='lv');
+    const present = rows.filter(r=>r.status==='in');
     if(absent.length){
       lines.push('⚠️ 未到／異常：');
       absent.forEach(r=>{
@@ -2378,8 +2384,8 @@ function genRollReport(date){
       lines.push('📝 請假中：');
       onLeave.forEach(r=>{
         const stu = students.find(s=>String(s.id)===String(r.stu_id))||{};
-        const lvRm = r.room||stu.r||'';
-        lines.push('  '+(lvRm?lvRm+'號房 ':'')+( stu.cls||'')+' '+(r.name||stu.name||''));
+        const note = r.note ? '（'+r.note+'）' : '';
+        lines.push('  '+(r.room||stu.r||'')+'號房 '+(stu.cls||'')+' '+(r.name||stu.name||'')+note);
       });
     }
     lines.push(`✅ 在宿：${present.length} 人`);
@@ -2686,15 +2692,15 @@ function buildRollReport(date){
   BLDS.filter(b=>bldMap[b]).forEach(b=>{
     const rows = bldMap[b];
     lines.push('【'+bldLbl(b)+'】');
-    const absent  = rows.filter(r=>r.status&&r.status!=='在宿'&&r.status!=='請假');
-    const onLeave = rows.filter(r=>r.status==='請假');
-    const present = rows.filter(r=>r.status==='在宿');
+    const absent  = rows.filter(r=>r.status==='ab');
+    const onLeave = rows.filter(r=>r.status==='lv');
+    const present = rows.filter(r=>r.status==='in');
     if(absent.length){
-      lines.push('⚠️ 未到／異常：');
+      lines.push('⚠️ 未到：');
       absent.forEach(r=>{
         const stu = students.find(s=>String(s.id)===String(r.stu_id))||{};
         const note = r.note ? '（'+r.note+'）' : '';
-        lines.push('  '+[r.room||stu.r||'', stu.cls||'', r.name||stu.name||'', r.status+note].filter(Boolean).join(' '));
+        lines.push('  '+(r.room||stu.r||'')+'號房 '+(stu.cls||'')+' '+(r.name||stu.name||'')+note);
       });
     }
     if(onLeave.length){
@@ -2973,12 +2979,15 @@ async function submitAddRoom(){
   let ok=true;
   for(const bed of BEDS){
     const r=await gasPost({action:'save_bed',bld,r:rm,bed,status:'empty',note,by:user.display||user.username});
-    if(!r.ok){toast('❌ '+r.error);ok=false;break;}
+    if(!r.ok){toast('❌ 新增床位失敗（'+bed+'床）：'+(r.error||'未知錯誤'));ok=false;break;}
   }
   if(ok){
-    toast(`✅ ${bldLbl(bld)} ${rm}號房新增完成（${bedCount}床）`);
     closeModal('m-add-room');
-    const br=await gasGet({action:'beds'});bedData=br.data||{};renderBeds();
+    const br=await gasGet({action:'beds'});
+    bedData=br.data||{};
+    const roomCount=Object.keys(bedData[bld]||{}).length;
+    toast('✅ '+bldLbl(bld)+' '+rm+'號房新增完成（'+bedCount+'床）　本棟共'+roomCount+'間');
+    renderBeds();
   }
 }
 
@@ -3011,9 +3020,12 @@ async function submitAddBed(){
   const note=document.getElementById('ab-note').value;
   const r=await gasPost({action:'save_bed',bld,r:rm,bed,status,note,by:user.display||user.username});
   if(!r.ok){toast('❌ '+r.error);return;}
-  toast(`✅ ${rm}號房 ${bed}床已新增`);
   closeModal('m-add-bed');
-  const br=await gasGet({action:'beds'});bedData=br.data||{};renderBeds();
+  const br=await gasGet({action:'beds'});
+  bedData=br.data||{};
+  const bedCount2=Object.keys((bedData[bld]||{})[rm]||{}).length;
+  toast('✅ '+rm+'號房 '+bed+'床已新增　該房共'+bedCount2+'床');
+  renderBeds();
 }
 
 async function deleteBed(bld, rm, bed){
