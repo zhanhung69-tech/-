@@ -1243,16 +1243,15 @@ if(pg==='roll'){
     renderRoll();
   });
   return;
-  }
-  if(pg==='students')   renderStudents();
-  if(pg==='leaves')     {renderLvTabs();renderLeaves();}
-  if(pg==='score')      {renderScHist();initScForm();}
-  if(pg==='beds')       renderBeds();
-  if(pg==='violations') {renderVioTabs();renderViolations();}
-  if(pg==='accounts')   loadAccounts();
-  if(pg==='sysconfig')  initSysConfig();
-  if(pg==='report')     initReport();
 }
+if(pg==='students')   renderStudents();
+if(pg==='leaves')     {renderLvTabs();renderLeaves();}
+if(pg==='score')      {renderScHist();initScForm();}
+if(pg==='beds')       renderBeds();
+if(pg==='violations') {renderVioTabs();renderViolations();}
+if(pg==='accounts')   loadAccounts();
+if(pg==='sysconfig')  initSysConfig();
+if(pg==='report')     initReport();
 }
 function openSB(){qs('#sidebar').classList.add('open');qs('#sb-ov').classList.add('on');}
 function closeSB(){qs('#sidebar').classList.remove('open');qs('#sb-ov').classList.remove('on');}
@@ -4023,6 +4022,7 @@ function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e
 </script>
 </body>
 </html>
+
 
 
 
