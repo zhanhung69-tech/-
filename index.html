@@ -1135,7 +1135,7 @@ async function doLogin(){
 }
 function showLE(m){const e=document.getElementById('lerr');e.textContent=m;e.style.display='block';}
 function doLogout(){localStorage.removeItem('gt');localStorage.removeItem('gu');location.reload();}
-document.getElementById('ip').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.addEventListener('DOMContentLoaded',function(){document.getElementById('ip').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});});
 
 (function auto(){
   const t=localStorage.getItem('gt'),u=localStorage.getItem('gu');
