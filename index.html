@@ -708,8 +708,8 @@ textarea.fi{resize:vertical;min-height:70px}
           <div class="fr"><label class="flbl">房號</label><input class="fi" id="m-mv-r" placeholder="如：901"></div>
           <div class="fr"><label class="flbl">床位</label>
             <select class="fi" id="m-mv-bed">
-              <option value="A">A（1床）</option><option value="B">B（2床）</option><option value="C">C（3床）</option>
-              <option value="D">D（4床）</option><option value="E">E（5床）</option><option value="F">F（6床）</option>
+              <option value="1">1床</option><option value="2">2床</option><option value="3">3床</option>
+<option value="4">4床</option><option value="5">5床</option><option value="6">6床</option>
             </select>
           </div>
           <div class="fr"><label class="flbl">狀態</label>
@@ -806,8 +806,9 @@ textarea.fi{resize:vertical;min-height:70px}
         <div class="fr"><label class="flbl">床　　位</label>
           <select class="fi" id="ms-bed">
             <option value="">未分配</option>
-            <option value="A">A（1床）</option><option value="B">B（2床）</option><option value="C">C（3床）</option>
-            <option value="D">D（4床）</option><option value="E">E（5床）</option><option value="F">F（6床）</option>
+            <option value="">未分配</option>
+<option value="1">1床</option><option value="2">2床</option><option value="3">3床</option>
+<option value="4">4床</option><option value="5">5床</option><option value="6">6床</option>
           </select>
         </div>
         <div class="fr"><label class="flbl">電　　話</label><input class="fi" id="ms-phone" placeholder="選填"></div>
@@ -1237,11 +1238,12 @@ if(pg==='roll'){
     applyRollData(rollAll);
     renderRoll();
     toast('✅ 點名資料已同步');
-  }).catch(()=>{
+}).catch(()=>{
     if(rollAll.length) applyRollData(rollAll);
     renderRoll();
   });
-  
+  return;
+  }
   if(pg==='students')   renderStudents();
   if(pg==='leaves')     {renderLvTabs();renderLeaves();}
   if(pg==='score')      {renderScHist();initScForm();}
@@ -4021,6 +4023,7 @@ function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e
 </script>
 </body>
 </html>
+
 
 
 
