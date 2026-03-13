@@ -154,11 +154,11 @@ textarea.fi{resize:vertical;min-height:70px}
 /* PROGRESS BAR */
 .pb-wrap{display:flex;flex-direction:column;gap:10px}
 .pb-row{display:flex;align-items:center;gap:10px}
-.pb-lbl{width:72px;font-size:12px;font-weight:600;color:var(--slat);flex-shrink:0}
+.pb-lbl{width:60px;font-size:12px;font-weight:600;color:var(--slat);flex-shrink:0}
 .pb{flex:1;height:8px;background:var(--sf2);border-radius:99px;overflow:hidden}
 .pb-fill{height:100%;border-radius:99px;transition:width .4s}
 .pb-fill.fem{background:#ec4899}.pb-fill.mal{background:var(--pri)}
-.pb-pct{width:34px;text-align:right;font-size:12px;font-family:var(--mo);font-weight:700}
+.pb-pct{width:70px;text-align:right;font-size:12px;font-family:var(--mo);font-weight:700}
 /* BED GRID */
 .bed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
 .bed-card{background:#fff;border:1.5px solid var(--bdr);border-radius:var(--r);padding:14px}
@@ -444,10 +444,42 @@ function renderDash(){
     <div class="sc"><div class="slbl">待處理違規</div><div class="sval" style="color:var(--red)">${vioN}</div><div class="ssub">需處理</div></div>`;
 
   document.getElementById('dash-pb').innerHTML=BLDS.map(b=>{
-    const tot=students.filter(s=>s.b===b).length;
-    const inB=students.filter(s=>s.b===b&&s.st==='入住').length;
-    const pct=tot?Math.round(inB/tot*100):0;
-    return `<div class="pb-row"><span class="pb-lbl">${bldLbl(b)}</span><div class="pb"><div class="pb-fill ${isFem(b)?'fem':'mal'}" style="width:${pct}%"></div></div><span class="pb-pct">${pct}%</span></div>`;
+    // 優先從 bedData 計算真實床位數
+    const bldRooms=bedData[b]||{};
+    let totalBeds=0,occBeds=0,emptyBeds=0;
+    Object.values(bldRooms).forEach(rm=>{
+      Object.values(rm).forEach(bed=>{
+        totalBeds++;
+        if(bed.status==='occupied') occBeds++;
+        else if(bed.status==='empty') emptyBeds++;
+      });
+    });
+    // bedData 尚未載入時 fallback 用學生資料
+    if(totalBeds===0){
+      const stuList=students.filter(s=>s.b===b);
+      totalBeds=stuList.length;
+      occBeds=stuList.filter(s=>s.st==='入住').length;
+      emptyBeds=totalBeds-occBeds;
+    }
+    const pct=totalBeds?Math.round(occBeds/totalBeds*100):0;
+    const col=isFem(b)?'#ec4899':'var(--pri)';
+    const pctCol=pct>=90?'#dc2626':pct>=70?'#d97706':'var(--pri)';
+    return `<div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span style="font-size:13px;font-weight:700;color:var(--slat)">${bldLbl(b)}</span>
+        <span style="font-size:11px;color:var(--slat-l)">
+          總 <b style="color:var(--slat)">${totalBeds}</b> 床・
+          使用 <b style="color:${col}">${occBeds}</b> 床・
+          尚餘 <b style="color:#16a34a">${emptyBeds}</b> 床
+        </span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="flex:1;height:10px;background:var(--sf2);border-radius:99px;overflow:hidden">
+          <div style="width:${pct}%;height:100%;background:${col};border-radius:99px;transition:width .4s"></div>
+        </div>
+        <span style="width:40px;text-align:right;font-size:12px;font-weight:700;font-family:var(--mo);color:${pctCol}">使用率 ${pct}%</span>
+      </div>
+    </div>`;
   }).join('');
 
   const pend=leaves.filter(l=>['待學務處核章','待實習處核章','待招生中心核章'].includes(l.status)).slice(0,5);
@@ -2136,7 +2168,7 @@ function renderBeds(){
           <button onclick="openEditRoomModal('${bld}','${rm}')" style="padding:2px 8px;font-size:11px;background:var(--amb-l);color:var(--amb);border:1px solid var(--amb);border-radius:4px;cursor:pointer">✏️</button>
         </div>`:''}
       </div>
-      ${Object.keys(beds).sort().map(bed=>{
+      ${Object.keys(beds).sort((a,b)=>Number(a)-Number(b)).map(bed=>{
         const b=beds[bed];
         const st=b.status||'empty';
         const stLabel={occupied:'入住',empty:'空床',repair:'維修',disabled:'停用',out:'離宿'}[st]||st;
@@ -2145,7 +2177,7 @@ function renderBeds(){
         else if(st==='empty') emptyN++;
         else if(st==='repair') repairN++;
         return `<div class="bed-row">
-          <span class="bed-num">${bed}</span>
+          <span class="bed-num">${bed}床</span>
           <div class="bed-info">
             ${b.name?`<div class="bed-name">${b.name}</div><div class="bed-sub">${b.cls||''} ${b.eng||''}</div>`:`<div class="bed-name" style="color:var(--slat-l)">${b.note||'—'}</div>`}
           </div>
@@ -2239,7 +2271,7 @@ function openAddBedForRoom(bld, rm){
 async function submitAddBed(){
   const {bld,rm}=_editRoomData;
   if(!bld||!rm){toast('請從房間卡片點「＋床」');return;}
-  const bed=document.getElementById('ab-bed').value;
+  const bed=String(document.getElementById('ab-bed').value);
   const status=document.getElementById('ab-status').value;
   const note=document.getElementById('ab-note').value;
   const r=await gasPost({action:'save_bed',bld,r:rm,bed,status,note,by:user.display||user.username});
@@ -2314,7 +2346,7 @@ function selectMvStu(id){
   document.getElementById('m-mv-name').textContent=`✏️ ${s.name}（${s.eng||''}）學號：${s.id}`;
   document.getElementById('m-mv-b').value=s.b||'F1';
   document.getElementById('m-mv-r').value=s.r||'';
-  document.getElementById('m-mv-bed').value=s.bed||'A';
+  document.getElementById('m-mv-bed').value=s.bed||'1';
   document.getElementById('m-mv-st').value=s.st||'入住';
   document.getElementById('m-mv-form').style.display='block';
   document.getElementById('m-mv-save').style.display='inline-flex';
@@ -3913,9 +3945,9 @@ function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e
       <div class="fg">
         <div class="fr"><label class="flbl">床位號</label>
           <select class="fi" id="ab-bed">
-            <option value="A">A 床</option><option value="B">B 床</option>
-            <option value="C">C 床</option><option value="D">D 床</option>
-            <option value="E">E 床</option><option value="F">F 床</option>
+            <option value="1">1 床</option><option value="2">2 床</option>
+            <option value="3">3 床</option><option value="4">4 床</option>
+            <option value="5">5 床</option><option value="6">6 床</option>
           </select>
         </div>
         <div class="fr"><label class="flbl">狀　態</label>
