@@ -231,8 +231,10 @@ textarea.fi{resize:vertical;min-height:70px}
       <div class="fr"><label class="flbl">帳　號</label><input class="fi" id="iu" placeholder="輸入帳號" autocomplete="username"></div>
       <div class="fr"><label class="flbl">密　碼</label><input class="fi" id="ip" type="password" placeholder="輸入密碼" autocomplete="current-password"></div>
       <button class="btn bp" style="width:100%;padding:11px;margin-top:4px" onclick="doLogin()">登　入</button>
-    </div>
-  </div>
+    </div>    ← lbox 結尾
+  </div>      ← ← 這行！scr-login 結尾
+</div>        ← ← 再加這行讓結構完整
+<div id="app">
 
 <!-- APP -->
 <div id="app">
@@ -574,8 +576,10 @@ textarea.fi{resize:vertical;min-height:70px}
             <div class="cbody">
               <div style="font-size:12px;color:var(--slat-l);margin-bottom:10px">設定每個班級對應的導師帳號（導師只能看到自己班級的假單）</div>
               <div id="cls-teacher-map"></div>
-              <div style="margin-top:14px"><button class="btn bp" onclick="saveClsTeacher()">💾 儲存對應設定</button></div>
-            </div>
+              <div style="margin-top:14px"><button ...>💾 儲存對應設定</button></div>
+            </div>      ← cbody ✓
+          </div>        ← card ✓
+        </div>          ← pg-sysconfig 結尾 ✓
         <!-- ↑ pg-sysconfig 結束 -->
 
         <!-- 報告訊息 -->
@@ -4029,6 +4033,7 @@ function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e
 </script>
 </body>
 </html>
+
 
 
 
