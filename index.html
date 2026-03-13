@@ -2998,9 +2998,9 @@ async function saveBedStatus(){
   try{
     const r=await gasPost({action:'save_bed',bld:_bedEdit.bld,r:_bedEdit.r,bed:_bedEdit.bed,status:document.getElementById('m-bed-st').value,note:document.getElementById('m-bed-note').value,by:user.display||user.username});
     if(!r.ok){toast('❌ '+r.error);return;}
-    toast('✅ 已儲存床位設定');
+toast('✅ 已儲存床位設定');
     closeModal('m-bed');
-    const br=await gasGet({action:'beds'});bedData=br.data||{};renderBeds();
+    const br=await gasGet({action:'beds'});bedData=br.data||{};renderBeds();renderDash();
   }catch(e){toast('❌ '+e.message);}
 }
 
@@ -3150,14 +3150,28 @@ function selectMvStu(id){
 
 async function saveMove(){
   if(!mvStuId){toast('請先選擇學生');return;}
+  const newBld=document.getElementById('m-mv-b').value;
   try{
-    const r=await gasPost({action:'move_student',stu_id:mvStuId,b:document.getElementById('m-mv-b').value,r:document.getElementById('m-mv-r').value,bed:document.getElementById('m-mv-bed').value,st:document.getElementById('m-mv-st').value,by:user.display||user.username});
+    const r=await gasPost({action:'move_student',stu_id:mvStuId,b:newBld,r:document.getElementById('m-mv-r').value,bed:document.getElementById('m-mv-bed').value,st:document.getElementById('m-mv-st').value,by:user.display||user.username});
     if(!r.ok){toast('❌ '+r.error);return;}
-    toast('✅ 床位已更新');closeModal('m-move');
+    closeModal('m-move');
+    toast('⏳ 同步中…');
     const [sR,bR]=await Promise.all([gasGet({action:'students'}),gasGet({action:'beds'})]);
     students=(sR.data||[]).map(s=>({...s,id:String(s.id).split('.')[0]}));
-    bedData=bR.data||{};renderBeds();renderStudents();
+    bedData=bR.data||{};
+    // 切換到學生新棟別
+    if(newBld && newBld!==bedBld){
+      bedBld=newBld;
+      document.querySelectorAll('#bed-blds .btab').forEach(el=>{
+        el.classList.toggle('on', el.getAttribute('onclick')===`bldSwitch('bed-blds','${newBld}')`);
+      });
+    }
+    renderBeds();
+    renderStudents();
+    renderDash();
+    toast('✅ 床位已更新');
   }catch(e){toast('❌ '+e.message);}
+}
 }
 
 // ── 違規通報 ──────────────────────────────────────────
@@ -4022,6 +4036,7 @@ function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e
 </script>
 </body>
 </html>
+
 
 
 
