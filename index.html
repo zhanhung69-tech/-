@@ -220,831 +220,7 @@ textarea.fi{resize:vertical;min-height:70px}
   .fg{grid-template-columns:1fr}
 }
 </style>
-</head>
-<body>
-<!-- LOGIN -->
-<div id="scr-login">
-  <div class="lbox">
-    <div class="llogo"><div class="icon">🏫</div><h1>樹人家商<br>僑生宿舍管理系統</h1><p>v4.0</p></div>
-    <div class="lerr" id="lerr"></div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <div class="fr"><label class="flbl">帳　號</label><input class="fi" id="iu" placeholder="輸入帳號" autocomplete="username"></div>
-      <div class="fr"><label class="flbl">密　碼</label><input class="fi" id="ip" type="password" placeholder="輸入密碼" autocomplete="current-password"></div>
-      <button class="btn bp" style="width:100%;padding:11px;margin-top:4px" onclick="doLogin()">登　入</button>
-    </div>
-  </div>
-</div>
-
-<!-- APP -->
-<div id="app">
-  <div class="sb-ov" id="sb-ov" onclick="closeSB()"></div>
-  <div class="layout">
-    <aside class="sidebar" id="sidebar">
-      <div class="sb-logo"><h1>🏠 僑生宿舍</h1><p>樹人家商管理系統</p></div>
-      <div class="sb-user">
-        <div class="sb-av" id="u-av">A</div>
-        <div><div class="sb-un" id="u-nm">—</div><div class="sb-ur" id="u-rl">—</div></div>
-      </div>
-      <nav id="mnav">
-        <div class="ni on"  data-pg="dash"       onclick="navTo('dash')">     <span class="ico">📊</span>儀表板</div>
-        <div class="ni"     data-pg="roll"        onclick="navTo('roll')">     <span class="ico">📋</span>點名作業</div>
-        <div class="ni"     data-pg="students"    onclick="navTo('students')"> <span class="ico">👥</span>僑生管理</div>
-        <div class="ni"     data-pg="leaves"      onclick="navTo('leaves')">   <span class="ico">📝</span>請假管理<span class="nbadge" id="nb-lv">0</span></div>
-        <div class="ni"     data-pg="score"       onclick="navTo('score')">    <span class="ico">🏆</span>內務評分</div>
-        <div class="ni"     data-pg="beds"        onclick="navTo('beds')">     <span class="ico">🛏️</span>床位管理</div>
-        <div class="ni"     data-pg="violations"  onclick="navTo('violations')"><span class="ico">🚨</span>違規通報<span class="nbadge" id="nb-vio">0</span></div>
-        <div class="ni"     data-pg="accounts"    onclick="navTo('accounts')"> <span class="ico">👤</span>帳號管理</div>
-        <div class="ni"     data-pg="sysconfig"   onclick="navTo('sysconfig')" id="nav-sysconfig"> <span class="ico">⚙️</span>系統設定</div>
-        <div class="ni"     data-pg="report"      onclick="navTo('report')"    id="nav-report">    <span class="ico">📢</span>報告訊息</div>
-      </nav>
-      <div class="sb-ft">
-        <div class="sync-row"><span class="sdot" id="sdot"></span><span class="stxt" id="stxt">連線中…</span></div>
-        <button class="btn-lo" onclick="doLogout()">登出</button>
-      </div>
-    </aside>
-    <div class="main">
-      <div class="topbar">
-        <button class="mtog" onclick="openSB()">☰</button>
-        <span class="tbtitle" id="tbtit">儀表板</span>
-        <div class="tbright"><button class="sync-btn" onclick="refreshAll()">🔄 同步</button></div>
-      </div>
-      <div class="content">
-
-        <!-- 儀表板 -->
-        <div class="pg on" id="pg-dash">
-          <!-- 公告欄 -->
-          <div id="announce-card" style="display:none;margin-bottom:14px">
-            <div style="background:linear-gradient(135deg,#1e3a8a,#2563eb);border-radius:12px;padding:14px 18px;color:#fff;position:relative">
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-                <span style="font-size:16px">📢</span>
-                <span style="font-weight:800;font-size:14px">宿舍公告</span>
-                <span id="announce-date" style="font-size:11px;opacity:.7;margin-left:auto"></span>
-                <button id="announce-edit-btn" onclick="openAnnounceEdit()" style="display:none;background:rgba(255,255,255,.2);border:none;color:#fff;padding:3px 10px;border-radius:99px;font-size:11px;cursor:pointer">✏️ 編輯</button>
-              </div>
-              <div id="announce-content" style="font-size:13px;line-height:1.7;white-space:pre-wrap"></div>
-            </div>
-          </div>
-          <div id="dash-sg" class="sg"></div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px">
-            <div class="card"><div class="chd"><span class="ctitle">🏢 各棟入住率</span></div><div class="cbody"><div id="dash-pb" class="pb-wrap"></div></div></div>
-            <div class="card"><div class="chd"><span class="ctitle">⏳ 待審假單</span></div><div class="cbody"><div id="dash-pend"></div></div></div>
-            <div class="card"><div class="chd"><span class="ctitle">🚨 待處理違規</span></div><div class="cbody"><div id="dash-vio"></div></div></div>
-          </div>
-        </div>
-
-        <!-- 點名 -->
-        <div class="pg" id="pg-roll">
-          <div class="card">
-            <div class="chd">
-              <span class="ctitle">📋 點名作業</span>
-              <div style="display:flex;gap:6px;flex-wrap:wrap">
-                <button class="btn bpdf bsm" onclick="openPrintModal('roll')">🖨️ 列印</button>
-                <button class="btn bg   bsm" onclick="openRptModal('roll')">📋 產生報告</button>
-                <button class="btn bp   bsm" onclick="submitRoll()">💾 儲存</button>
-              </div>
-            </div>
-            <div class="cbody">
-              <div id="roll-blds" class="btabs"></div>
-              <div id="roll-content"><div class="loading"><div class="spin"></div>載入中…</div></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 僑生 -->
-        <div class="pg" id="pg-students">
-          <!-- 未安排床位 / 職場實習 -->
-          <div class="card" id="stu-unassigned-card">
-            <div class="chd">
-              <span class="ctitle">⚠️ 未安排床位 / 職場實習</span>
-              <span id="stu-unassigned-count" style="font-size:12px;color:var(--slat-l)"></span>
-            </div>
-            <div class="cbody" id="stu-unassigned"></div>
-          </div>
-          <div class="card">
-            <div class="chd">
-              <span class="ctitle">👥 僑生管理</span>
-              <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-                <input class="fi" id="stu-q" placeholder="🔍 搜尋姓名/學號/班級…" style="width:180px" oninput="renderStudents()">
-                <button class="btn bp bsm" onclick="openStuModal(null)" id="stu-add-btn" style="display:none">➕ 新增學生</button>
-              </div>
-            </div>
-            <div class="cbody">
-              <div id="stu-blds" class="btabs"></div>
-              <div id="stu-content"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 請假 -->
-        <div class="pg" id="pg-leaves">
-          <div class="card" id="lv-apply-card" style="display:none">
-            <div class="chd"><span class="ctitle">➕ 申請假單</span></div>
-            <div class="cbody">
-              <div class="fg">
-                <div class="fr"><label class="flbl">班　級</label><select class="fi" id="lv-cls" onchange="loadLvStus()"></select></div>
-                <div class="fr"><label class="flbl">請假類別</label>
-                  <select class="fi" id="lv-type" onchange="showFlowHint()">
-                    <option>打工</option><option>職場實習</option><option>工讀</option>
-                    <option>晚歸</option><option>外宿</option><option>返鄉</option>
-                    <option>病假</option><option>其它</option>
-                  </select>
-                </div>
-                <div class="fr"><label class="flbl">開始日期</label><input class="fi" type="date" id="lv-sd"></div>
-                <div class="fr"><label class="flbl">開始時間</label><input class="fi" type="time" id="lv-st" step="60"></div>
-                <div class="fr"><label class="flbl">結束日期</label><input class="fi" type="date" id="lv-ed"></div>
-                <div class="fr"><label class="flbl">結束時間</label><input class="fi" type="time" id="lv-et" step="60"></div>
-              </div>
-              <div id="lv-hint" style="margin-top:10px;padding:8px 12px;background:var(--pri-l);border-radius:var(--rs);font-size:12px;color:var(--pri-d);font-weight:600"></div>
-              <div class="fr" style="margin-top:12px">
-                <label class="flbl">請假學生（勾選）</label>
-                <div style="margin:6px 0;display:flex;align-items:center;gap:8px">
-                  <button type="button" class="btn bgh bsm" onclick="lvAll()">☑ 全選</button>
-                  <button type="button" class="btn bgh bsm" onclick="lvNone()">☐ 清除</button>
-                  <span id="lv-cnt" style="font-size:13px;color:var(--pri);font-weight:700"></span>
-                </div>
-                <div id="lv-checks" style="border:1.5px solid var(--bdr);border-radius:var(--rs);max-height:220px;overflow-y:auto;padding:6px 10px;background:#fff;display:flex;flex-direction:column;gap:2px">
-                  <span style="color:var(--slat-l);font-size:13px;padding:8px 0">← 請先選擇班級</span>
-                </div>
-              </div>
-              <div class="fr" style="margin-top:12px">
-                <label class="flbl">請假事由（選填）</label>
-                <textarea class="fi" id="lv-reason" rows="2"></textarea>
-              </div>
-              <div style="margin-top:14px"><button class="btn bp" id="lv-btn" onclick="submitLeave()">提交假單</button></div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="chd">
-              <span class="ctitle">📄 假單列表</span>
-              <div style="display:flex;gap:6px;flex-wrap:wrap">
-                <button class="btn btd  bsm" onclick="showTodayModal()">📅 今日名單</button>
-                <button class="btn bg   bsm" onclick="openRptModal('leave')">📋 產生報告</button>
-                <button class="btn bpdf bsm" onclick="openPrintModal('leaves')">🖨️ 列印篩選</button>
-              </div>
-            </div>
-            <div class="cbody">
-              <div class="tabs" id="lv-tabs"></div>
-              <div id="lv-list"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 環境衛生評核 -->
-        <div class="pg" id="pg-score">
-          <!-- 頂部操作列 -->
-          <div class="card" style="margin-bottom:12px">
-            <div class="chd">
-              <span class="ctitle">🏆 環境衛生評核</span>
-              <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-                <select class="fi bsm" id="sc-date" style="width:130px"></select>
-                <input class="fi bsm" id="sc-ins" placeholder="評核人員" style="width:110px" value="">
-                <span id="sc-save-btn"></span>
-                <button class="btn bg   bsm" onclick="openRptModal('score')">📋 產生報告</button>
-                <button class="btn bpdf bsm" onclick="openPrintModal('score')">🖨️ 列印</button>
-              </div>
-            </div>
-            <div class="cbody" style="padding-top:8px">
-              <div id="sc-blds" class="btabs"></div>
-              <!-- 統計列 -->
-              <div id="sc-summary" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;font-size:12px"></div>
-            </div>
-          </div>
-          <!-- 房間卡片區 -->
-          <div id="sc-rooms-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px"></div>
-          <!-- 評核紀錄 -->
-          <div class="card" style="margin-top:12px">
-            <div class="chd"><span class="ctitle">📊 評核紀錄</span>
-              <button class="btn bgh bsm" onclick="renderScHist()">🔄 重整</button>
-            </div>
-            <div class="cbody" id="sc-hist"></div>
-          </div>
-        </div>
-
-        <!-- 床位管理 -->
-        <div class="pg" id="pg-beds">
-          <div class="card">
-            <div class="chd">
-              <span class="ctitle">🛏️ 床位管理</span>
-              <div style="display:flex;gap:6px;flex-wrap:wrap">
-                <button class="btn bp bsm" onclick="openMoveModal()">🔄 調換學生床位</button>
-                <button class="btn bg bsm" id="btn-add-room" onclick="openAddRoomModal()" style="display:none">➕ 新增房間</button>
-                <button class="btn bgh bsm" id="btn-add-bed" onclick="openAddBedModal()" style="display:none">🛏 新增床位</button>
-              </div>
-            </div>
-            <div class="cbody">
-              <div id="bed-blds" class="btabs"></div>
-              <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;font-size:12px">
-                <span style="display:flex;align-items:center;gap:4px"><span class="bed-stat bst-occ">⬤</span>入住</span>
-                <span style="display:flex;align-items:center;gap:4px"><span class="bed-stat bst-empty">⬤</span>空床</span>
-                <span style="display:flex;align-items:center;gap:4px"><span class="bed-stat bst-repair">⬤</span>維修</span>
-                <span style="display:flex;align-items:center;gap:4px"><span class="bed-stat bst-disabled">⬤</span>停用</span>
-                <span style="display:flex;align-items:center;gap:4px"><span class="bed-stat bst-out">⬤</span>離宿</span>
-              </div>
-              <div id="bed-content"><div class="loading"><div class="spin"></div>載入中…</div></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 違規通報 -->
-        <div class="pg" id="pg-violations">
-          <div class="card" id="vio-report-card">
-            <div class="chd"><span class="ctitle">📣 新增違規通報</span></div>
-            <div class="cbody">
-              <div class="fg">
-                <div class="fr"><label class="flbl">班　級</label><select class="fi" id="vio-cls" onchange="loadVioStus()"></select></div>
-                <div class="fr"><label class="flbl">違規類別</label>
-                  <select class="fi" id="vio-cat">
-                    <option>違禁物品（菸酒等）</option><option>宵禁違規</option>
-                    <option>打架鬥毆</option><option>財物損毀</option>
-                    <option>衛生不合格</option><option>其它</option>
-                  </select>
-                </div>
-                <div class="fr"><label class="flbl">嚴重程度</label>
-                  <select class="fi" id="vio-lvl">
-                    <option value="minor">輕微</option>
-                    <option value="normal" selected>一般</option>
-                    <option value="serious">嚴重</option>
-                  </select>
-                </div>
-              </div>
-              <div class="fr" style="margin-top:12px">
-                <label class="flbl">涉及學生（勾選，可多選）</label>
-                <div style="margin:6px 0;display:flex;gap:8px">
-                  <button type="button" class="btn bgh bsm" onclick="vioAll()">☑ 全選</button>
-                  <button type="button" class="btn bgh bsm" onclick="vioNone()">☐ 清除</button>
-                  <span id="vio-cnt" style="font-size:13px;color:var(--red);font-weight:700"></span>
-                </div>
-                <div id="vio-checks" style="border:1.5px solid var(--bdr);border-radius:var(--rs);max-height:200px;overflow-y:auto;padding:6px 10px;background:#fff;display:flex;flex-direction:column;gap:2px">
-                  <span style="color:var(--slat-l);font-size:13px;padding:8px 0">← 請先選擇班級</span>
-                </div>
-              </div>
-              <div class="fr" style="margin-top:12px">
-                <label class="flbl">違規描述</label>
-                <textarea class="fi" id="vio-desc" rows="3" placeholder="詳細描述違規情況…"></textarea>
-              </div>
-              <div style="margin-top:14px"><button class="btn bpin" onclick="submitViolation()">📣 提交通報</button></div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="chd">
-              <span class="ctitle">📋 違規紀錄</span>
-              <div style="display:flex;gap:6px;flex-wrap:wrap">
-                <button class="btn bg   bsm" onclick="openRptModal('vio')">📋 產生報告</button>
-                <button class="btn bpdf bsm" onclick="openPrintModal('violations')">🖨️ 列印篩選</button>
-              </div>
-            </div>
-            <div class="cbody">
-              <div class="tabs" id="vio-tabs"></div>
-              <div id="vio-list"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 帳號管理 -->
-        <div class="pg" id="pg-accounts">
-          <div class="card" id="acc-create-card">
-            <div class="chd"><span class="ctitle">➕ 新增帳號</span></div>
-            <div class="cbody">
-              <div class="fg">
-                <div class="fr"><label class="flbl">登入帳號（英文）</label><input class="fi" id="acc-uname" placeholder="如：principal01"></div>
-                <div class="fr"><label class="flbl">職務名稱（中文）</label><input class="fi" id="acc-display" placeholder="如：校長"></div>
-                <div class="fr"><label class="flbl">角　色</label>
-                  <select class="fi" id="acc-role">
-                    <option value="admin">系統管理員</option>
-                    <option value="warden">生輔組舍監</option>
-                    <option value="teacher" selected>導師</option>
-                    <option value="academic">學務處</option>
-                    <option value="intern">實習處</option>
-                    <option value="recruit">招生中心</option>
-                  </select>
-                </div>
-                <div class="fr"><label class="flbl">初始密碼（選填）</label><input class="fi" id="acc-initpwd" placeholder="預設：Welcome@1234"></div>
-              </div>
-              <div style="margin-top:6px;font-size:12px;color:var(--slat-l)">💡 初始密碼若不填則預設為 Welcome@1234，使用者登入後請自行修改</div>
-              <div style="margin-top:14px"><button class="btn bp" onclick="createAccount()">✅ 建立帳號</button></div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="chd"><span class="ctitle">👤 帳號列表</span><button class="btn bgh bsm" onclick="loadAccounts()">🔄 重新整理</button></div>
-            <div class="cbody" id="acc-list"><div class="loading"><div class="spin"></div>載入中…</div></div>
-          </div>
-          <div class="card">
-            <div class="chd"><span class="ctitle">🔑 修改我的密碼</span></div>
-            <div class="cbody">
-              <div class="fg">
-                <div class="fr"><label class="flbl">舊　密　碼</label><input class="fi" type="password" id="pwd-old" placeholder="輸入目前密碼"></div>
-                <div class="fr"><label class="flbl">新　密　碼</label><input class="fi" type="password" id="pwd-new" placeholder="至少 6 碼"></div>
-                <div class="fr"><label class="flbl">確認新密碼</label><input class="fi" type="password" id="pwd-cfm" placeholder="再輸入一次"></div>
-              </div>
-              <div style="margin-top:14px"><button class="btn bp" onclick="changeOwnPwd()">🔑 確認修改</button></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 系統設定 -->
-        <div class="pg" id="pg-sysconfig">
-          <!-- 帳號權限管理 -->
-          <div class="card" style="margin-bottom:14px">
-            <div class="chd">
-              <span class="ctitle">🔐 帳號權限管理</span>
-              <button class="btn bgh bsm" onclick="loadAccPerms()">🔄 重新整理</button>
-            </div>
-            <div class="cbody" id="perm-list"><div class="loading"><div class="spin"></div>載入中…</div></div>
-          </div>
-          <!-- 准假流程設定 -->
-          <div class="card" style="margin-bottom:14px">
-            <div class="chd"><span class="ctitle">📋 假單流程設定</span></div>
-            <div class="cbody">
-              <div style="font-size:12px;color:var(--slat-l);margin-bottom:12px">設定各假別需要哪些單位審核（可多選，順序為審核順序）</div>
-              <div id="flow-settings"></div>
-              <div style="margin-top:14px"><button class="btn bp" onclick="saveFlowSettings()">💾 儲存流程設定</button></div>
-            </div>
-          </div>
-          <!-- 准假天數上限 -->
-          <div class="card" style="margin-bottom:14px">
-            <div class="chd"><span class="ctitle">📅 准假天數上限</span></div>
-            <div class="cbody">
-              <div style="font-size:12px;color:var(--slat-l);margin-bottom:12px">設定各假別單次申請最多幾天（0 = 不限制）</div>
-              <div id="maxdays-settings" class="fg"></div>
-              <div style="margin-top:14px"><button class="btn bp" onclick="saveMaxDays()">💾 儲存天數設定</button></div>
-            </div>
-          </div>
-          <!-- 班級導師對應 -->
-          <div class="card">
-            <div class="chd"><span class="ctitle">🏫 班級導師對應</span></div>
-            <div class="cbody">
-              <div style="font-size:12px;color:var(--slat-l);margin-bottom:10px">設定每個班級對應的導師帳號（導師只能看到自己班級的假單）</div>
-              <div id="cls-teacher-map"></div>
-              <div style="margin-top:14px"><button class="btn bp" onclick="saveClsTeacher()">💾 儲存對應設定</button></div>
-            </div>
-          </div>
-        </div>
-        <!-- ↑ pg-sysconfig 結束 -->
-
-        <!-- 報告訊息 -->
-        <div class="pg" id="pg-report">
-          <div class="card" style="margin-bottom:14px">
-            <div class="chd">
-              <span class="ctitle">📢 一鍵報告訊息</span>
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <label style="font-size:13px;font-weight:700">日期</label>
-                <input type="date" id="rpt-date" class="fi" style="width:150px" onchange="generateReports()">
-                <button class="btn bp bsm" onclick="generateReports()">🔄 重新產生</button>
-              </div>
-            </div>
-          </div>
-          <!-- 點名報告 -->
-          <div class="card" style="margin-bottom:14px" id="rpt-roll-card">
-            <div class="chd">
-              <span class="ctitle">📋 點名狀況報告</span>
-              <button class="btn bg bsm" onclick="copyReport('rpt-roll-txt')">📋 複製</button>
-            </div>
-            <div class="cbody">
-              <pre id="rpt-roll-txt" style="font-family:inherit;font-size:13px;line-height:1.8;white-space:pre-wrap;background:var(--pri-l);border-radius:8px;padding:14px;margin:0;color:var(--slat-d)">產生中…</pre>
-            </div>
-          </div>
-          <!-- 評核報告 -->
-          <div class="card" style="margin-bottom:14px" id="rpt-score-card">
-            <div class="chd">
-              <span class="ctitle">🏆 環境評核報告</span>
-              <button class="btn bg bsm" onclick="copyReport('rpt-score-txt')">📋 複製</button>
-            </div>
-            <div class="cbody">
-              <pre id="rpt-score-txt" style="font-family:inherit;font-size:13px;line-height:1.8;white-space:pre-wrap;background:var(--pri-l);border-radius:8px;padding:14px;margin:0;color:var(--slat-d)">產生中…</pre>
-            </div>
-          </div>
-          <!-- 請假報告 -->
-          <div class="card" style="margin-bottom:14px" id="rpt-leave-card">
-            <div class="chd">
-              <span class="ctitle">📝 請假人員報告</span>
-              <button class="btn bg bsm" onclick="copyReport('rpt-leave-txt')">📋 複製</button>
-            </div>
-            <div class="cbody">
-              <pre id="rpt-leave-txt" style="font-family:inherit;font-size:13px;line-height:1.8;white-space:pre-wrap;background:var(--pri-l);border-radius:8px;padding:14px;margin:0;color:var(--slat-d)">產生中…</pre>
-            </div>
-          </div>
-          <!-- 違規報告 -->
-          <div class="card" style="margin-bottom:14px" id="rpt-vio-card">
-            <div class="chd">
-              <span class="ctitle">🚨 違規通報報告</span>
-              <button class="btn bg bsm" onclick="copyReport('rpt-vio-txt')">📋 複製</button>
-            </div>
-            <div class="cbody">
-              <pre id="rpt-vio-txt" style="font-family:inherit;font-size:13px;line-height:1.8;white-space:pre-wrap;background:var(--pri-l);border-radius:8px;padding:14px;margin:0;color:var(--slat-d)">產生中…</pre>
-            </div>
-          </div>
-          <!-- 全部複製 -->
-          <div style="text-align:center;margin-top:4px">
-            <button class="btn bp" onclick="copyAllReports()" style="padding:10px 32px;font-size:14px">📋 複製全部報告</button>
-          </div>
-        </div>
-
-        </div>
-
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: 今日假單 -->
-<div class="modal-ov" id="m-today">
-  <div class="modal">
-    <div class="mhd"><span class="mtit">📅 今日請假名單</span><button class="mcl" onclick="closeModal('m-today')">✕</button></div>
-    <div class="mbody" id="m-today-body"></div>
-    <div class="mft">
-      <button class="btn bpdf" onclick="printElem('m-today-body','今日請假名單')">🖨️ 列印</button>
-      <button class="btn bgh"  onclick="closeModal('m-today')">關閉</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: 床位設定 -->
-<div class="modal-ov" id="m-bed">
-  <div class="modal">
-    <div class="mhd"><span class="mtit">🛏️ 設定床位狀態</span><button class="mcl" onclick="closeModal('m-bed')">✕</button></div>
-    <div class="mbody">
-      <div id="m-bed-info" style="background:var(--sf2);padding:12px;border-radius:var(--rs);margin-bottom:16px;font-size:13px"></div>
-      <div class="fg">
-        <div class="fr"><label class="flbl">床位狀態</label>
-          <select class="fi" id="m-bed-st">
-            <option value="empty">空床</option>
-            <option value="repair">維修中</option>
-            <option value="disabled">停用</option>
-          </select>
-        </div>
-        <div class="fr"><label class="flbl">備　註</label><input class="fi" id="m-bed-note" placeholder="選填"></div>
-      </div>
-    </div>
-    <div class="mft">
-      <button class="btn bp" onclick="saveBedStatus()">💾 儲存</button>
-      <button class="btn bgh" onclick="closeModal('m-bed')">取消</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: 調換學生 -->
-<div class="modal-ov" id="m-move">
-  <div class="modal">
-    <div class="mhd"><span class="mtit">🔄 調換學生床位</span><button class="mcl" onclick="closeModal('m-move')">✕</button></div>
-    <div class="mbody">
-      <div class="fg">
-        <div class="fr" style="grid-column:1/-1">
-          <label class="flbl">學生姓名 / 學號</label>
-          <input class="fi" id="m-mv-q" placeholder="輸入姓名或學號搜尋…" oninput="searchMvStu()">
-        </div>
-      </div>
-      <div id="m-mv-results" style="margin-top:10px;max-height:200px;overflow-y:auto;border:1.5px solid var(--bdr);border-radius:var(--rs);"></div>
-      <div id="m-mv-form" style="display:none;margin-top:14px;padding:14px;background:var(--sf2);border-radius:var(--rs)">
-        <div style="font-size:13px;font-weight:700;margin-bottom:10px" id="m-mv-name"></div>
-        <div class="fg">
-          <div class="fr"><label class="flbl">棟別</label>
-            <select class="fi" id="m-mv-b">
-              <option value="F1">女12F</option><option value="F2">女11F</option><option value="F3">女10F</option>
-              <option value="M1">男9F</option><option value="M2">男8F</option><option value="M3">男6F</option>
-            </select>
-          </div>
-          <div class="fr"><label class="flbl">房號</label><input class="fi" id="m-mv-r" placeholder="如：901"></div>
-          <div class="fr"><label class="flbl">床位</label>
-            <select class="fi" id="m-mv-bed">
-              <option value="1">1床</option><option value="2">2床</option><option value="3">3床</option>
-<option value="4">4床</option><option value="5">5床</option><option value="6">6床</option>
-            </select>
-          </div>
-          <div class="fr"><label class="flbl">狀態</label>
-            <select class="fi" id="m-mv-st"><option value="入住">入住</option><option value="離宿">離宿</option><option value="休學">休學</option></select>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="mft">
-      <button class="btn bp" id="m-mv-save" style="display:none" onclick="saveMove()">💾 確認調換</button>
-      <button class="btn bgh" onclick="closeModal('m-move')">取消</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: 處理違規 -->
-<div class="modal-ov" id="m-handle">
-  <div class="modal">
-    <div class="mhd"><span class="mtit">✅ 處理違規</span><button class="mcl" onclick="closeModal('m-handle')">✕</button></div>
-    <div class="mbody">
-      <div id="m-handle-info" style="background:var(--sf2);padding:12px;border-radius:var(--rs);margin-bottom:16px;font-size:13px"></div>
-      <div class="fg">
-        <div class="fr"><label class="flbl">處理結果</label>
-          <select class="fi" id="m-handle-st">
-            <option value="已處理">已處理</option>
-            <option value="記過">記過</option>
-            <option value="警告">警告</option>
-            <option value="申誡">申誡</option>
-            <option value="移送學務處">移送學務處</option>
-          </select>
-        </div>
-      </div>
-      <div class="fr" style="margin-top:12px">
-        <label class="flbl">處理說明</label>
-        <textarea class="fi" id="m-handle-note" rows="3" placeholder="說明處理過程與結果…"></textarea>
-      </div>
-    </div>
-    <div class="mft">
-      <button class="btn bg" onclick="saveHandle()">✅ 確認處理</button>
-      <button class="btn bgh" onclick="closeModal('m-handle')">取消</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- Modal: 列印篩選 -->
-<div class="modal-ov" id="m-print">
-  <div class="modal" style="max-width:480px">
-    <div class="mhd"><span class="mtit" id="m-print-title">🖨️ 列印選項</span><button class="mcl" onclick="closeModal('m-print')">✕</button></div>
-    <div class="mbody" id="m-print-body"></div>
-    <div class="mft">
-      <button class="btn bpdf" onclick="doPrint()">🖨️ 列印</button>
-      <button class="btn bgh" onclick="closeModal('m-print')">取消</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- Modal: 學生資料編輯 -->
-<div class="modal-ov" id="m-stu">
-  <div class="modal" style="max-width:600px">
-    <div class="mhd"><span class="mtit" id="m-stu-title">✏️ 編輯學生資料</span><button class="mcl" onclick="closeModal('m-stu')">✕</button></div>
-    <div class="mbody">
-      <div class="fg">
-        <div class="fr"><label class="flbl">學　號 *</label><input class="fi" id="ms-id" placeholder="如：1234567"></div>
-        <div class="fr"><label class="flbl">中文姓名 *</label><input class="fi" id="ms-name" placeholder="姓名"></div>
-        <div class="fr"><label class="flbl">英文姓名</label><input class="fi" id="ms-eng" placeholder="English Name"></div>
-        <div class="fr"><label class="flbl">班　　級</label><input class="fi" id="ms-cls" placeholder="如：觀一仁"></div>
-        <div class="fr"><label class="flbl">國　　籍</label><input class="fi" id="ms-nation" placeholder="如：越南"></div>
-        <div class="fr"><label class="flbl">性　　別</label>
-          <select class="fi" id="ms-gender">
-            <option value="">未填</option>
-            <option value="男">男</option>
-            <option value="女">女</option>
-          </select>
-        </div>
-        <div class="fr"><label class="flbl">狀　　態</label>
-          <select class="fi" id="ms-st">
-            <option value="入住">入住</option>
-            <option value="離宿">離宿</option>
-            <option value="職場實習">職場實習</option>
-            <option value="休學">休學</option>
-            <option value="退宿">退宿</option>
-          </select>
-        </div>
-        <div class="fr"><label class="flbl">棟　　別</label>
-          <select class="fi" id="ms-b">
-            <option value="">未分配</option>
-            <option value="F1">女12F</option><option value="F2">女11F</option><option value="F3">女10F</option>
-            <option value="M1">男9F</option><option value="M2">男8F</option><option value="M3">男6F</option>
-          </select>
-        </div>
-        <div class="fr"><label class="flbl">房　　號</label><input class="fi" id="ms-r" placeholder="如：1201"></div>
-        <div class="fr"><label class="flbl">床　　位</label>
-          <select class="fi" id="ms-bed">
-            <option value="">未分配</option>
-            <option value="">未分配</option>
-<option value="1">1床</option><option value="2">2床</option><option value="3">3床</option>
-<option value="4">4床</option><option value="5">5床</option><option value="6">6床</option>
-          </select>
-        </div>
-        <div class="fr"><label class="flbl">電　　話</label><input class="fi" id="ms-phone" placeholder="選填"></div>
-        <div class="fr"><label class="flbl">Email</label><input class="fi" id="ms-email" placeholder="選填"></div>
-        <div class="fr" style="grid-column:1/-1"><label class="flbl">備　　註</label><textarea class="fi" id="ms-remark" rows="2" placeholder="選填"></textarea></div>
-      </div>
-    </div>
-    <div class="mft">
-      <button class="btn bp" onclick="saveStu()">💾 儲存</button>
-      <button class="btn br" id="ms-del-btn" onclick="deleteStu()" style="display:none">🗑️ 刪除</button>
-      <button class="btn bgh" onclick="closeModal('m-stu')">取消</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- Modal: 假單修改 -->
-<div class="modal-ov" id="m-edit-lv">
-  <div class="modal" style="max-width:480px">
-    <div class="mhd"><span class="mtit">✏️ 修改假單</span><button class="mcl" onclick="closeModal('m-edit-lv')">✕</button></div>
-    <div class="mbody">
-      <div id="m-elv-info" style="background:var(--pri-l);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-size:13px;font-weight:700;color:var(--pri-d)"></div>
-      <div class="fg">
-        <div class="fr"><label class="flbl">開始日期</label><input class="fi" type="date" id="elv-sd"></div>
-        <div class="fr"><label class="flbl">開始時間</label><input class="fi" type="time" id="elv-st" step="60"></div>
-        <div class="fr"><label class="flbl">結束日期</label><input class="fi" type="date" id="elv-ed"></div>
-        <div class="fr"><label class="flbl">結束時間</label><input class="fi" type="time" id="elv-et" step="60"></div>
-        <div class="fr" style="grid-column:1/-1"><label class="flbl">假別類型</label>
-          <select class="fi" id="elv-type">
-            <option>打工</option><option>職場實習</option><option>工讀</option>
-            <option>晚歸</option><option>外宿</option><option>返鄉</option><option>病假</option><option>其它</option>
-          </select>
-        </div>
-        <div class="fr" style="grid-column:1/-1"><label class="flbl">事　由</label><input class="fi" id="elv-reason" placeholder="事由說明"></div>
-      </div>
-    </div>
-    <div class="mft">
-      <button class="btn bp" onclick="saveEditLv()">💾 儲存</button>
-      <button class="btn bgh" onclick="closeModal('m-edit-lv')">取消</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: 違規修改 -->
-<div class="modal-ov" id="m-edit-vio">
-  <div class="modal" style="max-width:480px">
-    <div class="mhd"><span class="mtit">✏️ 修改違規通報</span><button class="mcl" onclick="closeModal('m-edit-vio')">✕</button></div>
-    <div class="mbody">
-      <div id="m-evio-info" style="background:var(--red-l);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-size:13px;font-weight:700;color:var(--red)"></div>
-      <div class="fg">
-        <div class="fr"><label class="flbl">違規類別</label>
-          <select class="fi" id="evio-cat">
-            <option>違禁物品（菸酒等）</option><option>宵禁違規</option><option>打架鬥毆</option>
-            <option>財物損毀</option><option>衛生不合格</option><option>其它</option>
-          </select>
-        </div>
-        <div class="fr"><label class="flbl">嚴重程度</label>
-          <select class="fi" id="evio-lvl">
-            <option value="minor">🟡 輕微</option>
-            <option value="normal">🟠 一般</option>
-            <option value="serious">🔴 嚴重</option>
-          </select>
-        </div>
-        <div class="fr" style="grid-column:1/-1"><label class="flbl">違規描述</label><textarea class="fi" id="evio-desc" rows="3"></textarea></div>
-        <div class="fr" style="grid-column:1/-1"><label class="flbl">處理狀態</label>
-          <select class="fi" id="evio-st">
-            <option value="待處理">待處理</option><option value="已處理">已處理</option>
-            <option value="記過">記過</option><option value="警告">警告</option>
-            <option value="申誡">申誡</option><option value="移送學務處">移送學務處</option>
-          </select>
-        </div>
-        <div class="fr" style="grid-column:1/-1"><label class="flbl">處理說明</label><input class="fi" id="evio-note" placeholder="選填"></div>
-      </div>
-    </div>
-    <div class="mft">
-      <button class="btn bp" onclick="saveEditVio()">💾 儲存</button>
-      <button class="btn bgh" onclick="closeModal('m-edit-vio')">取消</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- Modal: 新增房間 -->
-<div class="modal-ov" id="m-add-room">
-  <div class="modal" style="max-width:420px">
-    <div class="mhd"><span class="mtit">➕ 新增房間</span><button class="mcl" onclick="closeModal('m-add-room')">✕</button></div>
-    <div class="mbody">
-      <div class="fg">
-        <div class="fr"><label class="flbl">棟　別</label>
-          <select class="fi" id="ar-bld"></select>
-        </div>
-        <div class="fr"><label class="flbl">房　號</label>
-          <input class="fi" id="ar-room" placeholder="如 1201"></div>
-        <div class="fr"><label class="flbl">床位數</label>
-          <select class="fi" id="ar-beds">
-            <option value="2">2 床</option><option value="3">3 床</option>
-            <option value="4" selected>4 床</option><option value="5">5 床</option>
-            <option value="6">6 床</option>
-          </select>
-        </div>
-        <div class="fr"><label class="flbl">備　註</label>
-          <input class="fi" id="ar-note" placeholder="選填"></div>
-      </div>
-    </div>
-    <div class="mft">
-      <button class="btn bp" onclick="submitAddRoom()">💾 新增</button>
-      <button class="btn bgh" onclick="closeModal('m-add-room')">取消</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: 新增/修改床位 -->
-<div class="modal-ov" id="m-add-bed">
-  <div class="modal" style="max-width:420px">
-    <div class="mhd"><span class="mtit" id="ab-title">🛏 新增床位</span><button class="mcl" onclick="closeModal('m-add-bed')">✕</button></div>
-    <div class="mbody">
-      <div id="ab-info" style="background:var(--pri-l);border-radius:var(--rs);padding:8px 12px;margin-bottom:12px;font-size:13px;font-weight:700;color:var(--pri-d)"></div>
-      <div class="fg">
-        <div class="fr"><label class="flbl">床位號</label>
-          <select class="fi" id="ab-bed">
-            <option value="A">A 床</option><option value="B">B 床</option>
-            <option value="C">C 床</option><option value="D">D 床</option>
-            <option value="E">E 床</option><option value="F">F 床</option>
-          </select>
-        </div>
-        <div class="fr"><label class="flbl">狀　態</label>
-          <select class="fi" id="ab-status">
-            <option value="empty">空床</option><option value="repair">維修中</option>
-            <option value="disabled">停用</option>
-          </select>
-        </div>
-        <div class="fr" style="grid-column:1/-1"><label class="flbl">備　註</label>
-          <input class="fi" id="ab-note" placeholder="選填"></div>
-      </div>
-    </div>
-    <div class="mft">
-      <button class="btn bp" onclick="submitAddBed()">💾 儲存</button>
-      <button class="btn bgh" onclick="closeModal('m-add-bed')">取消</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: 修改房間 -->
-<div class="modal-ov" id="m-edit-room">
-  <div class="modal" style="max-width:420px">
-    <div class="mhd"><span class="mtit">✏️ 修改房間資訊</span><button class="mcl" onclick="closeModal('m-edit-room')">✕</button></div>
-    <div class="mbody">
-      <div id="er-info" style="background:var(--amb-l);border-radius:var(--rs);padding:8px 12px;margin-bottom:12px;font-size:13px;font-weight:700;color:var(--amb)"></div>
-      <div class="fg">
-        <div class="fr"><label class="flbl">新房號</label>
-          <input class="fi" id="er-newroom" placeholder="輸入新房號"></div>
-        <div class="fr"><label class="flbl">備　註</label>
-          <input class="fi" id="er-note" placeholder="選填"></div>
-      </div>
-    </div>
-    <div class="mft">
-      <button class="btn bp" onclick="submitEditRoom()">💾 儲存</button>
-      <button class="btn br" onclick="submitDeleteRoom()" style="margin-right:auto">🗑️ 刪除房間</button>
-      <button class="btn bgh" onclick="closeModal('m-edit-room')">取消</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- Modal: 編輯帳號（管理員） -->
-<div class="modal-ov" id="m-edit-acc">
-  <div class="modal" style="max-width:440px">
-    <div class="mhd"><span class="mtit">✏️ 編輯帳號</span><button class="mcl" onclick="closeModal('m-edit-acc')">✕</button></div>
-    <div class="mbody">
-      <div id="eacc-info" style="background:var(--pri-l);border-radius:8px;padding:8px 14px;margin-bottom:14px;font-size:13px;font-weight:700;color:var(--pri-d)"></div>
-      <div class="fg">
-        <div class="fr"><label class="flbl">職務名稱</label>
-          <input class="fi" id="eacc-display"></div>
-        <div class="fr"><label class="flbl">角　色</label>
-          <select class="fi" id="eacc-role">
-            <option value="admin">系統管理員</option>
-            <option value="warden">生輔組舍監</option>
-            <option value="teacher">導師</option>
-            <option value="academic">學務處</option>
-            <option value="intern">實習處</option>
-            <option value="recruit">招生中心</option>
-          </select>
-        </div>
-        <div class="fr"><label class="flbl">班　級<small style="color:var(--slat-l)">（導師適用）</small></label>
-          <input class="fi" id="eacc-cls" placeholder="如 114A，可留空"></div>
-      </div>
-      <div style="margin-top:10px;font-size:12px;color:var(--slat-l)">💡 細部權限調整請至「系統設定」頁面</div>
-    </div>
-    <div class="mft">
-      <button class="btn bp" onclick="submitEditAcc()">💾 儲存</button>
-      <button class="btn bgh" onclick="closeModal('m-edit-acc')">取消</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- Modal: 公告編輯 -->
-<div class="modal-ov" id="m-announce">
-  <div class="modal" style="max-width:500px">
-    <div class="mhd"><span class="mtit">📢 編輯公告訊息</span><button class="mcl" onclick="closeModal('m-announce')">✕</button></div>
-    <div class="mbody">
-      <div style="font-size:12px;color:var(--slat-l);margin-bottom:8px">公告內容將顯示在所有人登入後的儀表板最上方</div>
-      <textarea id="announce-input" style="width:100%;height:160px;border:1.5px solid var(--bdr);border-radius:8px;padding:10px;font-size:13px;line-height:1.7;resize:vertical;box-sizing:border-box;font-family:inherit" placeholder="輸入公告內容，留空則不顯示公告…"></textarea>
-    </div>
-    <div class="mft">
-      <button class="btn bp" onclick="saveAnnounce()">💾 儲存公告</button>
-      <button class="btn br" onclick="clearAnnounce()">🗑️ 清除公告</button>
-      <button class="btn bgh" onclick="closeModal('m-announce')">取消</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- Modal: 產生報告 -->
-<div class="modal-ov" id="m-report">
-  <div class="modal" style="max-width:600px">
-    <div class="mhd">
-      <span class="mtit" id="m-rpt-title">📋 產生報告</span>
-      <button class="mcl" onclick="closeModal('m-report')">✕</button>
-    </div>
-    <div class="mbody">
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
-        <label style="font-size:13px;font-weight:700">日期</label>
-        <input type="date" id="m-rpt-date" class="fi" style="width:150px">
-        <button class="btn bp bsm" onclick="refreshRptModal()">🔄 重新產生</button>
-      </div>
-      <pre id="m-rpt-content" style="font-family:inherit;font-size:13px;line-height:1.8;white-space:pre-wrap;background:var(--pri-l);border-radius:8px;padding:14px;margin:0;color:var(--slat-d);max-height:55vh;overflow-y:auto">產生中…</pre>
-    </div>
-    <div class="mft">
-      <button class="btn bg" onclick="copyRptModal()">📋 複製報告</button>
-      <button class="btn bgh" onclick="closeModal('m-report')">關閉</button>
-    </div>
-  </div>
-</div>
-
-<div id="toast"></div>
-
-<script>
+<script defer>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbw4Wlq3t5SO12e7Cs8bNgZyWgmvag1V6IB4t-RqMtJY9r0YbudMPAdHvqj-tZXrjac/exec';
 
 const BLDS   = ['F1','F2','F3','M1','M2','M3'];
@@ -1135,7 +311,7 @@ async function doLogin(){
 }
 function showLE(m){const e=document.getElementById('lerr');e.textContent=m;e.style.display='block';}
 function doLogout(){localStorage.removeItem('gt');localStorage.removeItem('gu');location.reload();}
-document.addEventListener('DOMContentLoaded',function(){document.getElementById('ip').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});});
+document.getElementById('ip').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 
 (function auto(){
   const t=localStorage.getItem('gt'),u=localStorage.getItem('gu');
@@ -4030,5 +3206,829 @@ function setSyncOK(ok){document.getElementById('sdot').className='sdot'+(ok?'':'
 let _tt=null;
 function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>e.classList.remove('show'),3000);}
 </script>
+</head>
+<body>
+<!-- LOGIN -->
+<div id="scr-login">
+  <div class="lbox">
+    <div class="llogo"><div class="icon">🏫</div><h1>樹人家商<br>僑生宿舍管理系統</h1><p>v4.0</p></div>
+    <div class="lerr" id="lerr"></div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="fr"><label class="flbl">帳　號</label><input class="fi" id="iu" placeholder="輸入帳號" autocomplete="username"></div>
+      <div class="fr"><label class="flbl">密　碼</label><input class="fi" id="ip" type="password" placeholder="輸入密碼" autocomplete="current-password"></div>
+      <button class="btn bp" style="width:100%;padding:11px;margin-top:4px" onclick="doLogin()">登　入</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="sb-ov" id="sb-ov" onclick="closeSB()"></div>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-logo"><h1>🏠 僑生宿舍</h1><p>樹人家商管理系統</p></div>
+      <div class="sb-user">
+        <div class="sb-av" id="u-av">A</div>
+        <div><div class="sb-un" id="u-nm">—</div><div class="sb-ur" id="u-rl">—</div></div>
+      </div>
+      <nav id="mnav">
+        <div class="ni on"  data-pg="dash"       onclick="navTo('dash')">     <span class="ico">📊</span>儀表板</div>
+        <div class="ni"     data-pg="roll"        onclick="navTo('roll')">     <span class="ico">📋</span>點名作業</div>
+        <div class="ni"     data-pg="students"    onclick="navTo('students')"> <span class="ico">👥</span>僑生管理</div>
+        <div class="ni"     data-pg="leaves"      onclick="navTo('leaves')">   <span class="ico">📝</span>請假管理<span class="nbadge" id="nb-lv">0</span></div>
+        <div class="ni"     data-pg="score"       onclick="navTo('score')">    <span class="ico">🏆</span>內務評分</div>
+        <div class="ni"     data-pg="beds"        onclick="navTo('beds')">     <span class="ico">🛏️</span>床位管理</div>
+        <div class="ni"     data-pg="violations"  onclick="navTo('violations')"><span class="ico">🚨</span>違規通報<span class="nbadge" id="nb-vio">0</span></div>
+        <div class="ni"     data-pg="accounts"    onclick="navTo('accounts')"> <span class="ico">👤</span>帳號管理</div>
+        <div class="ni"     data-pg="sysconfig"   onclick="navTo('sysconfig')" id="nav-sysconfig"> <span class="ico">⚙️</span>系統設定</div>
+        <div class="ni"     data-pg="report"      onclick="navTo('report')"    id="nav-report">    <span class="ico">📢</span>報告訊息</div>
+      </nav>
+      <div class="sb-ft">
+        <div class="sync-row"><span class="sdot" id="sdot"></span><span class="stxt" id="stxt">連線中…</span></div>
+        <button class="btn-lo" onclick="doLogout()">登出</button>
+      </div>
+    </aside>
+    <div class="main">
+      <div class="topbar">
+        <button class="mtog" onclick="openSB()">☰</button>
+        <span class="tbtitle" id="tbtit">儀表板</span>
+        <div class="tbright"><button class="sync-btn" onclick="refreshAll()">🔄 同步</button></div>
+      </div>
+      <div class="content">
+
+        <!-- 儀表板 -->
+        <div class="pg on" id="pg-dash">
+          <!-- 公告欄 -->
+          <div id="announce-card" style="display:none;margin-bottom:14px">
+            <div style="background:linear-gradient(135deg,#1e3a8a,#2563eb);border-radius:12px;padding:14px 18px;color:#fff;position:relative">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <span style="font-size:16px">📢</span>
+                <span style="font-weight:800;font-size:14px">宿舍公告</span>
+                <span id="announce-date" style="font-size:11px;opacity:.7;margin-left:auto"></span>
+                <button id="announce-edit-btn" onclick="openAnnounceEdit()" style="display:none;background:rgba(255,255,255,.2);border:none;color:#fff;padding:3px 10px;border-radius:99px;font-size:11px;cursor:pointer">✏️ 編輯</button>
+              </div>
+              <div id="announce-content" style="font-size:13px;line-height:1.7;white-space:pre-wrap"></div>
+            </div>
+          </div>
+          <div id="dash-sg" class="sg"></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px">
+            <div class="card"><div class="chd"><span class="ctitle">🏢 各棟入住率</span></div><div class="cbody"><div id="dash-pb" class="pb-wrap"></div></div></div>
+            <div class="card"><div class="chd"><span class="ctitle">⏳ 待審假單</span></div><div class="cbody"><div id="dash-pend"></div></div></div>
+            <div class="card"><div class="chd"><span class="ctitle">🚨 待處理違規</span></div><div class="cbody"><div id="dash-vio"></div></div></div>
+          </div>
+        </div>
+
+        <!-- 點名 -->
+        <div class="pg" id="pg-roll">
+          <div class="card">
+            <div class="chd">
+              <span class="ctitle">📋 點名作業</span>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="btn bpdf bsm" onclick="openPrintModal('roll')">🖨️ 列印</button>
+                <button class="btn bg   bsm" onclick="openRptModal('roll')">📋 產生報告</button>
+                <button class="btn bp   bsm" onclick="submitRoll()">💾 儲存</button>
+              </div>
+            </div>
+            <div class="cbody">
+              <div id="roll-blds" class="btabs"></div>
+              <div id="roll-content"><div class="loading"><div class="spin"></div>載入中…</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 僑生 -->
+        <div class="pg" id="pg-students">
+          <!-- 未安排床位 / 職場實習 -->
+          <div class="card" id="stu-unassigned-card">
+            <div class="chd">
+              <span class="ctitle">⚠️ 未安排床位 / 職場實習</span>
+              <span id="stu-unassigned-count" style="font-size:12px;color:var(--slat-l)"></span>
+            </div>
+            <div class="cbody" id="stu-unassigned"></div>
+          </div>
+          <div class="card">
+            <div class="chd">
+              <span class="ctitle">👥 僑生管理</span>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+                <input class="fi" id="stu-q" placeholder="🔍 搜尋姓名/學號/班級…" style="width:180px" oninput="renderStudents()">
+                <button class="btn bp bsm" onclick="openStuModal(null)" id="stu-add-btn" style="display:none">➕ 新增學生</button>
+              </div>
+            </div>
+            <div class="cbody">
+              <div id="stu-blds" class="btabs"></div>
+              <div id="stu-content"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 請假 -->
+        <div class="pg" id="pg-leaves">
+          <div class="card" id="lv-apply-card" style="display:none">
+            <div class="chd"><span class="ctitle">➕ 申請假單</span></div>
+            <div class="cbody">
+              <div class="fg">
+                <div class="fr"><label class="flbl">班　級</label><select class="fi" id="lv-cls" onchange="loadLvStus()"></select></div>
+                <div class="fr"><label class="flbl">請假類別</label>
+                  <select class="fi" id="lv-type" onchange="showFlowHint()">
+                    <option>打工</option><option>職場實習</option><option>工讀</option>
+                    <option>晚歸</option><option>外宿</option><option>返鄉</option>
+                    <option>病假</option><option>其它</option>
+                  </select>
+                </div>
+                <div class="fr"><label class="flbl">開始日期</label><input class="fi" type="date" id="lv-sd"></div>
+                <div class="fr"><label class="flbl">開始時間</label><input class="fi" type="time" id="lv-st" step="60"></div>
+                <div class="fr"><label class="flbl">結束日期</label><input class="fi" type="date" id="lv-ed"></div>
+                <div class="fr"><label class="flbl">結束時間</label><input class="fi" type="time" id="lv-et" step="60"></div>
+              </div>
+              <div id="lv-hint" style="margin-top:10px;padding:8px 12px;background:var(--pri-l);border-radius:var(--rs);font-size:12px;color:var(--pri-d);font-weight:600"></div>
+              <div class="fr" style="margin-top:12px">
+                <label class="flbl">請假學生（勾選）</label>
+                <div style="margin:6px 0;display:flex;align-items:center;gap:8px">
+                  <button type="button" class="btn bgh bsm" onclick="lvAll()">☑ 全選</button>
+                  <button type="button" class="btn bgh bsm" onclick="lvNone()">☐ 清除</button>
+                  <span id="lv-cnt" style="font-size:13px;color:var(--pri);font-weight:700"></span>
+                </div>
+                <div id="lv-checks" style="border:1.5px solid var(--bdr);border-radius:var(--rs);max-height:220px;overflow-y:auto;padding:6px 10px;background:#fff;display:flex;flex-direction:column;gap:2px">
+                  <span style="color:var(--slat-l);font-size:13px;padding:8px 0">← 請先選擇班級</span>
+                </div>
+              </div>
+              <div class="fr" style="margin-top:12px">
+                <label class="flbl">請假事由（選填）</label>
+                <textarea class="fi" id="lv-reason" rows="2"></textarea>
+              </div>
+              <div style="margin-top:14px"><button class="btn bp" id="lv-btn" onclick="submitLeave()">提交假單</button></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="chd">
+              <span class="ctitle">📄 假單列表</span>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="btn btd  bsm" onclick="showTodayModal()">📅 今日名單</button>
+                <button class="btn bg   bsm" onclick="openRptModal('leave')">📋 產生報告</button>
+                <button class="btn bpdf bsm" onclick="openPrintModal('leaves')">🖨️ 列印篩選</button>
+              </div>
+            </div>
+            <div class="cbody">
+              <div class="tabs" id="lv-tabs"></div>
+              <div id="lv-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 環境衛生評核 -->
+        <div class="pg" id="pg-score">
+          <!-- 頂部操作列 -->
+          <div class="card" style="margin-bottom:12px">
+            <div class="chd">
+              <span class="ctitle">🏆 環境衛生評核</span>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+                <select class="fi bsm" id="sc-date" style="width:130px"></select>
+                <input class="fi bsm" id="sc-ins" placeholder="評核人員" style="width:110px" value="">
+                <span id="sc-save-btn"></span>
+                <button class="btn bg   bsm" onclick="openRptModal('score')">📋 產生報告</button>
+                <button class="btn bpdf bsm" onclick="openPrintModal('score')">🖨️ 列印</button>
+              </div>
+            </div>
+            <div class="cbody" style="padding-top:8px">
+              <div id="sc-blds" class="btabs"></div>
+              <!-- 統計列 -->
+              <div id="sc-summary" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;font-size:12px"></div>
+            </div>
+          </div>
+          <!-- 房間卡片區 -->
+          <div id="sc-rooms-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px"></div>
+          <!-- 評核紀錄 -->
+          <div class="card" style="margin-top:12px">
+            <div class="chd"><span class="ctitle">📊 評核紀錄</span>
+              <button class="btn bgh bsm" onclick="renderScHist()">🔄 重整</button>
+            </div>
+            <div class="cbody" id="sc-hist"></div>
+          </div>
+        </div>
+
+        <!-- 床位管理 -->
+        <div class="pg" id="pg-beds">
+          <div class="card">
+            <div class="chd">
+              <span class="ctitle">🛏️ 床位管理</span>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="btn bp bsm" onclick="openMoveModal()">🔄 調換學生床位</button>
+                <button class="btn bg bsm" id="btn-add-room" onclick="openAddRoomModal()" style="display:none">➕ 新增房間</button>
+                <button class="btn bgh bsm" id="btn-add-bed" onclick="openAddBedModal()" style="display:none">🛏 新增床位</button>
+              </div>
+            </div>
+            <div class="cbody">
+              <div id="bed-blds" class="btabs"></div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;font-size:12px">
+                <span style="display:flex;align-items:center;gap:4px"><span class="bed-stat bst-occ">⬤</span>入住</span>
+                <span style="display:flex;align-items:center;gap:4px"><span class="bed-stat bst-empty">⬤</span>空床</span>
+                <span style="display:flex;align-items:center;gap:4px"><span class="bed-stat bst-repair">⬤</span>維修</span>
+                <span style="display:flex;align-items:center;gap:4px"><span class="bed-stat bst-disabled">⬤</span>停用</span>
+                <span style="display:flex;align-items:center;gap:4px"><span class="bed-stat bst-out">⬤</span>離宿</span>
+              </div>
+              <div id="bed-content"><div class="loading"><div class="spin"></div>載入中…</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 違規通報 -->
+        <div class="pg" id="pg-violations">
+          <div class="card" id="vio-report-card">
+            <div class="chd"><span class="ctitle">📣 新增違規通報</span></div>
+            <div class="cbody">
+              <div class="fg">
+                <div class="fr"><label class="flbl">班　級</label><select class="fi" id="vio-cls" onchange="loadVioStus()"></select></div>
+                <div class="fr"><label class="flbl">違規類別</label>
+                  <select class="fi" id="vio-cat">
+                    <option>違禁物品（菸酒等）</option><option>宵禁違規</option>
+                    <option>打架鬥毆</option><option>財物損毀</option>
+                    <option>衛生不合格</option><option>其它</option>
+                  </select>
+                </div>
+                <div class="fr"><label class="flbl">嚴重程度</label>
+                  <select class="fi" id="vio-lvl">
+                    <option value="minor">輕微</option>
+                    <option value="normal" selected>一般</option>
+                    <option value="serious">嚴重</option>
+                  </select>
+                </div>
+              </div>
+              <div class="fr" style="margin-top:12px">
+                <label class="flbl">涉及學生（勾選，可多選）</label>
+                <div style="margin:6px 0;display:flex;gap:8px">
+                  <button type="button" class="btn bgh bsm" onclick="vioAll()">☑ 全選</button>
+                  <button type="button" class="btn bgh bsm" onclick="vioNone()">☐ 清除</button>
+                  <span id="vio-cnt" style="font-size:13px;color:var(--red);font-weight:700"></span>
+                </div>
+                <div id="vio-checks" style="border:1.5px solid var(--bdr);border-radius:var(--rs);max-height:200px;overflow-y:auto;padding:6px 10px;background:#fff;display:flex;flex-direction:column;gap:2px">
+                  <span style="color:var(--slat-l);font-size:13px;padding:8px 0">← 請先選擇班級</span>
+                </div>
+              </div>
+              <div class="fr" style="margin-top:12px">
+                <label class="flbl">違規描述</label>
+                <textarea class="fi" id="vio-desc" rows="3" placeholder="詳細描述違規情況…"></textarea>
+              </div>
+              <div style="margin-top:14px"><button class="btn bpin" onclick="submitViolation()">📣 提交通報</button></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="chd">
+              <span class="ctitle">📋 違規紀錄</span>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="btn bg   bsm" onclick="openRptModal('vio')">📋 產生報告</button>
+                <button class="btn bpdf bsm" onclick="openPrintModal('violations')">🖨️ 列印篩選</button>
+              </div>
+            </div>
+            <div class="cbody">
+              <div class="tabs" id="vio-tabs"></div>
+              <div id="vio-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 帳號管理 -->
+        <div class="pg" id="pg-accounts">
+          <div class="card" id="acc-create-card">
+            <div class="chd"><span class="ctitle">➕ 新增帳號</span></div>
+            <div class="cbody">
+              <div class="fg">
+                <div class="fr"><label class="flbl">登入帳號（英文）</label><input class="fi" id="acc-uname" placeholder="如：principal01"></div>
+                <div class="fr"><label class="flbl">職務名稱（中文）</label><input class="fi" id="acc-display" placeholder="如：校長"></div>
+                <div class="fr"><label class="flbl">角　色</label>
+                  <select class="fi" id="acc-role">
+                    <option value="admin">系統管理員</option>
+                    <option value="warden">生輔組舍監</option>
+                    <option value="teacher" selected>導師</option>
+                    <option value="academic">學務處</option>
+                    <option value="intern">實習處</option>
+                    <option value="recruit">招生中心</option>
+                  </select>
+                </div>
+                <div class="fr"><label class="flbl">初始密碼（選填）</label><input class="fi" id="acc-initpwd" placeholder="預設：Welcome@1234"></div>
+              </div>
+              <div style="margin-top:6px;font-size:12px;color:var(--slat-l)">💡 初始密碼若不填則預設為 Welcome@1234，使用者登入後請自行修改</div>
+              <div style="margin-top:14px"><button class="btn bp" onclick="createAccount()">✅ 建立帳號</button></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="chd"><span class="ctitle">👤 帳號列表</span><button class="btn bgh bsm" onclick="loadAccounts()">🔄 重新整理</button></div>
+            <div class="cbody" id="acc-list"><div class="loading"><div class="spin"></div>載入中…</div></div>
+          </div>
+          <div class="card">
+            <div class="chd"><span class="ctitle">🔑 修改我的密碼</span></div>
+            <div class="cbody">
+              <div class="fg">
+                <div class="fr"><label class="flbl">舊　密　碼</label><input class="fi" type="password" id="pwd-old" placeholder="輸入目前密碼"></div>
+                <div class="fr"><label class="flbl">新　密　碼</label><input class="fi" type="password" id="pwd-new" placeholder="至少 6 碼"></div>
+                <div class="fr"><label class="flbl">確認新密碼</label><input class="fi" type="password" id="pwd-cfm" placeholder="再輸入一次"></div>
+              </div>
+              <div style="margin-top:14px"><button class="btn bp" onclick="changeOwnPwd()">🔑 確認修改</button></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 系統設定 -->
+        <div class="pg" id="pg-sysconfig">
+          <!-- 帳號權限管理 -->
+          <div class="card" style="margin-bottom:14px">
+            <div class="chd">
+              <span class="ctitle">🔐 帳號權限管理</span>
+              <button class="btn bgh bsm" onclick="loadAccPerms()">🔄 重新整理</button>
+            </div>
+            <div class="cbody" id="perm-list"><div class="loading"><div class="spin"></div>載入中…</div></div>
+          </div>
+          <!-- 准假流程設定 -->
+          <div class="card" style="margin-bottom:14px">
+            <div class="chd"><span class="ctitle">📋 假單流程設定</span></div>
+            <div class="cbody">
+              <div style="font-size:12px;color:var(--slat-l);margin-bottom:12px">設定各假別需要哪些單位審核（可多選，順序為審核順序）</div>
+              <div id="flow-settings"></div>
+              <div style="margin-top:14px"><button class="btn bp" onclick="saveFlowSettings()">💾 儲存流程設定</button></div>
+            </div>
+          </div>
+          <!-- 准假天數上限 -->
+          <div class="card" style="margin-bottom:14px">
+            <div class="chd"><span class="ctitle">📅 准假天數上限</span></div>
+            <div class="cbody">
+              <div style="font-size:12px;color:var(--slat-l);margin-bottom:12px">設定各假別單次申請最多幾天（0 = 不限制）</div>
+              <div id="maxdays-settings" class="fg"></div>
+              <div style="margin-top:14px"><button class="btn bp" onclick="saveMaxDays()">💾 儲存天數設定</button></div>
+            </div>
+          </div>
+          <!-- 班級導師對應 -->
+          <div class="card">
+            <div class="chd"><span class="ctitle">🏫 班級導師對應</span></div>
+            <div class="cbody">
+              <div style="font-size:12px;color:var(--slat-l);margin-bottom:10px">設定每個班級對應的導師帳號（導師只能看到自己班級的假單）</div>
+              <div id="cls-teacher-map"></div>
+              <div style="margin-top:14px"><button class="btn bp" onclick="saveClsTeacher()">💾 儲存對應設定</button></div>
+            </div>
+          </div>
+        </div>
+        <!-- ↑ pg-sysconfig 結束 -->
+
+        <!-- 報告訊息 -->
+        <div class="pg" id="pg-report">
+          <div class="card" style="margin-bottom:14px">
+            <div class="chd">
+              <span class="ctitle">📢 一鍵報告訊息</span>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <label style="font-size:13px;font-weight:700">日期</label>
+                <input type="date" id="rpt-date" class="fi" style="width:150px" onchange="generateReports()">
+                <button class="btn bp bsm" onclick="generateReports()">🔄 重新產生</button>
+              </div>
+            </div>
+          </div>
+          <!-- 點名報告 -->
+          <div class="card" style="margin-bottom:14px" id="rpt-roll-card">
+            <div class="chd">
+              <span class="ctitle">📋 點名狀況報告</span>
+              <button class="btn bg bsm" onclick="copyReport('rpt-roll-txt')">📋 複製</button>
+            </div>
+            <div class="cbody">
+              <pre id="rpt-roll-txt" style="font-family:inherit;font-size:13px;line-height:1.8;white-space:pre-wrap;background:var(--pri-l);border-radius:8px;padding:14px;margin:0;color:var(--slat-d)">產生中…</pre>
+            </div>
+          </div>
+          <!-- 評核報告 -->
+          <div class="card" style="margin-bottom:14px" id="rpt-score-card">
+            <div class="chd">
+              <span class="ctitle">🏆 環境評核報告</span>
+              <button class="btn bg bsm" onclick="copyReport('rpt-score-txt')">📋 複製</button>
+            </div>
+            <div class="cbody">
+              <pre id="rpt-score-txt" style="font-family:inherit;font-size:13px;line-height:1.8;white-space:pre-wrap;background:var(--pri-l);border-radius:8px;padding:14px;margin:0;color:var(--slat-d)">產生中…</pre>
+            </div>
+          </div>
+          <!-- 請假報告 -->
+          <div class="card" style="margin-bottom:14px" id="rpt-leave-card">
+            <div class="chd">
+              <span class="ctitle">📝 請假人員報告</span>
+              <button class="btn bg bsm" onclick="copyReport('rpt-leave-txt')">📋 複製</button>
+            </div>
+            <div class="cbody">
+              <pre id="rpt-leave-txt" style="font-family:inherit;font-size:13px;line-height:1.8;white-space:pre-wrap;background:var(--pri-l);border-radius:8px;padding:14px;margin:0;color:var(--slat-d)">產生中…</pre>
+            </div>
+          </div>
+          <!-- 違規報告 -->
+          <div class="card" style="margin-bottom:14px" id="rpt-vio-card">
+            <div class="chd">
+              <span class="ctitle">🚨 違規通報報告</span>
+              <button class="btn bg bsm" onclick="copyReport('rpt-vio-txt')">📋 複製</button>
+            </div>
+            <div class="cbody">
+              <pre id="rpt-vio-txt" style="font-family:inherit;font-size:13px;line-height:1.8;white-space:pre-wrap;background:var(--pri-l);border-radius:8px;padding:14px;margin:0;color:var(--slat-d)">產生中…</pre>
+            </div>
+          </div>
+          <!-- 全部複製 -->
+          <div style="text-align:center;margin-top:4px">
+            <button class="btn bp" onclick="copyAllReports()" style="padding:10px 32px;font-size:14px">📋 複製全部報告</button>
+          </div>
+        </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: 今日假單 -->
+<div class="modal-ov" id="m-today">
+  <div class="modal">
+    <div class="mhd"><span class="mtit">📅 今日請假名單</span><button class="mcl" onclick="closeModal('m-today')">✕</button></div>
+    <div class="mbody" id="m-today-body"></div>
+    <div class="mft">
+      <button class="btn bpdf" onclick="printElem('m-today-body','今日請假名單')">🖨️ 列印</button>
+      <button class="btn bgh"  onclick="closeModal('m-today')">關閉</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: 床位設定 -->
+<div class="modal-ov" id="m-bed">
+  <div class="modal">
+    <div class="mhd"><span class="mtit">🛏️ 設定床位狀態</span><button class="mcl" onclick="closeModal('m-bed')">✕</button></div>
+    <div class="mbody">
+      <div id="m-bed-info" style="background:var(--sf2);padding:12px;border-radius:var(--rs);margin-bottom:16px;font-size:13px"></div>
+      <div class="fg">
+        <div class="fr"><label class="flbl">床位狀態</label>
+          <select class="fi" id="m-bed-st">
+            <option value="empty">空床</option>
+            <option value="repair">維修中</option>
+            <option value="disabled">停用</option>
+          </select>
+        </div>
+        <div class="fr"><label class="flbl">備　註</label><input class="fi" id="m-bed-note" placeholder="選填"></div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn bp" onclick="saveBedStatus()">💾 儲存</button>
+      <button class="btn bgh" onclick="closeModal('m-bed')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: 調換學生 -->
+<div class="modal-ov" id="m-move">
+  <div class="modal">
+    <div class="mhd"><span class="mtit">🔄 調換學生床位</span><button class="mcl" onclick="closeModal('m-move')">✕</button></div>
+    <div class="mbody">
+      <div class="fg">
+        <div class="fr" style="grid-column:1/-1">
+          <label class="flbl">學生姓名 / 學號</label>
+          <input class="fi" id="m-mv-q" placeholder="輸入姓名或學號搜尋…" oninput="searchMvStu()">
+        </div>
+      </div>
+      <div id="m-mv-results" style="margin-top:10px;max-height:200px;overflow-y:auto;border:1.5px solid var(--bdr);border-radius:var(--rs);"></div>
+      <div id="m-mv-form" style="display:none;margin-top:14px;padding:14px;background:var(--sf2);border-radius:var(--rs)">
+        <div style="font-size:13px;font-weight:700;margin-bottom:10px" id="m-mv-name"></div>
+        <div class="fg">
+          <div class="fr"><label class="flbl">棟別</label>
+            <select class="fi" id="m-mv-b">
+              <option value="F1">女12F</option><option value="F2">女11F</option><option value="F3">女10F</option>
+              <option value="M1">男9F</option><option value="M2">男8F</option><option value="M3">男6F</option>
+            </select>
+          </div>
+          <div class="fr"><label class="flbl">房號</label><input class="fi" id="m-mv-r" placeholder="如：901"></div>
+          <div class="fr"><label class="flbl">床位</label>
+            <select class="fi" id="m-mv-bed">
+              <option value="1">1床</option><option value="2">2床</option><option value="3">3床</option>
+<option value="4">4床</option><option value="5">5床</option><option value="6">6床</option>
+            </select>
+          </div>
+          <div class="fr"><label class="flbl">狀態</label>
+            <select class="fi" id="m-mv-st"><option value="入住">入住</option><option value="離宿">離宿</option><option value="休學">休學</option></select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn bp" id="m-mv-save" style="display:none" onclick="saveMove()">💾 確認調換</button>
+      <button class="btn bgh" onclick="closeModal('m-move')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: 處理違規 -->
+<div class="modal-ov" id="m-handle">
+  <div class="modal">
+    <div class="mhd"><span class="mtit">✅ 處理違規</span><button class="mcl" onclick="closeModal('m-handle')">✕</button></div>
+    <div class="mbody">
+      <div id="m-handle-info" style="background:var(--sf2);padding:12px;border-radius:var(--rs);margin-bottom:16px;font-size:13px"></div>
+      <div class="fg">
+        <div class="fr"><label class="flbl">處理結果</label>
+          <select class="fi" id="m-handle-st">
+            <option value="已處理">已處理</option>
+            <option value="記過">記過</option>
+            <option value="警告">警告</option>
+            <option value="申誡">申誡</option>
+            <option value="移送學務處">移送學務處</option>
+          </select>
+        </div>
+      </div>
+      <div class="fr" style="margin-top:12px">
+        <label class="flbl">處理說明</label>
+        <textarea class="fi" id="m-handle-note" rows="3" placeholder="說明處理過程與結果…"></textarea>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn bg" onclick="saveHandle()">✅ 確認處理</button>
+      <button class="btn bgh" onclick="closeModal('m-handle')">取消</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal: 列印篩選 -->
+<div class="modal-ov" id="m-print">
+  <div class="modal" style="max-width:480px">
+    <div class="mhd"><span class="mtit" id="m-print-title">🖨️ 列印選項</span><button class="mcl" onclick="closeModal('m-print')">✕</button></div>
+    <div class="mbody" id="m-print-body"></div>
+    <div class="mft">
+      <button class="btn bpdf" onclick="doPrint()">🖨️ 列印</button>
+      <button class="btn bgh" onclick="closeModal('m-print')">取消</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal: 學生資料編輯 -->
+<div class="modal-ov" id="m-stu">
+  <div class="modal" style="max-width:600px">
+    <div class="mhd"><span class="mtit" id="m-stu-title">✏️ 編輯學生資料</span><button class="mcl" onclick="closeModal('m-stu')">✕</button></div>
+    <div class="mbody">
+      <div class="fg">
+        <div class="fr"><label class="flbl">學　號 *</label><input class="fi" id="ms-id" placeholder="如：1234567"></div>
+        <div class="fr"><label class="flbl">中文姓名 *</label><input class="fi" id="ms-name" placeholder="姓名"></div>
+        <div class="fr"><label class="flbl">英文姓名</label><input class="fi" id="ms-eng" placeholder="English Name"></div>
+        <div class="fr"><label class="flbl">班　　級</label><input class="fi" id="ms-cls" placeholder="如：觀一仁"></div>
+        <div class="fr"><label class="flbl">國　　籍</label><input class="fi" id="ms-nation" placeholder="如：越南"></div>
+        <div class="fr"><label class="flbl">性　　別</label>
+          <select class="fi" id="ms-gender">
+            <option value="">未填</option>
+            <option value="男">男</option>
+            <option value="女">女</option>
+          </select>
+        </div>
+        <div class="fr"><label class="flbl">狀　　態</label>
+          <select class="fi" id="ms-st">
+            <option value="入住">入住</option>
+            <option value="離宿">離宿</option>
+            <option value="職場實習">職場實習</option>
+            <option value="休學">休學</option>
+            <option value="退宿">退宿</option>
+          </select>
+        </div>
+        <div class="fr"><label class="flbl">棟　　別</label>
+          <select class="fi" id="ms-b">
+            <option value="">未分配</option>
+            <option value="F1">女12F</option><option value="F2">女11F</option><option value="F3">女10F</option>
+            <option value="M1">男9F</option><option value="M2">男8F</option><option value="M3">男6F</option>
+          </select>
+        </div>
+        <div class="fr"><label class="flbl">房　　號</label><input class="fi" id="ms-r" placeholder="如：1201"></div>
+        <div class="fr"><label class="flbl">床　　位</label>
+          <select class="fi" id="ms-bed">
+            <option value="">未分配</option>
+            <option value="">未分配</option>
+<option value="1">1床</option><option value="2">2床</option><option value="3">3床</option>
+<option value="4">4床</option><option value="5">5床</option><option value="6">6床</option>
+          </select>
+        </div>
+        <div class="fr"><label class="flbl">電　　話</label><input class="fi" id="ms-phone" placeholder="選填"></div>
+        <div class="fr"><label class="flbl">Email</label><input class="fi" id="ms-email" placeholder="選填"></div>
+        <div class="fr" style="grid-column:1/-1"><label class="flbl">備　　註</label><textarea class="fi" id="ms-remark" rows="2" placeholder="選填"></textarea></div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn bp" onclick="saveStu()">💾 儲存</button>
+      <button class="btn br" id="ms-del-btn" onclick="deleteStu()" style="display:none">🗑️ 刪除</button>
+      <button class="btn bgh" onclick="closeModal('m-stu')">取消</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal: 假單修改 -->
+<div class="modal-ov" id="m-edit-lv">
+  <div class="modal" style="max-width:480px">
+    <div class="mhd"><span class="mtit">✏️ 修改假單</span><button class="mcl" onclick="closeModal('m-edit-lv')">✕</button></div>
+    <div class="mbody">
+      <div id="m-elv-info" style="background:var(--pri-l);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-size:13px;font-weight:700;color:var(--pri-d)"></div>
+      <div class="fg">
+        <div class="fr"><label class="flbl">開始日期</label><input class="fi" type="date" id="elv-sd"></div>
+        <div class="fr"><label class="flbl">開始時間</label><input class="fi" type="time" id="elv-st" step="60"></div>
+        <div class="fr"><label class="flbl">結束日期</label><input class="fi" type="date" id="elv-ed"></div>
+        <div class="fr"><label class="flbl">結束時間</label><input class="fi" type="time" id="elv-et" step="60"></div>
+        <div class="fr" style="grid-column:1/-1"><label class="flbl">假別類型</label>
+          <select class="fi" id="elv-type">
+            <option>打工</option><option>職場實習</option><option>工讀</option>
+            <option>晚歸</option><option>外宿</option><option>返鄉</option><option>病假</option><option>其它</option>
+          </select>
+        </div>
+        <div class="fr" style="grid-column:1/-1"><label class="flbl">事　由</label><input class="fi" id="elv-reason" placeholder="事由說明"></div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn bp" onclick="saveEditLv()">💾 儲存</button>
+      <button class="btn bgh" onclick="closeModal('m-edit-lv')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: 違規修改 -->
+<div class="modal-ov" id="m-edit-vio">
+  <div class="modal" style="max-width:480px">
+    <div class="mhd"><span class="mtit">✏️ 修改違規通報</span><button class="mcl" onclick="closeModal('m-edit-vio')">✕</button></div>
+    <div class="mbody">
+      <div id="m-evio-info" style="background:var(--red-l);border-radius:var(--rs);padding:10px 14px;margin-bottom:14px;font-size:13px;font-weight:700;color:var(--red)"></div>
+      <div class="fg">
+        <div class="fr"><label class="flbl">違規類別</label>
+          <select class="fi" id="evio-cat">
+            <option>違禁物品（菸酒等）</option><option>宵禁違規</option><option>打架鬥毆</option>
+            <option>財物損毀</option><option>衛生不合格</option><option>其它</option>
+          </select>
+        </div>
+        <div class="fr"><label class="flbl">嚴重程度</label>
+          <select class="fi" id="evio-lvl">
+            <option value="minor">🟡 輕微</option>
+            <option value="normal">🟠 一般</option>
+            <option value="serious">🔴 嚴重</option>
+          </select>
+        </div>
+        <div class="fr" style="grid-column:1/-1"><label class="flbl">違規描述</label><textarea class="fi" id="evio-desc" rows="3"></textarea></div>
+        <div class="fr" style="grid-column:1/-1"><label class="flbl">處理狀態</label>
+          <select class="fi" id="evio-st">
+            <option value="待處理">待處理</option><option value="已處理">已處理</option>
+            <option value="記過">記過</option><option value="警告">警告</option>
+            <option value="申誡">申誡</option><option value="移送學務處">移送學務處</option>
+          </select>
+        </div>
+        <div class="fr" style="grid-column:1/-1"><label class="flbl">處理說明</label><input class="fi" id="evio-note" placeholder="選填"></div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn bp" onclick="saveEditVio()">💾 儲存</button>
+      <button class="btn bgh" onclick="closeModal('m-edit-vio')">取消</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal: 新增房間 -->
+<div class="modal-ov" id="m-add-room">
+  <div class="modal" style="max-width:420px">
+    <div class="mhd"><span class="mtit">➕ 新增房間</span><button class="mcl" onclick="closeModal('m-add-room')">✕</button></div>
+    <div class="mbody">
+      <div class="fg">
+        <div class="fr"><label class="flbl">棟　別</label>
+          <select class="fi" id="ar-bld"></select>
+        </div>
+        <div class="fr"><label class="flbl">房　號</label>
+          <input class="fi" id="ar-room" placeholder="如 1201"></div>
+        <div class="fr"><label class="flbl">床位數</label>
+          <select class="fi" id="ar-beds">
+            <option value="2">2 床</option><option value="3">3 床</option>
+            <option value="4" selected>4 床</option><option value="5">5 床</option>
+            <option value="6">6 床</option>
+          </select>
+        </div>
+        <div class="fr"><label class="flbl">備　註</label>
+          <input class="fi" id="ar-note" placeholder="選填"></div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn bp" onclick="submitAddRoom()">💾 新增</button>
+      <button class="btn bgh" onclick="closeModal('m-add-room')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: 新增/修改床位 -->
+<div class="modal-ov" id="m-add-bed">
+  <div class="modal" style="max-width:420px">
+    <div class="mhd"><span class="mtit" id="ab-title">🛏 新增床位</span><button class="mcl" onclick="closeModal('m-add-bed')">✕</button></div>
+    <div class="mbody">
+      <div id="ab-info" style="background:var(--pri-l);border-radius:var(--rs);padding:8px 12px;margin-bottom:12px;font-size:13px;font-weight:700;color:var(--pri-d)"></div>
+      <div class="fg">
+        <div class="fr"><label class="flbl">床位號</label>
+          <select class="fi" id="ab-bed">
+            <option value="A">A 床</option><option value="B">B 床</option>
+            <option value="C">C 床</option><option value="D">D 床</option>
+            <option value="E">E 床</option><option value="F">F 床</option>
+          </select>
+        </div>
+        <div class="fr"><label class="flbl">狀　態</label>
+          <select class="fi" id="ab-status">
+            <option value="empty">空床</option><option value="repair">維修中</option>
+            <option value="disabled">停用</option>
+          </select>
+        </div>
+        <div class="fr" style="grid-column:1/-1"><label class="flbl">備　註</label>
+          <input class="fi" id="ab-note" placeholder="選填"></div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn bp" onclick="submitAddBed()">💾 儲存</button>
+      <button class="btn bgh" onclick="closeModal('m-add-bed')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: 修改房間 -->
+<div class="modal-ov" id="m-edit-room">
+  <div class="modal" style="max-width:420px">
+    <div class="mhd"><span class="mtit">✏️ 修改房間資訊</span><button class="mcl" onclick="closeModal('m-edit-room')">✕</button></div>
+    <div class="mbody">
+      <div id="er-info" style="background:var(--amb-l);border-radius:var(--rs);padding:8px 12px;margin-bottom:12px;font-size:13px;font-weight:700;color:var(--amb)"></div>
+      <div class="fg">
+        <div class="fr"><label class="flbl">新房號</label>
+          <input class="fi" id="er-newroom" placeholder="輸入新房號"></div>
+        <div class="fr"><label class="flbl">備　註</label>
+          <input class="fi" id="er-note" placeholder="選填"></div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn bp" onclick="submitEditRoom()">💾 儲存</button>
+      <button class="btn br" onclick="submitDeleteRoom()" style="margin-right:auto">🗑️ 刪除房間</button>
+      <button class="btn bgh" onclick="closeModal('m-edit-room')">取消</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal: 編輯帳號（管理員） -->
+<div class="modal-ov" id="m-edit-acc">
+  <div class="modal" style="max-width:440px">
+    <div class="mhd"><span class="mtit">✏️ 編輯帳號</span><button class="mcl" onclick="closeModal('m-edit-acc')">✕</button></div>
+    <div class="mbody">
+      <div id="eacc-info" style="background:var(--pri-l);border-radius:8px;padding:8px 14px;margin-bottom:14px;font-size:13px;font-weight:700;color:var(--pri-d)"></div>
+      <div class="fg">
+        <div class="fr"><label class="flbl">職務名稱</label>
+          <input class="fi" id="eacc-display"></div>
+        <div class="fr"><label class="flbl">角　色</label>
+          <select class="fi" id="eacc-role">
+            <option value="admin">系統管理員</option>
+            <option value="warden">生輔組舍監</option>
+            <option value="teacher">導師</option>
+            <option value="academic">學務處</option>
+            <option value="intern">實習處</option>
+            <option value="recruit">招生中心</option>
+          </select>
+        </div>
+        <div class="fr"><label class="flbl">班　級<small style="color:var(--slat-l)">（導師適用）</small></label>
+          <input class="fi" id="eacc-cls" placeholder="如 114A，可留空"></div>
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:var(--slat-l)">💡 細部權限調整請至「系統設定」頁面</div>
+    </div>
+    <div class="mft">
+      <button class="btn bp" onclick="submitEditAcc()">💾 儲存</button>
+      <button class="btn bgh" onclick="closeModal('m-edit-acc')">取消</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal: 公告編輯 -->
+<div class="modal-ov" id="m-announce">
+  <div class="modal" style="max-width:500px">
+    <div class="mhd"><span class="mtit">📢 編輯公告訊息</span><button class="mcl" onclick="closeModal('m-announce')">✕</button></div>
+    <div class="mbody">
+      <div style="font-size:12px;color:var(--slat-l);margin-bottom:8px">公告內容將顯示在所有人登入後的儀表板最上方</div>
+      <textarea id="announce-input" style="width:100%;height:160px;border:1.5px solid var(--bdr);border-radius:8px;padding:10px;font-size:13px;line-height:1.7;resize:vertical;box-sizing:border-box;font-family:inherit" placeholder="輸入公告內容，留空則不顯示公告…"></textarea>
+    </div>
+    <div class="mft">
+      <button class="btn bp" onclick="saveAnnounce()">💾 儲存公告</button>
+      <button class="btn br" onclick="clearAnnounce()">🗑️ 清除公告</button>
+      <button class="btn bgh" onclick="closeModal('m-announce')">取消</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal: 產生報告 -->
+<div class="modal-ov" id="m-report">
+  <div class="modal" style="max-width:600px">
+    <div class="mhd">
+      <span class="mtit" id="m-rpt-title">📋 產生報告</span>
+      <button class="mcl" onclick="closeModal('m-report')">✕</button>
+    </div>
+    <div class="mbody">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+        <label style="font-size:13px;font-weight:700">日期</label>
+        <input type="date" id="m-rpt-date" class="fi" style="width:150px">
+        <button class="btn bp bsm" onclick="refreshRptModal()">🔄 重新產生</button>
+      </div>
+      <pre id="m-rpt-content" style="font-family:inherit;font-size:13px;line-height:1.8;white-space:pre-wrap;background:var(--pri-l);border-radius:8px;padding:14px;margin:0;color:var(--slat-d);max-height:55vh;overflow-y:auto">產生中…</pre>
+    </div>
+    <div class="mft">
+      <button class="btn bg" onclick="copyRptModal()">📋 複製報告</button>
+      <button class="btn bgh" onclick="closeModal('m-report')">關閉</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
 </body>
 </html>
