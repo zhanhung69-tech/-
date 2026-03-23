@@ -3,442 +3,1166 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2026 樹人家商 校服創意Show 抽獎系統</title>
+<title>🎽 樹人家商 校服創意Show 抽獎系統</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+  :root {
+    --navy: #0F1E35;
+    --navy2: #1A2E4A;
+    --blue: #1A56C4;
+    --sky: #3B82F6;
+    --gold: #D97706;
+    --amber: #F59E0B;
+    --yellow: #FEF9C3;
+    --green: #065F46;
+    --teal: #0E7490;
+    --red: #B91C1C;
+    --white: #FFFFFF;
+    --gray1: #F8FAFC;
+    --gray2: #E2E8F0;
+    --gray3: #94A3B8;
+    --text: #0F172A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
-    background: #F5F5F3;
-    color: #1a1a1a;
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--navy);
+    color: var(--white);
     min-height: 100vh;
+    overflow-x: hidden;
   }
-  header {
-    background: #fff;
-    border-bottom: 1px solid #E0E0DC;
-    padding: 1.25rem 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
+
+  /* ── Stars background ── */
+  .stars {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: radial-gradient(ellipse at 20% 30%, rgba(59,130,246,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 70%, rgba(217,119,6,0.06) 0%, transparent 50%);
   }
-  header h1 { font-size: 18px; font-weight: 600; color: #1a1a1a; }
-  header p { font-size: 13px; color: #888; margin-top: 2px; }
+
+  /* ── Top banner ── */
+  .banner {
+    background: linear-gradient(135deg, #0F1E35 0%, #1A2E4A 50%, #0F1E35 100%);
+    border-bottom: 2px solid rgba(245,158,11,0.3);
+    padding: 20px 0 16px;
+    text-align: center;
+    position: relative; z-index: 1;
+  }
+  .banner h1 { font-size: clamp(18px,3vw,28px); font-weight:900; letter-spacing:0.05em; }
+  .banner h1 span { color: var(--amber); }
+  .banner p { font-size: 13px; color: var(--gray3); margin-top: 4px; }
+  .badge-row { display:flex; justify-content:center; gap:10px; margin-top:10px; flex-wrap:wrap; }
   .badge {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 20px;
-    background: #E6F1FB;
-    color: #185FA5;
+    font-size:12px; font-weight:700; padding:3px 10px; border-radius:20px;
+    background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.4);
+    color: var(--amber);
   }
-  main { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem; }
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 1.75rem;
+
+  /* ── Tab nav ── */
+  .tabs {
+    display: flex; justify-content: center; gap: 0;
+    padding: 20px 16px 0; position: relative; z-index: 1;
   }
-  .stat-card {
-    background: #fff;
-    border: 1px solid #E8E8E4;
-    border-radius: 12px;
-    padding: 1.125rem 1.25rem;
+  .tab-btn {
+    padding: 11px 28px; font-size: 14px; font-weight: 700;
+    border: none; cursor: pointer; transition: all .2s;
+    font-family: inherit;
   }
-  .stat-label { font-size: 12px; color: #888; margin-bottom: 6px; }
-  .stat-value { font-size: 26px; font-weight: 600; color: #1a1a1a; }
-  .stat-sub { font-size: 12px; color: #aaa; margin-top: 2px; }
-  .card {
-    background: #fff;
-    border: 1px solid #E8E8E4;
+  .tab-btn:first-child { border-radius: 10px 0 0 10px; }
+  .tab-btn:last-child  { border-radius: 0 10px 10px 0; }
+  .tab-btn.inactive {
+    background: rgba(255,255,255,0.06);
+    color: var(--gray3);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .tab-btn.active {
+    background: var(--blue);
+    color: var(--white);
+    border: 1px solid var(--sky);
+  }
+  .tab-btn.active.green-tab { background: var(--green); border-color: #059669; }
+
+  /* ── Main content ── */
+  .content { max-width: 900px; margin: 0 auto; padding: 20px 16px 60px; position: relative; z-index: 1; }
+
+  /* ── Section header ── */
+  .section-header {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 14px;
-    padding: 1.5rem;
-    margin-bottom: 1.25rem;
+    padding: 20px 24px;
+    margin-bottom: 20px;
   }
-  .card-title { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
-  .card-desc { font-size: 13px; color: #666; line-height: 1.6; margin-bottom: 1rem; }
-  .info-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: .75rem; }
-  .tag {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 20px;
+  .section-header h2 { font-size: 18px; font-weight: 900; }
+  .section-header p { font-size: 13px; color: var(--gray3); margin-top: 5px; line-height:1.6; }
+  .prize-tag {
+    display: inline-block; margin-top: 10px;
+    background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.5);
+    color: var(--amber); font-size: 13px; font-weight: 700;
+    padding: 5px 14px; border-radius: 20px;
   }
-  .tag-blue { background: #E6F1FB; color: #185FA5; }
-  .tag-amber { background: #FAEEDA; color: #854F0B; }
-  .tag-green { background: #EAF3DE; color: #3B6D11; }
-  .controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 1rem;
-    padding: 1rem 1.125rem;
-    background: #F8F8F6;
+
+  /* ── Drum machine ── */
+  .drum-area {
+    background: var(--navy2);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 28px 24px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .drum-screen {
+    background: #050D18;
+    border: 2px solid rgba(59,130,246,0.3);
     border-radius: 10px;
+    padding: 18px;
+    min-height: 80px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px;
+    position: relative; overflow: hidden;
   }
-  .label { font-size: 13px; color: #555; white-space: nowrap; }
-  input[type=number] {
-    width: 80px;
-    padding: 8px 10px;
-    border: 1px solid #D0D0CC;
-    border-radius: 8px;
-    font-size: 14px;
+  .drum-screen::before {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px, rgba(59,130,246,0.02) 2px, rgba(59,130,246,0.02) 4px
+    );
+    pointer-events: none;
+  }
+  .drum-text {
+    font-size: clamp(22px,4vw,36px); font-weight: 900;
+    color: var(--amber); letter-spacing: 0.08em;
+    text-shadow: 0 0 20px rgba(245,158,11,0.5);
+    transition: all .1s;
+    line-height: 1.3;
+  }
+  .drum-text.spinning { animation: spinText 0.08s steps(1) infinite; }
+  @keyframes spinText {
+    0%  { opacity:1; transform: translateY(0); }
+    50% { opacity:0.3; transform: translateY(-4px); }
+  }
+  .drum-text.reveal { animation: revealPop 0.4s ease-out forwards; }
+  @keyframes revealPop {
+    0%   { transform: scale(0.8); opacity:0; }
+    60%  { transform: scale(1.1); }
+    100% { transform: scale(1); opacity:1; }
+  }
+  .drum-hint { font-size: 12px; color: var(--gray3); margin-bottom: 14px; }
+
+  /* Count input */
+  .count-row {
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    margin-bottom: 18px; flex-wrap: wrap;
+  }
+  .count-row label { font-size: 13px; color: var(--gray3); }
+  .count-input {
+    width: 70px; padding: 7px 10px; text-align: center;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px; color: var(--white); font-size: 15px; font-weight: 700;
     font-family: inherit;
-    color: #1a1a1a;
-    background: #fff;
-    outline: none;
-    transition: border-color .15s;
   }
-  input[type=number]:focus { border-color: #185FA5; }
+  .count-input:focus { outline: none; border-color: var(--sky); }
+
+  /* Buttons */
+  .btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
   .btn {
-    padding: 9px 22px;
-    border-radius: 9px;
-    font-size: 14px;
-    font-weight: 500;
-    font-family: inherit;
-    cursor: pointer;
-    border: 1px solid #D0D0CC;
-    background: #fff;
-    color: #1a1a1a;
-    transition: all .12s;
-    outline: none;
+    padding: 12px 28px; font-size: 14px; font-weight: 700;
+    border: none; border-radius: 10px; cursor: pointer;
+    font-family: inherit; transition: all .15s; letter-spacing: 0.03em;
   }
-  .btn:hover { background: #F0F0EC; border-color: #B0B0AC; }
-  .btn:active { transform: scale(.97); }
-  .btn-primary { background: #185FA5; color: #fff; border-color: #185FA5; }
-  .btn-primary:hover { background: #0C447C; border-color: #0C447C; }
-  .btn-primary:disabled { background: #A0C4E8; border-color: #A0C4E8; cursor: not-allowed; transform: none; }
-  .btn-gold { background: #BA7517; color: #fff; border-color: #BA7517; font-size: 15px; padding: 11px 28px; }
-  .btn-gold:hover { background: #854F0B; border-color: #854F0B; }
-  .btn-danger { background: #A32D2D; color: #fff; border-color: #A32D2D; }
-  .btn-danger:hover { background: #791F1F; }
-  .btn-sm { padding: 6px 14px; font-size: 12px; }
-  .progress-wrap { height: 5px; background: #E8E8E4; border-radius: 3px; margin-bottom: 1rem; overflow: hidden; }
-  .progress-bar { height: 100%; background: #185FA5; border-radius: 3px; transition: width .2s ease; width: 0%; }
-  .stage {
-    min-height: 90px;
-    background: #F8F8F6;
-    border-radius: 10px;
-    padding: 1rem;
-    margin-bottom: 1rem;
+  .btn-draw {
+    background: linear-gradient(135deg, var(--blue), #2563EB);
+    color: var(--white); border: 1px solid var(--sky);
+    box-shadow: 0 4px 16px rgba(59,130,246,0.3);
   }
-  .stage-empty { font-size: 13px; color: #aaa; padding: 8px 0; }
+  .btn-draw:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(59,130,246,0.5); }
+  .btn-draw:active { transform: translateY(0); }
+  .btn-draw.green-btn {
+    background: linear-gradient(135deg, #065F46, #047857);
+    border-color: #059669;
+    box-shadow: 0 4px 16px rgba(5,150,105,0.3);
+  }
+  .btn-draw.green-btn:hover { box-shadow: 0 6px 20px rgba(5,150,105,0.5); }
+  .btn-reset {
+    background: rgba(255,255,255,0.06);
+    color: var(--gray3); border: 1px solid rgba(255,255,255,0.15);
+  }
+  .btn-reset:hover { background: rgba(255,255,255,0.1); color: var(--white); }
+  .btn-copy {
+    background: rgba(245,158,11,0.12);
+    color: var(--amber); border: 1px solid rgba(245,158,11,0.4);
+    font-size: 12px; padding: 8px 16px;
+  }
+  .btn-copy:hover { background: rgba(245,158,11,0.2); }
+
+  /* Progress bar */
+  .progress-bar {
+    background: rgba(255,255,255,0.08);
+    border-radius: 6px; height: 6px; margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; border-radius: 6px;
+    background: linear-gradient(90deg, var(--sky), var(--amber));
+    transition: width .3s ease;
+  }
+  .progress-text { font-size: 12px; color: var(--gray3); margin-bottom: 8px; }
+
+  /* ── Winner cards ── */
+  .winners-area { margin-top: 20px; }
+  .winners-title {
+    font-size: 13px; font-weight: 700; color: var(--gray3);
+    margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+  }
   .winners-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
-    gap: 7px;
-  }
-  .chip {
-    background: #fff;
-    border: 1px solid #E0E0DC;
-    border-radius: 9px;
-    padding: 9px 12px;
-    transition: border-color .5s, background .5s;
-    position: relative;
-  }
-  .chip.new { border-color: #378ADD; background: #EEF6FF; }
-  .chip-seq { font-size: 10px; color: #bbb; margin-bottom: 1px; }
-  .chip-class { font-size: 11px; color: #888; margin-bottom: 2px; }
-  .chip-num { font-size: 14px; font-weight: 600; color: #185FA5; }
-  .chip-tickets { font-size: 11px; color: #aaa; margin-top: 1px; }
-  .chip.repeat { border-color: #EF9F27; background: #FEFAF3; }
-  .chip.repeat .chip-num { color: #854F0B; }
-  .repeat-badge {
-    position: absolute;
-    top: 6px; right: 8px;
-    font-size: 10px;
-    font-weight: 600;
-    color: #854F0B;
-    background: #FAEEDA;
-    padding: 1px 5px;
-    border-radius: 8px;
-  }
-  .status-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 8px;
   }
-  .status-text { font-size: 13px; color: #666; }
-  .jackpot-stage {
-    min-height: 150px;
-    background: #FAFAF8;
-    border-radius: 12px;
-    padding: 1.5rem;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .winner-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; padding: 10px 12px;
+    animation: cardIn 0.3s ease-out backwards;
+    position: relative;
   }
-  .jp-idle { font-size: 14px; color: #aaa; }
-  .jp-spin { font-size: 24px; font-weight: 600; color: #185FA5; animation: blink .4s ease-in-out infinite alternate; }
-  @keyframes blink { from { opacity: .25; } to { opacity: 1; } }
-  .jp-winner { text-align: center; }
-  .jp-label { font-size: 13px; color: #888; margin-bottom: 8px; }
-  .jp-name { font-size: 40px; font-weight: 700; color: #854F0B; letter-spacing: 2px; margin-bottom: 8px; }
-  .jp-detail { font-size: 14px; color: #666; }
-  .jp-prize {
-    display: inline-block;
-    margin-top: 12px;
-    background: #FAEEDA;
-    color: #633806;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 5px 18px;
-    border-radius: 20px;
+  @keyframes cardIn {
+    from { opacity:0; transform: scale(0.9) translateY(8px); }
+    to   { opacity:1; transform: none; }
   }
-  .divider { border: none; border-top: 1px solid #E8E8E4; margin: 1.5rem 0; }
-  footer {
-    text-align: center;
-    font-size: 12px;
-    color: #aaa;
-    padding: 2rem 1.5rem;
-    border-top: 1px solid #E8E8E4;
-    margin-top: 1rem;
+  .winner-card.dup {
+    background: rgba(217,119,6,0.12);
+    border-color: rgba(217,119,6,0.4);
   }
-  @media (max-width: 580px) {
-    .stats-row { grid-template-columns: 1fr 1fr; }
-    main { padding: 1.25rem 1rem; }
-    .jp-name { font-size: 28px; }
+  .winner-card .w-cls {
+    font-size: 13px; font-weight: 700; color: var(--sky);
+  }
+  .winner-card .w-seat {
+    font-size: 20px; font-weight: 900; color: var(--white);
+    margin: 2px 0;
+  }
+  .winner-card .w-votes {
+    font-size: 11px; color: var(--gray3);
+  }
+  .winner-card .w-dup-badge {
+    position: absolute; top: 6px; right: 6px;
+    font-size: 9px; font-weight: 700;
+    background: var(--gold); color: #fff;
+    padding: 2px 5px; border-radius: 4px;
+  }
+  .winner-card.full-att { border-color: rgba(5,150,105,0.5); }
+  .winner-card .w-fa-badge {
+    font-size: 9px; color: #059669; font-weight: 700;
+    margin-top: 1px;
+  }
+
+  /* ── Confetti canvas ── */
+  #confetti-canvas {
+    position: fixed; inset: 0; pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── Stats row ── */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px; padding: 14px; text-align: center;
+  }
+  .stat-card .sv { font-size: 26px; font-weight: 900; color: var(--amber); }
+  .stat-card .sl { font-size: 11px; color: var(--gray3); margin-top: 2px; }
+
+  /* ── Week toggle ── */
+  .week-btns { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px; }
+  .week-btn {
+    padding: 6px 16px; font-size: 12px; font-weight: 700;
+    border-radius: 20px; cursor: pointer; border: none; font-family: inherit;
+    transition: all .15s;
+  }
+  .week-btn.off {
+    background: rgba(255,255,255,0.06); color: var(--gray3);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .week-btn.on {
+    background: var(--blue); color: var(--white);
+    border: 1px solid var(--sky);
+  }
+  .week-info { font-size: 12px; color: var(--gray3); margin-bottom: 16px; }
+
+  /* ── Page visibility ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* announcement */
+  .ann-wrap {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px; overflow: hidden;
+  }
+  .ann-section {
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .ann-section:last-child { border-bottom: none; }
+  .ann-section-hdr {
+    padding: 14px 20px; font-size: 13px; font-weight: 700;
+    color: var(--amber); letter-spacing: 0.05em;
+    background: rgba(245,158,11,0.05); cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    user-select: none;
+  }
+  .ann-section-hdr:hover { background: rgba(245,158,11,0.09); }
+  .ann-body {
+    padding: 16px 20px; display: none;
+  }
+  .ann-body.open { display: block; }
+  .ann-pre {
+    white-space: pre-wrap; font-size: 13px; line-height: 1.75;
+    color: #CBD5E1; font-family: 'Noto Sans TC', sans-serif;
+  }
+  .ann-copy-btn {
+    margin-top: 10px;
+    padding: 7px 18px; font-size: 12px; font-weight: 700;
+    background: rgba(59,130,246,0.15); color: var(--sky);
+    border: 1px solid rgba(59,130,246,0.4);
+    border-radius: 8px; cursor: pointer; font-family: inherit;
+  }
+  .ann-copy-btn:hover { background: rgba(59,130,246,0.25); }
+
+  /* scrollable winners */
+  .winners-scroll {
+    max-height: 300px; overflow-y: auto;
+    padding-right: 4px;
+  }
+  .winners-scroll::-webkit-scrollbar { width: 4px; }
+  .winners-scroll::-webkit-scrollbar-track { background: transparent; }
+  .winners-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+  /* mobile */
+  @media (max-width:520px) {
+    .tab-btn { padding: 10px 16px; font-size: 13px; }
+    .stats-row { grid-template-columns: repeat(3,1fr); }
+    .stat-card .sv { font-size: 20px; }
+    .winners-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
   }
 </style>
 </head>
 <body>
+<canvas id="confetti-canvas"></canvas>
+<div class="stars"></div>
 
-<header>
-  <div>
-    <h1>2026 樹人家商「校服創意 Show」抽獎系統</h1>
-    <p>活動期間 3/2 – 3/21　｜　三週合併一次抽　｜　週週好禮不限中獎次數</p>
+<div class="banner">
+  <h1>🎽 樹人家商 <span>校服創意 Show</span> 抽獎系統</h1>
+  <p>2026 活動成果・網路投票獎勵抽籤</p>
+  <div class="badge-row">
+    <span class="badge">週週好禮 1,054人候選</span>
+    <span class="badge">全勤鐵粉 112人</span>
+    <span class="badge">全校總票數 35,884票</span>
   </div>
-  <span class="badge">抽獎系統</span>
-</header>
+</div>
 
-<main>
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('weekly')">🎟 週週好禮</button>
+  <button class="tab-btn inactive green-tab" onclick="switchTab('fullatt')">💯 全勤大獎</button>
+  <button class="tab-btn inactive" onclick="switchTab('ann')">📢 公告訊息</button>
+</div>
+
+<!-- ══ PAGE: Weekly ══ -->
+<div id="page-weekly" class="page active">
+<div class="content">
+
+  <div class="section-header">
+    <h2>🎟 週週好禮抽獎</h2>
+    <p>全活動期間（3/3–3/21）共 3 週投票，合併一次抽出得獎名單。<br>
+       <strong>加權抽籤：票數越多中獎機率越高</strong>，不限重複中獎。<br>
+       可依週篩選候選資格（打勾=該週有票才可參加）。</p>
+    <span class="prize-tag">🎁 獎品：便利商店 $50 商品卡 × 60 名</span>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="sv" id="w-cand">1,054</div><div class="sl">候選人數</div></div>
+    <div class="stat-card"><div class="sv" id="w-pool">35,884</div><div class="sl">抽籤票數池</div></div>
+    <div class="stat-card"><div class="sv" id="w-drawn">0</div><div class="sl">已抽出人數</div></div>
+  </div>
+
+  <div class="drum-area">
+    <p class="drum-hint">週別資格篩選（可複選）</p>
+    <div class="week-btns">
+      <button class="week-btn on" id="wbtn1" onclick="toggleWeek(1)">第1週 3/3–3/7 (835人)</button>
+      <button class="week-btn on" id="wbtn2" onclick="toggleWeek(2)">第2週 3/8–3/14 (950人)</button>
+      <button class="week-btn on" id="wbtn3" onclick="toggleWeek(3)">第3週 3/15–3/21 (815人)</button>
+    </div>
+    <p class="week-info" id="week-info">目前候選：<strong id="cand-count">1,054</strong> 人 · 票數池：<strong id="pool-count">35,884</strong> 票</p>
+
+    <div class="count-row">
+      <label>抽出人數</label>
+      <input type="number" class="count-input" id="draw-count" value="60" min="1" max="200">
+      <label>名</label>
+    </div>
+
+    <div class="progress-text" id="prog-text"></div>
+    <div class="progress-bar" id="prog-bar" style="display:none">
+      <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+
+    <div class="drum-screen">
+      <div class="drum-text" id="drum-display">準備就緒 · 點擊開始抽籤</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-draw" id="btn-draw-weekly" onclick="startDrawWeekly()">🎰 開始抽籤</button>
+      <button class="btn btn-reset" onclick="resetWeekly()">↺ 重置</button>
+    </div>
+  </div>
+
+  <div class="winners-area" id="weekly-winners-area" style="display:none">
+    <div class="winners-title">
+      <span id="winners-count-label">中獎名單</span>
+      <button class="btn btn-copy" onclick="copyWeeklyWinners()">📋 複製名單</button>
+    </div>
+    <div class="winners-scroll">
+      <div class="winners-grid" id="weekly-winners-grid"></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══ PAGE: Full Attendance ══ -->
+<div id="page-fullatt" class="page">
+<div class="content">
+
+  <div class="section-header" style="border-color:rgba(5,150,105,0.3)">
+    <h2>💯 全勤鐵粉終極大獎</h2>
+    <p>活動期間 3/3（一）至 3/21（六）共 <strong>19 天</strong>，每天都有投票紀錄的同學。<br>
+       共 <strong>112 位</strong>全勤鐵粉參加終極大獎抽籤，純隨機抽出 1 名。</p>
+    <span class="prize-tag" style="background:rgba(5,150,105,0.15);border-color:rgba(5,150,105,0.5);color:#34D399">🏆 獎品：品牌禮券 $1,000 元</span>
+  </div>
 
   <div class="stats-row">
     <div class="stat-card">
-      <div class="stat-label">週週好禮候選人數</div>
-      <div class="stat-value">1,054</div>
-      <div class="stat-sub">有投票皆可參加</div>
+      <div class="sv" style="color:#34D399">112</div>
+      <div class="sl">全勤候選人</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">總抽獎票數（加權）</div>
-      <div class="stat-value">38,179</div>
-      <div class="stat-sub">票數多 = 機率高</div>
+      <div class="sv" style="color:#34D399">19</div>
+      <div class="sl">連續天數</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">全勤鐵粉資格人數</div>
-      <div class="stat-value">112</div>
-      <div class="stat-sub">3/3–3/21 連續19天</div>
+      <div class="sv" style="color:#34D399">7</div>
+      <div class="sl">全勤班級數</div>
     </div>
   </div>
 
-  <!-- 週週好禮 -->
-  <div class="card">
-    <div class="card-title">週週好禮抽獎　—　三週合併一次抽</div>
-    <div class="info-row">
-      <span class="tag tag-blue">3/3 – 3/21 全期間</span>
-      <span class="tag tag-green">加權亂數　票多機率高</span>
-      <span class="tag tag-amber">不限中獎次數</span>
-    </div>
-    <div class="card-desc">
-      三週共抽 60 名，每名獲便利商店 50 元商品卡。每次抽獎為獨立亂數，同一人可重複中獎。
-      投票票數越多，每次被抽中的機率越高。
-    </div>
+  <!-- Full att class list -->
+  <div style="background:rgba(5,150,105,0.05);border:1px solid rgba(5,150,105,0.2);border-radius:12px;padding:16px;margin-bottom:20px">
+    <div style="font-size:12px;font-weight:700;color:#34D399;margin-bottom:10px;">全勤班級一覽</div>
+    <div id="fa-class-list" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+  </div>
 
-    <div class="controls">
-      <span class="label">抽出</span>
-      <input type="number" id="drawN" value="60" min="1" max="300" step="1">
-      <span class="label">名次</span>
-      <button class="btn btn-primary" id="drawBtn" onclick="startDraw()">開始抽獎</button>
-      <button class="btn" onclick="resetWeekly()">重置</button>
-      <button class="btn btn-sm" onclick="exportWeekly()">複製名單</button>
+  <div class="drum-area" style="border-color:rgba(5,150,105,0.2)">
+    <div class="drum-screen" style="border-color:rgba(5,150,105,0.3)">
+      <div class="drum-text" id="fa-drum-display" style="color:#34D399">準備就緒 · 點擊開始抽籤</div>
     </div>
-
-    <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
-
-    <div class="stage" id="weeklyStage">
-      <div class="stage-empty" id="weeklyEmpty">點擊「開始抽獎」以開始（每次抽籤均為獨立亂數，可重複得獎）</div>
-      <div class="winners-grid" id="weeklyGrid"></div>
-    </div>
-
-    <div class="status-row">
-      <span class="status-text" id="weeklyStatus"></span>
+    <div class="btn-row">
+      <button class="btn btn-draw green-btn" id="btn-draw-fa" onclick="startDrawFA()">🏆 抽出終極大獎得主</button>
+      <button class="btn btn-reset" onclick="resetFA()">↺ 重置</button>
     </div>
   </div>
 
-  <hr class="divider">
-
-  <!-- 全勤大獎 -->
-  <div class="card">
-    <div class="card-title">全勤鐵粉大獎　—　終極抽獎</div>
-    <div class="info-row">
-      <span class="tag tag-amber">3/3 – 3/21 連續19天天天投票</span>
-      <span class="tag tag-amber">共 112 人資格</span>
-    </div>
-    <div class="card-desc">從全勤學生中抽出 1 名終極大獎得主，獎品為品牌禮券 $1,000 元。</div>
-
-    <div style="display:flex;gap:10px;margin-bottom:1.125rem;flex-wrap:wrap;">
-      <button class="btn btn-gold" id="jpBtn" onclick="startJackpot()">抽出終極大獎得主</button>
-      <button class="btn btn-danger" id="jpReset" onclick="resetJackpot()" style="display:none">重新抽獎</button>
-    </div>
-
-    <div class="jackpot-stage" id="jpStage">
-      <div class="jp-idle">按下按鈕開始抽獎</div>
+  <div id="fa-winner-area" style="display:none;margin-top:20px">
+    <div style="text-align:center;padding:24px;background:rgba(5,150,105,0.1);border:1px solid rgba(5,150,105,0.4);border-radius:14px">
+      <div style="font-size:13px;color:#34D399;font-weight:700;margin-bottom:6px;">🏆 終極大獎得主</div>
+      <div id="fa-winner-cls" style="font-size:16px;color:#A7F3D0;font-weight:700;"></div>
+      <div id="fa-winner-seat" style="font-size:52px;font-weight:900;color:#FFFFFF;line-height:1.1;margin:4px 0;"></div>
+      <div style="font-size:13px;color:#6EE7B7;">恭喜獲得品牌禮券 $1,000 元 🎉</div>
     </div>
   </div>
 
-</main>
+</div>
+</div>
 
-<footer>
-  2026 樹人家商「校服創意 Show」抽獎系統　｜　學務處製作　｜　資料截至 2026/3/21
-</footer>
+<!-- ══ PAGE: Announcement ══ -->
+<div id="page-ann" class="page">
+<div class="content">
+
+  <div class="section-header" style="margin-bottom:16px">
+    <h2>📢 完整公告訊息</h2>
+    <p>點擊展開各群組公告，可直接複製貼到 LINE 發送。</p>
+  </div>
+
+  <div class="ann-wrap" id="ann-container"></div>
+
+</div>
+</div>
 
 <script>
-const WEEKLY = [{"班級": "商一忠", "座號": 1, "票數": 3}, {"班級": "商一忠", "座號": 2, "票數": 3}, {"班級": "商一忠", "座號": 4, "票數": 17}, {"班級": "商一忠", "座號": 7, "票數": 18}, {"班級": "商一忠", "座號": 8, "票數": 7}, {"班級": "商一忠", "座號": 10, "票數": 28}, {"班級": "商一忠", "座號": 11, "票數": 18}, {"班級": "商一忠", "座號": 12, "票數": 5}, {"班級": "商一忠", "座號": 14, "票數": 27}, {"班級": "商一忠", "座號": 15, "票數": 20}, {"班級": "商一忠", "座號": 16, "票數": 13}, {"班級": "商一忠", "座號": 17, "票數": 1}, {"班級": "商一忠", "座號": 18, "票數": 3}, {"班級": "商一忠", "座號": 20, "票數": 1}, {"班級": "商一忠", "座號": 22, "票數": 6}, {"班級": "商一忠", "座號": 23, "票數": 1}, {"班級": "商一忠", "座號": 24, "票數": 2}, {"班級": "商一忠", "座號": 25, "票數": 17}, {"班級": "商一忠", "座號": 26, "票數": 2}, {"班級": "商一忠", "座號": 27, "票數": 42}, {"班級": "商一忠", "座號": 28, "票數": 18}, {"班級": "商一忠", "座號": 29, "票數": 2}, {"班級": "商一忠", "座號": 30, "票數": 17}, {"班級": "商一忠", "座號": 33, "票數": 8}, {"班級": "商一忠", "座號": 34, "票數": 1123}, {"班級": "商一忠", "座號": 35, "票數": 1}, {"班級": "商一忠", "座號": 36, "票數": 40}, {"班級": "商一忠", "座號": 37, "票數": 14}, {"班級": "餐一忠", "座號": 1, "票數": 76}, {"班級": "餐一忠", "座號": 2, "票數": 5}, {"班級": "餐一忠", "座號": 3, "票數": 2}, {"班級": "餐一忠", "座號": 4, "票數": 15}, {"班級": "餐一忠", "座號": 5, "票數": 4}, {"班級": "餐一忠", "座號": 7, "票數": 13}, {"班級": "餐一忠", "座號": 9, "票數": 14}, {"班級": "餐一忠", "座號": 10, "票數": 12}, {"班級": "餐一忠", "座號": 11, "票數": 3}, {"班級": "餐一忠", "座號": 12, "票數": 2}, {"班級": "餐一忠", "座號": 13, "票數": 1}, {"班級": "餐一忠", "座號": 14, "票數": 5}, {"班級": "餐一忠", "座號": 15, "票數": 12}, {"班級": "餐一忠", "座號": 16, "票數": 14}, {"班級": "餐一忠", "座號": 17, "票數": 7}, {"班級": "餐一忠", "座號": 18, "票數": 6}, {"班級": "餐一忠", "座號": 19, "票數": 4}, {"班級": "餐一忠", "座號": 21, "票數": 3}, {"班級": "餐一忠", "座號": 22, "票數": 15}, {"班級": "餐一忠", "座號": 24, "票數": 2}, {"班級": "餐一忠", "座號": 25, "票數": 1}, {"班級": "餐一忠", "座號": 26, "票數": 15}, {"班級": "餐一忠", "座號": 27, "票數": 93}, {"班級": "餐一忠", "座號": 28, "票數": 6}, {"班級": "餐一忠", "座號": 29, "票數": 2}, {"班級": "餐一忠", "座號": 30, "票數": 2}, {"班級": "餐一忠", "座號": 31, "票數": 29}, {"班級": "餐一忠", "座號": 32, "票數": 1}, {"班級": "餐一忠", "座號": 33, "票數": 7}, {"班級": "餐一忠", "座號": 34, "票數": 29}, {"班級": "餐一忠", "座號": 35, "票數": 9}, {"班級": "餐一忠", "座號": 36, "票數": 12}, {"班級": "餐一忠", "座號": 37, "票數": 35}, {"班級": "餐一忠", "座號": 38, "票數": 5}, {"班級": "餐一忠", "座號": 39, "票數": 3}, {"班級": "餐一忠", "座號": 40, "票數": 12}, {"班級": "餐一忠", "座號": 41, "票數": 2}, {"班級": "餐一忠", "座號": 42, "票數": 19}, {"班級": "餐一忠", "座號": 43, "票數": 1}, {"班級": "餐一忠", "座號": 44, "票數": 15}, {"班級": "餐一忠", "座號": 45, "票數": 2}, {"班級": "餐一忠", "座號": 46, "票數": 4}, {"班級": "餐一愛", "座號": 1, "票數": 9}, {"班級": "餐一愛", "座號": 6, "票數": 19}, {"班級": "餐一愛", "座號": 29, "票數": 1}, {"班級": "餐一義", "座號": 25, "票數": 1}, {"班級": "幼一忠", "座號": 1, "票數": 111}, {"班級": "幼一忠", "座號": 2, "票數": 65}, {"班級": "幼一忠", "座號": 3, "票數": 68}, {"班級": "幼一忠", "座號": 4, "票數": 2}, {"班級": "幼一忠", "座號": 5, "票數": 10}, {"班級": "幼一忠", "座號": 6, "票數": 2}, {"班級": "幼一忠", "座號": 8, "票數": 31}, {"班級": "幼一忠", "座號": 9, "票數": 81}, {"班級": "幼一忠", "座號": 10, "票數": 208}, {"班級": "幼一忠", "座號": 11, "票數": 36}, {"班級": "幼一忠", "座號": 12, "票數": 40}, {"班級": "幼一忠", "座號": 13, "票數": 125}, {"班級": "幼一忠", "座號": 14, "票數": 28}, {"班級": "幼一忠", "座號": 15, "票數": 209}, {"班級": "幼一忠", "座號": 16, "票數": 195}, {"班級": "幼一忠", "座號": 17, "票數": 27}, {"班級": "幼一忠", "座號": 18, "票數": 11}, {"班級": "幼一忠", "座號": 19, "票數": 45}, {"班級": "幼一忠", "座號": 20, "票數": 69}, {"班級": "幼一忠", "座號": 21, "票數": 5}, {"班級": "幼一忠", "座號": 22, "票數": 36}, {"班級": "幼一忠", "座號": 23, "票數": 49}, {"班級": "幼一忠", "座號": 24, "票數": 311}, {"班級": "幼一忠", "座號": 25, "票數": 27}, {"班級": "幼一忠", "座號": 26, "票數": 137}, {"班級": "幼一忠", "座號": 27, "票數": 65}, {"班級": "幼一忠", "座號": 28, "票數": 15}, {"班級": "幼一忠", "座號": 29, "票數": 106}, {"班級": "幼一忠", "座號": 30, "票數": 50}, {"班級": "幼一忠", "座號": 31, "票數": 11}, {"班級": "幼一忠", "座號": 32, "票數": 274}, {"班級": "幼一忠", "座號": 33, "票數": 88}, {"班級": "幼一忠", "座號": 34, "票數": 40}, {"班級": "幼一忠", "座號": 35, "票數": 2}, {"班級": "幼一忠", "座號": 36, "票數": 48}, {"班級": "幼一忠", "座號": 37, "票數": 35}, {"班級": "幼一忠", "座號": 38, "票數": 7}, {"班級": "幼一忠", "座號": 39, "票數": 1}, {"班級": "幼一忠", "座號": 40, "票數": 72}, {"班級": "幼一忠", "座號": 41, "票數": 7}, {"班級": "幼一忠", "座號": 42, "票數": 18}, {"班級": "幼一忠", "座號": 44, "票數": 74}, {"班級": "幼一忠", "座號": 45, "票數": 30}, {"班級": "幼一忠", "座號": 46, "票數": 48}, {"班級": "幼一忠", "座號": 47, "票數": 72}, {"班級": "幼一忠", "座號": 49, "票數": 4}, {"班級": "美一忠", "座號": 3, "票數": 7}, {"班級": "美一忠", "座號": 5, "票數": 7}, {"班級": "美一忠", "座號": 6, "票數": 1}, {"班級": "美一忠", "座號": 7, "票數": 1}, {"班級": "美一忠", "座號": 10, "票數": 7}, {"班級": "美一忠", "座號": 11, "票數": 7}, {"班級": "美一忠", "座號": 12, "票數": 7}, {"班級": "美一忠", "座號": 18, "票數": 2}, {"班級": "美一忠", "座號": 19, "票數": 5}, {"班級": "美一忠", "座號": 20, "票數": 5}, {"班級": "美一忠", "座號": 21, "票數": 5}, {"班級": "美一忠", "座號": 22, "票數": 3}, {"班級": "美一忠", "座號": 24, "票數": 8}, {"班級": "美一忠", "座號": 25, "票數": 2}, {"班級": "美一忠", "座號": 26, "票數": 3}, {"班級": "美一忠", "座號": 27, "票數": 7}, {"班級": "美一忠", "座號": 28, "票數": 8}, {"班級": "美一忠", "座號": 29, "票數": 6}, {"班級": "美一忠", "座號": 31, "票數": 8}, {"班級": "美一忠", "座號": 33, "票數": 1}, {"班級": "美一忠", "座號": 34, "票數": 2}, {"班級": "美一忠", "座號": 37, "票數": 6}, {"班級": "美一忠", "座號": 38, "票數": 1}, {"班級": "美一忠", "座號": 39, "票數": 3}, {"班級": "美一忠", "座號": 40, "票數": 8}, {"班級": "美一忠", "座號": 42, "票數": 6}, {"班級": "美一忠", "座號": 43, "票數": 6}, {"班級": "美一忠", "座號": 45, "票數": 7}, {"班級": "美一忠", "座號": 46, "票數": 5}, {"班級": "美一孝", "座號": 1, "票數": 17}, {"班級": "美一孝", "座號": 2, "票數": 18}, {"班級": "美一孝", "座號": 3, "票數": 470}, {"班級": "美一孝", "座號": 4, "票數": 21}, {"班級": "美一孝", "座號": 5, "票數": 25}, {"班級": "美一孝", "座號": 7, "票數": 25}, {"班級": "美一孝", "座號": 10, "票數": 16}, {"班級": "美一孝", "座號": 11, "票數": 17}, {"班級": "美一孝", "座號": 12, "票數": 27}, {"班級": "美一孝", "座號": 13, "票數": 19}, {"班級": "美一孝", "座號": 14, "票數": 40}, {"班級": "美一孝", "座號": 15, "票數": 18}, {"班級": "美一孝", "座號": 16, "票數": 18}, {"班級": "美一孝", "座號": 17, "票數": 33}, {"班級": "美一孝", "座號": 18, "票數": 29}, {"班級": "美一孝", "座號": 19, "票數": 62}, {"班級": "美一孝", "座號": 20, "票數": 60}, {"班級": "美一孝", "座號": 21, "票數": 17}, {"班級": "美一孝", "座號": 22, "票數": 22}, {"班級": "美一孝", "座號": 23, "票數": 36}, {"班級": "美一孝", "座號": 24, "票數": 18}, {"班級": "美一孝", "座號": 25, "票數": 18}, {"班級": "美一孝", "座號": 26, "票數": 24}, {"班級": "美一孝", "座號": 27, "票數": 22}, {"班級": "美一孝", "座號": 28, "票數": 30}, {"班級": "美一孝", "座號": 29, "票數": 20}, {"班級": "美一孝", "座號": 30, "票數": 17}, {"班級": "美一孝", "座號": 32, "票數": 45}, {"班級": "美一孝", "座號": 34, "票數": 21}, {"班級": "美一孝", "座號": 35, "票數": 37}, {"班級": "美一孝", "座號": 37, "票數": 17}, {"班級": "美一孝", "座號": 38, "票數": 29}, {"班級": "美一孝", "座號": 39, "票數": 40}, {"班級": "美一孝", "座號": 40, "票數": 17}, {"班級": "美一孝", "座號": 41, "票數": 64}, {"班級": "美一孝", "座號": 42, "票數": 17}, {"班級": "美一孝", "座號": 43, "票數": 79}, {"班級": "美一孝", "座號": 44, "票數": 18}, {"班級": "美一孝", "座號": 45, "票數": 16}, {"班級": "美一孝", "座號": 46, "票數": 17}, {"班級": "美一孝", "座號": 47, "票數": 25}, {"班級": "美一仁", "座號": 1, "票數": 44}, {"班級": "美一仁", "座號": 2, "票數": 56}, {"班級": "美一仁", "座號": 3, "票數": 45}, {"班級": "美一仁", "座號": 4, "票數": 51}, {"班級": "美一仁", "座號": 5, "票數": 1}, {"班級": "美一仁", "座號": 6, "票數": 107}, {"班級": "美一仁", "座號": 7, "票數": 78}, {"班級": "美一仁", "座號": 8, "票數": 51}, {"班級": "美一仁", "座號": 9, "票數": 56}, {"班級": "美一仁", "座號": 10, "票數": 40}, {"班級": "美一仁", "座號": 11, "票數": 73}, {"班級": "美一仁", "座號": 12, "票數": 48}, {"班級": "美一仁", "座號": 13, "票數": 86}, {"班級": "美一仁", "座號": 14, "票數": 59}, {"班級": "美一仁", "座號": 15, "票數": 3}, {"班級": "美一仁", "座號": 16, "票數": 69}, {"班級": "美一仁", "座號": 17, "票數": 72}, {"班級": "美一仁", "座號": 18, "票數": 44}, {"班級": "美一仁", "座號": 19, "票數": 55}, {"班級": "美一仁", "座號": 20, "票數": 70}, {"班級": "美一仁", "座號": 21, "票數": 52}, {"班級": "美一仁", "座號": 22, "票數": 43}, {"班級": "美一仁", "座號": 23, "票數": 97}, {"班級": "美一仁", "座號": 24, "票數": 46}, {"班級": "美一仁", "座號": 25, "票數": 49}, {"班級": "美一仁", "座號": 26, "票數": 51}, {"班級": "美一仁", "座號": 27, "票數": 46}, {"班級": "美一仁", "座號": 28, "票數": 131}, {"班級": "美一仁", "座號": 29, "票數": 47}, {"班級": "美一仁", "座號": 30, "票數": 49}, {"班級": "美一仁", "座號": 31, "票數": 57}, {"班級": "美一仁", "座號": 32, "票數": 50}, {"班級": "美一仁", "座號": 33, "票數": 85}, {"班級": "美一仁", "座號": 34, "票數": 54}, {"班級": "美一仁", "座號": 35, "票數": 4}, {"班級": "美一仁", "座號": 37, "票數": 48}, {"班級": "美一仁", "座號": 39, "票數": 57}, {"班級": "美一仁", "座號": 40, "票數": 74}, {"班級": "美一仁", "座號": 41, "票數": 47}, {"班級": "美一仁", "座號": 42, "票數": 79}, {"班級": "美一仁", "座號": 43, "票數": 66}, {"班級": "美一仁", "座號": 44, "票數": 43}, {"班級": "美一仁", "座號": 45, "票數": 54}, {"班級": "影一忠", "座號": 1, "票數": 2}, {"班級": "影一忠", "座號": 2, "票數": 3}, {"班級": "影一忠", "座號": 4, "票數": 3}, {"班級": "影一忠", "座號": 5, "票數": 2}, {"班級": "影一忠", "座號": 6, "票數": 2}, {"班級": "影一忠", "座號": 8, "票數": 3}, {"班級": "影一忠", "座號": 9, "票數": 3}, {"班級": "影一忠", "座號": 10, "票數": 3}, {"班級": "影一忠", "座號": 13, "票數": 1}, {"班級": "影一忠", "座號": 14, "票數": 2}, {"班級": "影一忠", "座號": 15, "票數": 3}, {"班級": "影一忠", "座號": 17, "票數": 3}, {"班級": "影一忠", "座號": 18, "票數": 3}, {"班級": "影一忠", "座號": 19, "票數": 3}, {"班級": "影一忠", "座號": 20, "票數": 2}, {"班級": "影一忠", "座號": 22, "票數": 1}, {"班級": "影一忠", "座號": 23, "票數": 1}, {"班級": "影一忠", "座號": 25, "票數": 2}, {"班級": "影一忠", "座號": 26, "票數": 2}, {"班級": "影一忠", "座號": 27, "票數": 3}, {"班級": "影一忠", "座號": 28, "票數": 2}, {"班級": "影一忠", "座號": 30, "票數": 2}, {"班級": "影一忠", "座號": 31, "票數": 5}, {"班級": "商二忠", "座號": 1, "票數": 40}, {"班級": "商二忠", "座號": 2, "票數": 15}, {"班級": "商二忠", "座號": 3, "票數": 13}, {"班級": "商二忠", "座號": 5, "票數": 13}, {"班級": "商二忠", "座號": 6, "票數": 2}, {"班級": "商二忠", "座號": 7, "票數": 11}, {"班級": "商二忠", "座號": 8, "票數": 11}, {"班級": "商二忠", "座號": 9, "票數": 10}, {"班級": "商二忠", "座號": 10, "票數": 10}, {"班級": "商二忠", "座號": 11, "票數": 14}, {"班級": "商二忠", "座號": 13, "票數": 12}, {"班級": "商二忠", "座號": 14, "票數": 13}, {"班級": "商二忠", "座號": 15, "票數": 12}, {"班級": "商二忠", "座號": 16, "票數": 14}, {"班級": "商二忠", "座號": 17, "票數": 1}, {"班級": "商二忠", "座號": 18, "票數": 2}, {"班級": "商二忠", "座號": 19, "票數": 13}, {"班級": "商二忠", "座號": 20, "票數": 14}, {"班級": "商二忠", "座號": 21, "票數": 14}, {"班級": "商二忠", "座號": 22, "票數": 13}, {"班級": "商二忠", "座號": 23, "票數": 9}, {"班級": "商二忠", "座號": 24, "票數": 6}, {"班級": "商二忠", "座號": 25, "票數": 13}, {"班級": "商二忠", "座號": 26, "票數": 13}, {"班級": "商二忠", "座號": 27, "票數": 8}, {"班級": "商二忠", "座號": 31, "票數": 1}, {"班級": "商二忠", "座號": 32, "票數": 13}, {"班級": "商二忠", "座號": 33, "票數": 14}, {"班級": "商二忠", "座號": 34, "票數": 13}, {"班級": "商二忠", "座號": 35, "票數": 12}, {"班級": "商二忠", "座號": 36, "票數": 13}, {"班級": "商二忠", "座號": 37, "票數": 11}, {"班級": "商二忠", "座號": 38, "票數": 12}, {"班級": "商二忠", "座號": 39, "票數": 10}, {"班級": "商二忠", "座號": 40, "票數": 12}, {"班級": "商二忠", "座號": 41, "票數": 13}, {"班級": "商二忠", "座號": 42, "票數": 11}, {"班級": "商二忠", "座號": 43, "票數": 10}, {"班級": "商二忠", "座號": 44, "票數": 14}, {"班級": "商二忠", "座號": 45, "票數": 14}, {"班級": "商二忠", "座號": 46, "票數": 13}, {"班級": "資處二孝", "座號": 1, "票數": 9}, {"班級": "資處二孝", "座號": 4, "票數": 7}, {"班級": "資處二孝", "座號": 5, "票數": 2}, {"班級": "資處二孝", "座號": 6, "票數": 5}, {"班級": "資處二孝", "座號": 7, "票數": 4}, {"班級": "資處二孝", "座號": 8, "票數": 1}, {"班級": "資處二孝", "座號": 10, "票數": 3}, {"班級": "資處二孝", "座號": 11, "票數": 2}, {"班級": "資處二孝", "座號": 12, "票數": 2}, {"班級": "資處二孝", "座號": 14, "票數": 2}, {"班級": "資處二孝", "座號": 15, "票數": 4}, {"班級": "資處二孝", "座號": 16, "票數": 2}, {"班級": "資處二孝", "座號": 17, "票數": 2}, {"班級": "資處二孝", "座號": 19, "票數": 4}, {"班級": "資處二孝", "座號": 20, "票數": 1}, {"班級": "資處二孝", "座號": 22, "票數": 2}, {"班級": "資處二孝", "座號": 23, "票數": 4}, {"班級": "資處二孝", "座號": 24, "票數": 2}, {"班級": "資處二孝", "座號": 25, "票數": 1}, {"班級": "資處二孝", "座號": 26, "票數": 1}, {"班級": "資處二孝", "座號": 30, "票數": 6}, {"班級": "資處二孝", "座號": 33, "票數": 3}, {"班級": "資處二孝", "座號": 38, "票數": 6}, {"班級": "資處二孝", "座號": 40, "票數": 4}, {"班級": "資處二孝", "座號": 44, "票數": 3}, {"班級": "資處二孝", "座號": 46, "票數": 7}, {"班級": "觀二忠", "座號": 1, "票數": 570}, {"班級": "觀二忠", "座號": 2, "票數": 39}, {"班級": "觀二忠", "座號": 3, "票數": 135}, {"班級": "觀二忠", "座號": 4, "票數": 23}, {"班級": "觀二忠", "座號": 5, "票數": 48}, {"班級": "觀二忠", "座號": 6, "票數": 131}, {"班級": "觀二忠", "座號": 8, "票數": 31}, {"班級": "觀二忠", "座號": 9, "票數": 295}, {"班級": "觀二忠", "座號": 10, "票數": 15}, {"班級": "觀二忠", "座號": 11, "票數": 36}, {"班級": "觀二忠", "座號": 13, "票數": 132}, {"班級": "觀二忠", "座號": 15, "票數": 14}, {"班級": "觀二忠", "座號": 16, "票數": 35}, {"班級": "觀二忠", "座號": 17, "票數": 100}, {"班級": "觀二忠", "座號": 19, "票數": 33}, {"班級": "觀二忠", "座號": 21, "票數": 38}, {"班級": "觀二忠", "座號": 22, "票數": 29}, {"班級": "觀二忠", "座號": 23, "票數": 19}, {"班級": "觀二忠", "座號": 24, "票數": 41}, {"班級": "觀二忠", "座號": 25, "票數": 14}, {"班級": "觀二忠", "座號": 26, "票數": 52}, {"班級": "觀二忠", "座號": 27, "票數": 49}, {"班級": "觀二忠", "座號": 28, "票數": 187}, {"班級": "觀二忠", "座號": 29, "票數": 17}, {"班級": "觀二忠", "座號": 30, "票數": 36}, {"班級": "觀二忠", "座號": 31, "票數": 10}, {"班級": "觀二忠", "座號": 32, "票數": 46}, {"班級": "觀二忠", "座號": 34, "票數": 25}, {"班級": "觀二忠", "座號": 37, "票數": 15}, {"班級": "觀二忠", "座號": 38, "票數": 16}, {"班級": "觀二忠", "座號": 39, "票數": 12}, {"班級": "觀二忠", "座號": 40, "票數": 39}, {"班級": "觀二忠", "座號": 41, "票數": 10}, {"班級": "觀二孝", "座號": 1, "票數": 92}, {"班級": "觀二孝", "座號": 3, "票數": 29}, {"班級": "觀二孝", "座號": 4, "票數": 37}, {"班級": "觀二孝", "座號": 5, "票數": 30}, {"班級": "觀二孝", "座號": 6, "票數": 38}, {"班級": "觀二孝", "座號": 7, "票數": 29}, {"班級": "觀二孝", "座號": 8, "票數": 25}, {"班級": "觀二孝", "座號": 9, "票數": 45}, {"班級": "觀二孝", "座號": 10, "票數": 33}, {"班級": "觀二孝", "座號": 11, "票數": 24}, {"班級": "觀二孝", "座號": 12, "票數": 99}, {"班級": "觀二孝", "座號": 13, "票數": 31}, {"班級": "觀二孝", "座號": 14, "票數": 37}, {"班級": "觀二孝", "座號": 16, "票數": 17}, {"班級": "觀二孝", "座號": 17, "票數": 21}, {"班級": "觀二孝", "座號": 18, "票數": 44}, {"班級": "觀二孝", "座號": 19, "票數": 27}, {"班級": "觀二孝", "座號": 20, "票數": 31}, {"班級": "觀二孝", "座號": 21, "票數": 25}, {"班級": "觀二孝", "座號": 23, "票數": 17}, {"班級": "觀二孝", "座號": 24, "票數": 30}, {"班級": "觀二孝", "座號": 25, "票數": 1}, {"班級": "觀二孝", "座號": 26, "票數": 22}, {"班級": "觀二孝", "座號": 27, "票數": 13}, {"班級": "觀二孝", "座號": 28, "票數": 37}, {"班級": "觀二孝", "座號": 29, "票數": 37}, {"班級": "觀二孝", "座號": 30, "票數": 41}, {"班級": "觀二孝", "座號": 31, "票數": 29}, {"班級": "觀二孝", "座號": 32, "票數": 36}, {"班級": "觀二孝", "座號": 33, "票數": 25}, {"班級": "觀二孝", "座號": 34, "票數": 6}, {"班級": "觀二孝", "座號": 35, "票數": 40}, {"班級": "觀二孝", "座號": 38, "票數": 35}, {"班級": "觀二孝", "座號": 39, "票數": 21}, {"班級": "餐二忠", "座號": 1, "票數": 21}, {"班級": "餐二忠", "座號": 2, "票數": 18}, {"班級": "餐二忠", "座號": 3, "票數": 17}, {"班級": "餐二忠", "座號": 4, "票數": 20}, {"班級": "餐二忠", "座號": 5, "票數": 17}, {"班級": "餐二忠", "座號": 6, "票數": 5}, {"班級": "餐二忠", "座號": 7, "票數": 13}, {"班級": "餐二忠", "座號": 8, "票數": 16}, {"班級": "餐二忠", "座號": 9, "票數": 44}, {"班級": "餐二忠", "座號": 11, "票數": 12}, {"班級": "餐二忠", "座號": 12, "票數": 12}, {"班級": "餐二忠", "座號": 13, "票數": 5}, {"班級": "餐二忠", "座號": 14, "票數": 19}, {"班級": "餐二忠", "座號": 15, "票數": 7}, {"班級": "餐二忠", "座號": 16, "票數": 17}, {"班級": "餐二忠", "座號": 17, "票數": 209}, {"班級": "餐二忠", "座號": 18, "票數": 16}, {"班級": "餐二忠", "座號": 19, "票數": 15}, {"班級": "餐二忠", "座號": 20, "票數": 16}, {"班級": "餐二忠", "座號": 21, "票數": 14}, {"班級": "餐二忠", "座號": 22, "票數": 26}, {"班級": "餐二忠", "座號": 23, "票數": 9}, {"班級": "餐二忠", "座號": 24, "票數": 9}, {"班級": "餐二忠", "座號": 25, "票數": 16}, {"班級": "餐二忠", "座號": 26, "票數": 17}, {"班級": "餐二忠", "座號": 27, "票數": 16}, {"班級": "餐二忠", "座號": 28, "票數": 7}, {"班級": "餐二忠", "座號": 29, "票數": 14}, {"班級": "餐二忠", "座號": 30, "票數": 18}, {"班級": "餐二忠", "座號": 31, "票數": 14}, {"班級": "餐二忠", "座號": 32, "票數": 5}, {"班級": "餐二忠", "座號": 33, "票數": 19}, {"班級": "餐二忠", "座號": 34, "票數": 49}, {"班級": "餐二忠", "座號": 35, "票數": 398}, {"班級": "餐二忠", "座號": 36, "票數": 60}, {"班級": "餐二忠", "座號": 37, "票數": 14}, {"班級": "餐二忠", "座號": 38, "票數": 39}, {"班級": "餐二忠", "座號": 39, "票數": 17}, {"班級": "餐二忠", "座號": 40, "票數": 8}, {"班級": "餐二忠", "座號": 41, "票數": 6}, {"班級": "餐二忠", "座號": 42, "票數": 38}, {"班級": "餐二忠", "座號": 43, "票數": 10}, {"班級": "餐二忠", "座號": 44, "票數": 374}, {"班級": "餐二忠", "座號": 45, "票數": 3}, {"班級": "餐二孝", "座號": 15, "票數": 4}, {"班級": "餐二孝", "座號": 41, "票數": 4}, {"班級": "餐二孝", "座號": 43, "票數": 8}, {"班級": "餐二仁", "座號": 1, "票數": 3}, {"班級": "餐二仁", "座號": 3, "票數": 36}, {"班級": "餐二仁", "座號": 6, "票數": 20}, {"班級": "餐二仁", "座號": 7, "票數": 11}, {"班級": "餐二仁", "座號": 8, "票數": 1}, {"班級": "餐二仁", "座號": 9, "票數": 15}, {"班級": "餐二仁", "座號": 10, "票數": 5}, {"班級": "餐二仁", "座號": 11, "票數": 19}, {"班級": "餐二仁", "座號": 14, "票數": 19}, {"班級": "餐二仁", "座號": 15, "票數": 5}, {"班級": "餐二仁", "座號": 16, "票數": 1}, {"班級": "餐二仁", "座號": 17, "票數": 14}, {"班級": "餐二仁", "座號": 18, "票數": 8}, {"班級": "餐二仁", "座號": 19, "票數": 8}, {"班級": "餐二仁", "座號": 21, "票數": 11}, {"班級": "餐二仁", "座號": 22, "票數": 5}, {"班級": "餐二仁", "座號": 23, "票數": 4}, {"班級": "餐二仁", "座號": 24, "票數": 1}, {"班級": "餐二仁", "座號": 25, "票數": 19}, {"班級": "餐二仁", "座號": 27, "票數": 2}, {"班級": "餐二仁", "座號": 28, "票數": 5}, {"班級": "餐二仁", "座號": 29, "票數": 2}, {"班級": "餐二仁", "座號": 31, "票數": 16}, {"班級": "餐二仁", "座號": 32, "票數": 7}, {"班級": "餐二仁", "座號": 33, "票數": 1}, {"班級": "餐二仁", "座號": 37, "票數": 11}, {"班級": "餐二仁", "座號": 38, "票數": 19}, {"班級": "餐二仁", "座號": 39, "票數": 2}, {"班級": "餐二仁", "座號": 41, "票數": 4}, {"班級": "餐二仁", "座號": 43, "票數": 5}, {"班級": "餐二仁", "座號": 45, "票數": 11}, {"班級": "餐二愛", "座號": 1, "票數": 22}, {"班級": "餐二愛", "座號": 3, "票數": 16}, {"班級": "餐二愛", "座號": 4, "票數": 5}, {"班級": "餐二愛", "座號": 5, "票數": 17}, {"班級": "餐二愛", "座號": 6, "票數": 7}, {"班級": "餐二愛", "座號": 8, "票數": 22}, {"班級": "餐二愛", "座號": 9, "票數": 9}, {"班級": "餐二愛", "座號": 10, "票數": 26}, {"班級": "餐二愛", "座號": 11, "票數": 14}, {"班級": "餐二愛", "座號": 12, "票數": 45}, {"班級": "餐二愛", "座號": 13, "票數": 18}, {"班級": "餐二愛", "座號": 14, "票數": 7}, {"班級": "餐二愛", "座號": 15, "票數": 1}, {"班級": "餐二愛", "座號": 16, "票數": 4}, {"班級": "餐二愛", "座號": 17, "票數": 13}, {"班級": "餐二愛", "座號": 18, "票數": 5}, {"班級": "餐二愛", "座號": 19, "票數": 10}, {"班級": "餐二愛", "座號": 20, "票數": 4}, {"班級": "餐二愛", "座號": 21, "票數": 14}, {"班級": "餐二愛", "座號": 22, "票數": 5}, {"班級": "餐二愛", "座號": 23, "票數": 1}, {"班級": "餐二愛", "座號": 24, "票數": 6}, {"班級": "餐二愛", "座號": 25, "票數": 20}, {"班級": "餐二愛", "座號": 26, "票數": 14}, {"班級": "餐二愛", "座號": 27, "票數": 14}, {"班級": "餐二愛", "座號": 29, "票數": 3}, {"班級": "餐二愛", "座號": 30, "票數": 19}, {"班級": "餐二愛", "座號": 31, "票數": 5}, {"班級": "餐二愛", "座號": 32, "票數": 19}, {"班級": "餐二愛", "座號": 33, "票數": 7}, {"班級": "餐二愛", "座號": 34, "票數": 2}, {"班級": "餐二愛", "座號": 36, "票數": 19}, {"班級": "餐二愛", "座號": 38, "票數": 9}, {"班級": "餐二愛", "座號": 39, "票數": 13}, {"班級": "餐二愛", "座號": 40, "票數": 5}, {"班級": "餐二愛", "座號": 41, "票數": 1}, {"班級": "餐二愛", "座號": 43, "票數": 18}, {"班級": "餐二愛", "座號": 44, "票數": 24}, {"班級": "餐二愛", "座號": 45, "票數": 6}, {"班級": "餐二義", "座號": 1, "票數": 1}, {"班級": "餐二義", "座號": 3, "票數": 1}, {"班級": "餐二義", "座號": 4, "票數": 13}, {"班級": "餐二義", "座號": 8, "票數": 1}, {"班級": "餐二義", "座號": 10, "票數": 2}, {"班級": "餐二義", "座號": 14, "票數": 14}, {"班級": "餐二義", "座號": 25, "票數": 26}, {"班級": "餐二義", "座號": 29, "票數": 14}, {"班級": "餐二義", "座號": 30, "票數": 1}, {"班級": "餐二義", "座號": 32, "票數": 66}, {"班級": "餐二義", "座號": 34, "票數": 2}, {"班級": "餐二義", "座號": 35, "票數": 1}, {"班級": "餐二義", "座號": 38, "票數": 7}, {"班級": "餐二義", "座號": 39, "票數": 1}, {"班級": "幼二忠", "座號": 2, "票數": 120}, {"班級": "幼二忠", "座號": 3, "票數": 46}, {"班級": "幼二忠", "座號": 4, "票數": 90}, {"班級": "幼二忠", "座號": 5, "票數": 159}, {"班級": "幼二忠", "座號": 6, "票數": 35}, {"班級": "幼二忠", "座號": 7, "票數": 59}, {"班級": "幼二忠", "座號": 8, "票數": 31}, {"班級": "幼二忠", "座號": 9, "票數": 39}, {"班級": "幼二忠", "座號": 10, "票數": 92}, {"班級": "幼二忠", "座號": 12, "票數": 136}, {"班級": "幼二忠", "座號": 13, "票數": 38}, {"班級": "幼二忠", "座號": 14, "票數": 87}, {"班級": "幼二忠", "座號": 15, "票數": 140}, {"班級": "幼二忠", "座號": 16, "票數": 47}, {"班級": "幼二忠", "座號": 19, "票數": 72}, {"班級": "幼二忠", "座號": 20, "票數": 124}, {"班級": "幼二忠", "座號": 21, "票數": 126}, {"班級": "幼二忠", "座號": 22, "票數": 37}, {"班級": "幼二忠", "座號": 23, "票數": 47}, {"班級": "幼二忠", "座號": 24, "票數": 92}, {"班級": "幼二忠", "座號": 25, "票數": 74}, {"班級": "幼二忠", "座號": 26, "票數": 122}, {"班級": "幼二忠", "座號": 27, "票數": 188}, {"班級": "幼二忠", "座號": 28, "票數": 76}, {"班級": "幼二忠", "座號": 29, "票數": 40}, {"班級": "幼二忠", "座號": 30, "票數": 44}, {"班級": "幼二忠", "座號": 31, "票數": 50}, {"班級": "幼二忠", "座號": 32, "票數": 3}, {"班級": "幼二忠", "座號": 33, "票數": 60}, {"班級": "幼二忠", "座號": 34, "票數": 29}, {"班級": "幼二忠", "座號": 36, "票數": 175}, {"班級": "幼二忠", "座號": 37, "票數": 98}, {"班級": "幼二忠", "座號": 38, "票數": 108}, {"班級": "幼二忠", "座號": 39, "票數": 57}, {"班級": "幼二忠", "座號": 40, "票數": 38}, {"班級": "幼二忠", "座號": 41, "票數": 47}, {"班級": "幼二忠", "座號": 42, "票數": 41}, {"班級": "幼二忠", "座號": 43, "票數": 88}, {"班級": "幼二忠", "座號": 44, "票數": 33}, {"班級": "幼二忠", "座號": 45, "票數": 16}, {"班級": "幼二忠", "座號": 46, "票數": 12}, {"班級": "幼二忠", "座號": 47, "票數": 32}, {"班級": "幼二忠", "座號": 48, "票數": 41}, {"班級": "美二忠", "座號": 1, "票數": 58}, {"班級": "美二忠", "座號": 2, "票數": 58}, {"班級": "美二忠", "座號": 3, "票數": 61}, {"班級": "美二忠", "座號": 4, "票數": 57}, {"班級": "美二忠", "座號": 5, "票數": 292}, {"班級": "美二忠", "座號": 6, "票數": 121}, {"班級": "美二忠", "座號": 7, "票數": 53}, {"班級": "美二忠", "座號": 8, "票數": 65}, {"班級": "美二忠", "座號": 9, "票數": 77}, {"班級": "美二忠", "座號": 10, "票數": 92}, {"班級": "美二忠", "座號": 11, "票數": 963}, {"班級": "美二忠", "座號": 12, "票數": 71}, {"班級": "美二忠", "座號": 13, "票數": 54}, {"班級": "美二忠", "座號": 14, "票數": 62}, {"班級": "美二忠", "座號": 15, "票數": 62}, {"班級": "美二忠", "座號": 16, "票數": 34}, {"班級": "美二忠", "座號": 17, "票數": 36}, {"班級": "美二忠", "座號": 18, "票數": 105}, {"班級": "美二忠", "座號": 19, "票數": 248}, {"班級": "美二忠", "座號": 20, "票數": 56}, {"班級": "美二忠", "座號": 21, "票數": 57}, {"班級": "美二忠", "座號": 22, "票數": 58}, {"班級": "美二忠", "座號": 23, "票數": 55}, {"班級": "美二忠", "座號": 24, "票數": 58}, {"班級": "美二忠", "座號": 25, "票數": 78}, {"班級": "美二忠", "座號": 26, "票數": 84}, {"班級": "美二忠", "座號": 27, "票數": 57}, {"班級": "美二忠", "座號": 28, "票數": 59}, {"班級": "美二忠", "座號": 29, "票數": 53}, {"班級": "美二忠", "座號": 30, "票數": 382}, {"班級": "美二忠", "座號": 31, "票數": 930}, {"班級": "美二忠", "座號": 32, "票數": 57}, {"班級": "美二忠", "座號": 33, "票數": 65}, {"班級": "美二忠", "座號": 34, "票數": 54}, {"班級": "美二忠", "座號": 35, "票數": 58}, {"班級": "美二忠", "座號": 36, "票數": 62}, {"班級": "美二忠", "座號": 37, "票數": 55}, {"班級": "美二忠", "座號": 38, "票數": 60}, {"班級": "美二忠", "座號": 39, "票數": 322}, {"班級": "美二忠", "座號": 40, "票數": 51}, {"班級": "美二忠", "座號": 41, "票數": 68}, {"班級": "美二忠", "座號": 42, "票數": 419}, {"班級": "美二忠", "座號": 44, "票數": 92}, {"班級": "美二忠", "座號": 45, "票數": 36}, {"班級": "美二孝", "座號": 1, "票數": 5}, {"班級": "美二孝", "座號": 2, "票數": 6}, {"班級": "美二孝", "座號": 3, "票數": 6}, {"班級": "美二孝", "座號": 4, "票數": 4}, {"班級": "美二孝", "座號": 7, "票數": 3}, {"班級": "美二孝", "座號": 8, "票數": 2}, {"班級": "美二孝", "座號": 9, "票數": 3}, {"班級": "美二孝", "座號": 11, "票數": 4}, {"班級": "美二孝", "座號": 12, "票數": 1}, {"班級": "美二孝", "座號": 13, "票數": 1}, {"班級": "美二孝", "座號": 14, "票數": 6}, {"班級": "美二孝", "座號": 15, "票數": 2}, {"班級": "美二孝", "座號": 16, "票數": 2}, {"班級": "美二孝", "座號": 17, "票數": 3}, {"班級": "美二孝", "座號": 19, "票數": 6}, {"班級": "美二孝", "座號": 20, "票數": 6}, {"班級": "美二孝", "座號": 21, "票數": 1}, {"班級": "美二孝", "座號": 23, "票數": 4}, {"班級": "美二孝", "座號": 24, "票數": 5}, {"班級": "美二孝", "座號": 25, "票數": 3}, {"班級": "美二孝", "座號": 26, "票數": 3}, {"班級": "美二孝", "座號": 27, "票數": 3}, {"班級": "美二孝", "座號": 28, "票數": 1}, {"班級": "美二孝", "座號": 29, "票數": 7}, {"班級": "美二孝", "座號": 30, "票數": 1}, {"班級": "美二孝", "座號": 31, "票數": 6}, {"班級": "美二孝", "座號": 32, "票數": 3}, {"班級": "美二孝", "座號": 34, "票數": 1}, {"班級": "美二孝", "座號": 35, "票數": 3}, {"班級": "美二孝", "座號": 36, "票數": 2}, {"班級": "美二孝", "座號": 38, "票數": 1}, {"班級": "美二孝", "座號": 39, "票數": 3}, {"班級": "美二孝", "座號": 41, "票數": 2}, {"班級": "美二孝", "座號": 42, "票數": 4}, {"班級": "美二孝", "座號": 44, "票數": 4}, {"班級": "美二孝", "座號": 45, "票數": 1}, {"班級": "影二忠", "座號": 1, "票數": 18}, {"班級": "影二忠", "座號": 2, "票數": 18}, {"班級": "影二忠", "座號": 3, "票數": 18}, {"班級": "影二忠", "座號": 4, "票數": 18}, {"班級": "影二忠", "座號": 5, "票數": 18}, {"班級": "影二忠", "座號": 6, "票數": 18}, {"班級": "影二忠", "座號": 7, "票數": 18}, {"班級": "影二忠", "座號": 8, "票數": 18}, {"班級": "影二忠", "座號": 9, "票數": 18}, {"班級": "影二忠", "座號": 10, "票數": 18}, {"班級": "影二忠", "座號": 11, "票數": 18}, {"班級": "影二忠", "座號": 12, "票數": 60}, {"班級": "影二忠", "座號": 13, "票數": 18}, {"班級": "影二忠", "座號": 14, "票數": 21}, {"班級": "影二忠", "座號": 15, "票數": 18}, {"班級": "影二忠", "座號": 16, "票數": 18}, {"班級": "影二忠", "座號": 17, "票數": 18}, {"班級": "影二忠", "座號": 18, "票數": 18}, {"班級": "影二忠", "座號": 20, "票數": 18}, {"班級": "影二忠", "座號": 21, "票數": 18}, {"班級": "影二忠", "座號": 22, "票數": 18}, {"班級": "影二忠", "座號": 23, "票數": 18}, {"班級": "影二忠", "座號": 24, "票數": 18}, {"班級": "影二忠", "座號": 25, "票數": 18}, {"班級": "影二忠", "座號": 26, "票數": 18}, {"班級": "影二忠", "座號": 27, "票數": 18}, {"班級": "影二忠", "座號": 28, "票數": 1}, {"班級": "影二忠", "座號": 29, "票數": 18}, {"班級": "影二忠", "座號": 30, "票數": 21}, {"班級": "影二忠", "座號": 31, "票數": 18}, {"班級": "影二忠", "座號": 32, "票數": 18}, {"班級": "影二忠", "座號": 33, "票數": 19}, {"班級": "影二忠", "座號": 35, "票數": 18}, {"班級": "影二忠", "座號": 36, "票數": 18}, {"班級": "影二忠", "座號": 37, "票數": 18}, {"班級": "影二忠", "座號": 39, "票數": 26}, {"班級": "影二忠", "座號": 40, "票數": 18}, {"班級": "影二忠", "座號": 41, "票數": 18}, {"班級": "影二忠", "座號": 42, "票數": 18}, {"班級": "影二忠", "座號": 43, "票數": 18}, {"班級": "影二忠", "座號": 44, "票數": 18}, {"班級": "影二忠", "座號": 45, "票數": 17}, {"班級": "影二孝", "座號": 1, "票數": 1}, {"班級": "影二孝", "座號": 2, "票數": 18}, {"班級": "影二孝", "座號": 3, "票數": 1}, {"班級": "影二孝", "座號": 4, "票數": 17}, {"班級": "影二孝", "座號": 7, "票數": 17}, {"班級": "影二孝", "座號": 8, "票數": 17}, {"班級": "影二孝", "座號": 11, "票數": 17}, {"班級": "影二孝", "座號": 12, "票數": 17}, {"班級": "影二孝", "座號": 13, "票數": 17}, {"班級": "影二孝", "座號": 14, "票數": 17}, {"班級": "影二孝", "座號": 15, "票數": 17}, {"班級": "影二孝", "座號": 16, "票數": 29}, {"班級": "商三忠", "座號": 1, "票數": 8}, {"班級": "商三忠", "座號": 2, "票數": 19}, {"班級": "商三忠", "座號": 3, "票數": 19}, {"班級": "商三忠", "座號": 4, "票數": 19}, {"班級": "商三忠", "座號": 5, "票數": 28}, {"班級": "商三忠", "座號": 7, "票數": 19}, {"班級": "商三忠", "座號": 8, "票數": 20}, {"班級": "商三忠", "座號": 10, "票數": 19}, {"班級": "商三忠", "座號": 11, "票數": 19}, {"班級": "商三忠", "座號": 13, "票數": 16}, {"班級": "商三忠", "座號": 14, "票數": 73}, {"班級": "商三忠", "座號": 15, "票數": 17}, {"班級": "商三忠", "座號": 16, "票數": 19}, {"班級": "商三忠", "座號": 17, "票數": 424}, {"班級": "商三忠", "座號": 18, "票數": 18}, {"班級": "商三忠", "座號": 19, "票數": 19}, {"班級": "商三忠", "座號": 20, "票數": 18}, {"班級": "商三忠", "座號": 21, "票數": 16}, {"班級": "商三忠", "座號": 22, "票數": 21}, {"班級": "商三忠", "座號": 23, "票數": 19}, {"班級": "商三忠", "座號": 24, "票數": 19}, {"班級": "商三忠", "座號": 25, "票數": 20}, {"班級": "商三忠", "座號": 26, "票數": 19}, {"班級": "商三忠", "座號": 27, "票數": 18}, {"班級": "商三忠", "座號": 28, "票數": 34}, {"班級": "商三忠", "座號": 29, "票數": 19}, {"班級": "商三忠", "座號": 30, "票數": 16}, {"班級": "商三忠", "座號": 35, "票數": 19}, {"班級": "商三忠", "座號": 36, "票數": 22}, {"班級": "商三忠", "座號": 37, "票數": 1}, {"班級": "商三忠", "座號": 38, "票數": 18}, {"班級": "商三忠", "座號": 39, "票數": 19}, {"班級": "商三忠", "座號": 40, "票數": 1}, {"班級": "商三忠", "座號": 41, "票數": 13}, {"班級": "商三忠", "座號": 42, "票數": 19}, {"班級": "資處三忠", "座號": 1, "票數": 2}, {"班級": "資處三忠", "座號": 2, "票數": 13}, {"班級": "資處三忠", "座號": 3, "票數": 212}, {"班級": "資處三忠", "座號": 4, "票數": 3}, {"班級": "資處三忠", "座號": 5, "票數": 3}, {"班級": "資處三忠", "座號": 6, "票數": 6}, {"班級": "資處三忠", "座號": 7, "票數": 7}, {"班級": "資處三忠", "座號": 9, "票數": 2}, {"班級": "資處三忠", "座號": 10, "票數": 4}, {"班級": "資處三忠", "座號": 11, "票數": 2}, {"班級": "資處三忠", "座號": 12, "票數": 29}, {"班級": "資處三忠", "座號": 13, "票數": 14}, {"班級": "資處三忠", "座號": 14, "票數": 6}, {"班級": "資處三忠", "座號": 15, "票數": 9}, {"班級": "資處三忠", "座號": 17, "票數": 5}, {"班級": "資處三忠", "座號": 18, "票數": 3}, {"班級": "資處三忠", "座號": 19, "票數": 25}, {"班級": "資處三忠", "座號": 20, "票數": 34}, {"班級": "資處三忠", "座號": 21, "票數": 380}, {"班級": "資處三忠", "座號": 22, "票數": 2624}, {"班級": "資處三忠", "座號": 23, "票數": 9}, {"班級": "資處三忠", "座號": 24, "票數": 14}, {"班級": "資處三忠", "座號": 25, "票數": 13}, {"班級": "資處三忠", "座號": 26, "票數": 27}, {"班級": "資處三忠", "座號": 27, "票數": 3}, {"班級": "資處三忠", "座號": 28, "票數": 1}, {"班級": "資處三忠", "座號": 29, "票數": 4}, {"班級": "資處三忠", "座號": 30, "票數": 17}, {"班級": "資處三忠", "座號": 31, "票數": 1}, {"班級": "資處三忠", "座號": 32, "票數": 2}, {"班級": "資處三忠", "座號": 33, "票數": 23}, {"班級": "資處三忠", "座號": 34, "票數": 2}, {"班級": "資處三忠", "座號": 35, "票數": 2}, {"班級": "資處三忠", "座號": 38, "票數": 8}, {"班級": "資處三忠", "座號": 40, "票數": 4}, {"班級": "資處三忠", "座號": 41, "票數": 17}, {"班級": "資處三忠", "座號": 42, "票數": 5}, {"班級": "資處三忠", "座號": 43, "票數": 4}, {"班級": "資處三孝", "座號": 1, "票數": 8}, {"班級": "資處三孝", "座號": 3, "票數": 1}, {"班級": "資處三孝", "座號": 4, "票數": 9}, {"班級": "資處三孝", "座號": 5, "票數": 1}, {"班級": "資處三孝", "座號": 6, "票數": 9}, {"班級": "資處三孝", "座號": 9, "票數": 9}, {"班級": "資處三孝", "座號": 11, "票數": 1}, {"班級": "資處三孝", "座號": 12, "票數": 2}, {"班級": "資處三孝", "座號": 15, "票數": 1}, {"班級": "資處三孝", "座號": 16, "票數": 8}, {"班級": "資處三孝", "座號": 17, "票數": 8}, {"班級": "資處三孝", "座號": 19, "票數": 6}, {"班級": "資處三孝", "座號": 20, "票數": 2}, {"班級": "資處三孝", "座號": 22, "票數": 7}, {"班級": "資處三孝", "座號": 23, "票數": 4}, {"班級": "資處三孝", "座號": 24, "票數": 4}, {"班級": "資處三孝", "座號": 25, "票數": 6}, {"班級": "資處三孝", "座號": 26, "票數": 3}, {"班級": "資處三孝", "座號": 27, "票數": 8}, {"班級": "資處三孝", "座號": 28, "票數": 4}, {"班級": "資處三孝", "座號": 30, "票數": 2}, {"班級": "資處三孝", "座號": 31, "票數": 8}, {"班級": "資處三孝", "座號": 32, "票數": 9}, {"班級": "資處三孝", "座號": 33, "票數": 1}, {"班級": "資處三孝", "座號": 34, "票數": 2}, {"班級": "資處三孝", "座號": 35, "票數": 5}, {"班級": "資處三孝", "座號": 36, "票數": 1}, {"班級": "資處三孝", "座號": 38, "票數": 5}, {"班級": "資處三孝", "座號": 39, "票數": 8}, {"班級": "資處三孝", "座號": 40, "票數": 1}, {"班級": "資處三孝", "座號": 42, "票數": 4}, {"班級": "資處三孝", "座號": 46, "票數": 3}, {"班級": "觀三忠", "座號": 2, "票數": 1}, {"班級": "觀三忠", "座號": 3, "票數": 1}, {"班級": "觀三忠", "座號": 4, "票數": 1}, {"班級": "觀三忠", "座號": 6, "票數": 1}, {"班級": "觀三忠", "座號": 9, "票數": 1}, {"班級": "觀三忠", "座號": 10, "票數": 1}, {"班級": "觀三忠", "座號": 11, "票數": 1}, {"班級": "觀三忠", "座號": 12, "票數": 1}, {"班級": "觀三忠", "座號": 13, "票數": 1}, {"班級": "觀三忠", "座號": 14, "票數": 1}, {"班級": "觀三忠", "座號": 15, "票數": 1}, {"班級": "觀三忠", "座號": 16, "票數": 1}, {"班級": "觀三忠", "座號": 19, "票數": 1}, {"班級": "觀三忠", "座號": 20, "票數": 1}, {"班級": "觀三忠", "座號": 22, "票數": 1}, {"班級": "觀三忠", "座號": 23, "票數": 1}, {"班級": "觀三忠", "座號": 26, "票數": 1}, {"班級": "觀三忠", "座號": 27, "票數": 1}, {"班級": "觀三忠", "座號": 29, "票數": 1}, {"班級": "觀三忠", "座號": 30, "票數": 1}, {"班級": "觀三忠", "座號": 31, "票數": 1}, {"班級": "觀三忠", "座號": 32, "票數": 1}, {"班級": "觀三忠", "座號": 34, "票數": 1}, {"班級": "觀三忠", "座號": 35, "票數": 1}, {"班級": "觀三忠", "座號": 36, "票數": 1}, {"班級": "觀三忠", "座號": 39, "票數": 1}, {"班級": "觀三忠", "座號": 40, "票數": 1}, {"班級": "觀三忠", "座號": 41, "票數": 1}, {"班級": "觀三孝", "座號": 1, "票數": 17}, {"班級": "觀三孝", "座號": 2, "票數": 10}, {"班級": "觀三孝", "座號": 3, "票數": 2}, {"班級": "觀三孝", "座號": 4, "票數": 26}, {"班級": "觀三孝", "座號": 5, "票數": 15}, {"班級": "觀三孝", "座號": 8, "票數": 4}, {"班級": "觀三孝", "座號": 9, "票數": 16}, {"班級": "觀三孝", "座號": 10, "票數": 9}, {"班級": "觀三孝", "座號": 13, "票數": 12}, {"班級": "觀三孝", "座號": 15, "票數": 1}, {"班級": "觀三孝", "座號": 16, "票數": 7}, {"班級": "觀三孝", "座號": 17, "票數": 14}, {"班級": "觀三孝", "座號": 18, "票數": 4}, {"班級": "觀三孝", "座號": 19, "票數": 1}, {"班級": "觀三孝", "座號": 20, "票數": 2}, {"班級": "觀三孝", "座號": 21, "票數": 1}, {"班級": "觀三孝", "座號": 22, "票數": 4}, {"班級": "觀三孝", "座號": 24, "票數": 2}, {"班級": "觀三孝", "座號": 25, "票數": 11}, {"班級": "觀三孝", "座號": 26, "票數": 16}, {"班級": "觀三孝", "座號": 28, "票數": 1}, {"班級": "觀三孝", "座號": 29, "票數": 8}, {"班級": "觀三孝", "座號": 30, "票數": 12}, {"班級": "觀三孝", "座號": 32, "票數": 4}, {"班級": "觀三孝", "座號": 33, "票數": 9}, {"班級": "觀三孝", "座號": 34, "票數": 14}, {"班級": "觀三孝", "座號": 36, "票數": 3}, {"班級": "觀三孝", "座號": 38, "票數": 12}, {"班級": "餐三忠", "座號": 1, "票數": 56}, {"班級": "餐三忠", "座號": 2, "票數": 40}, {"班級": "餐三忠", "座號": 3, "票數": 110}, {"班級": "餐三忠", "座號": 4, "票數": 71}, {"班級": "餐三忠", "座號": 5, "票數": 290}, {"班級": "餐三忠", "座號": 6, "票數": 116}, {"班級": "餐三忠", "座號": 7, "票數": 66}, {"班級": "餐三忠", "座號": 8, "票數": 143}, {"班級": "餐三忠", "座號": 9, "票數": 66}, {"班級": "餐三忠", "座號": 10, "票數": 44}, {"班級": "餐三忠", "座號": 11, "票數": 56}, {"班級": "餐三忠", "座號": 12, "票數": 224}, {"班級": "餐三忠", "座號": 13, "票數": 137}, {"班級": "餐三忠", "座號": 14, "票數": 54}, {"班級": "餐三忠", "座號": 15, "票數": 53}, {"班級": "餐三忠", "座號": 16, "票數": 49}, {"班級": "餐三忠", "座號": 17, "票數": 208}, {"班級": "餐三忠", "座號": 18, "票數": 36}, {"班級": "餐三忠", "座號": 19, "票數": 47}, {"班級": "餐三忠", "座號": 20, "票數": 39}, {"班級": "餐三忠", "座號": 21, "票數": 1017}, {"班級": "餐三忠", "座號": 22, "票數": 89}, {"班級": "餐三忠", "座號": 23, "票數": 55}, {"班級": "餐三忠", "座號": 24, "票數": 21}, {"班級": "餐三忠", "座號": 25, "票數": 61}, {"班級": "餐三忠", "座號": 26, "票數": 76}, {"班級": "餐三忠", "座號": 28, "票數": 68}, {"班級": "餐三忠", "座號": 29, "票數": 252}, {"班級": "餐三忠", "座號": 30, "票數": 27}, {"班級": "餐三忠", "座號": 31, "票數": 67}, {"班級": "餐三忠", "座號": 32, "票數": 654}, {"班級": "餐三忠", "座號": 33, "票數": 31}, {"班級": "餐三忠", "座號": 34, "票數": 313}, {"班級": "餐三忠", "座號": 35, "票數": 43}, {"班級": "餐三忠", "座號": 36, "票數": 24}, {"班級": "餐三忠", "座號": 37, "票數": 40}, {"班級": "餐三忠", "座號": 39, "票數": 58}, {"班級": "餐三忠", "座號": 40, "票數": 166}, {"班級": "餐三忠", "座號": 41, "票數": 59}, {"班級": "餐三忠", "座號": 42, "票數": 34}, {"班級": "餐三忠", "座號": 43, "票數": 41}, {"班級": "餐三忠", "座號": 44, "票數": 34}, {"班級": "餐三忠", "座號": 45, "票數": 20}, {"班級": "餐三忠", "座號": 46, "票數": 48}, {"班級": "餐三和", "座號": 1, "票數": 2}, {"班級": "餐三和", "座號": 4, "票數": 2}, {"班級": "餐三和", "座號": 5, "票數": 1}, {"班級": "餐三和", "座號": 6, "票數": 1}, {"班級": "餐三和", "座號": 7, "票數": 1}, {"班級": "餐三和", "座號": 8, "票數": 1}, {"班級": "餐三和", "座號": 9, "票數": 2}, {"班級": "餐三和", "座號": 10, "票數": 2}, {"班級": "餐三和", "座號": 11, "票數": 2}, {"班級": "餐三和", "座號": 13, "票數": 7}, {"班級": "餐三和", "座號": 15, "票數": 1}, {"班級": "餐三和", "座號": 16, "票數": 1}, {"班級": "餐三和", "座號": 17, "票數": 1}, {"班級": "餐三和", "座號": 18, "票數": 2}, {"班級": "餐三和", "座號": 20, "票數": 2}, {"班級": "餐三和", "座號": 21, "票數": 2}, {"班級": "餐三和", "座號": 22, "票數": 2}, {"班級": "餐三和", "座號": 23, "票數": 2}, {"班級": "餐三和", "座號": 24, "票數": 2}, {"班級": "餐三和", "座號": 25, "票數": 2}, {"班級": "餐三和", "座號": 26, "票數": 2}, {"班級": "餐三和", "座號": 27, "票數": 2}, {"班級": "餐三和", "座號": 28, "票數": 1}, {"班級": "餐三和", "座號": 29, "票數": 2}, {"班級": "餐三和", "座號": 31, "票數": 6}, {"班級": "餐三和", "座號": 33, "票數": 1}, {"班級": "餐三和", "座號": 34, "票數": 2}, {"班級": "餐三和", "座號": 37, "票數": 2}, {"班級": "餐三和", "座號": 38, "票數": 2}, {"班級": "餐三和", "座號": 40, "票數": 2}, {"班級": "餐三和", "座號": 43, "票數": 2}, {"班級": "幼三孝", "座號": 3, "票數": 1}, {"班級": "幼三孝", "座號": 6, "票數": 3}, {"班級": "幼三孝", "座號": 8, "票數": 12}, {"班級": "幼三孝", "座號": 9, "票數": 1}, {"班級": "幼三孝", "座號": 12, "票數": 6}, {"班級": "幼三孝", "座號": 13, "票數": 1}, {"班級": "幼三孝", "座號": 15, "票數": 1}, {"班級": "幼三孝", "座號": 16, "票數": 20}, {"班級": "幼三孝", "座號": 20, "票數": 7}, {"班級": "幼三孝", "座號": 22, "票數": 1}, {"班級": "幼三孝", "座號": 23, "票數": 3}, {"班級": "幼三孝", "座號": 24, "票數": 6}, {"班級": "幼三孝", "座號": 25, "票數": 1}, {"班級": "幼三孝", "座號": 26, "票數": 87}, {"班級": "幼三孝", "座號": 29, "票數": 1}, {"班級": "幼三孝", "座號": 31, "票數": 1}, {"班級": "美三忠", "座號": 1, "票數": 14}, {"班級": "美三忠", "座號": 2, "票數": 10}, {"班級": "美三忠", "座號": 3, "票數": 13}, {"班級": "美三忠", "座號": 4, "票數": 12}, {"班級": "美三忠", "座號": 5, "票數": 14}, {"班級": "美三忠", "座號": 6, "票數": 14}, {"班級": "美三忠", "座號": 8, "票數": 11}, {"班級": "美三忠", "座號": 9, "票數": 11}, {"班級": "美三忠", "座號": 10, "票數": 15}, {"班級": "美三忠", "座號": 11, "票數": 13}, {"班級": "美三忠", "座號": 13, "票數": 289}, {"班級": "美三忠", "座號": 14, "票數": 14}, {"班級": "美三忠", "座號": 16, "票數": 15}, {"班級": "美三忠", "座號": 17, "票數": 10}, {"班級": "美三忠", "座號": 18, "票數": 13}, {"班級": "美三忠", "座號": 20, "票數": 16}, {"班級": "美三忠", "座號": 21, "票數": 11}, {"班級": "美三忠", "座號": 22, "票數": 15}, {"班級": "美三忠", "座號": 23, "票數": 13}, {"班級": "美三忠", "座號": 24, "票數": 26}, {"班級": "美三忠", "座號": 26, "票數": 16}, {"班級": "美三忠", "座號": 28, "票數": 11}, {"班級": "美三忠", "座號": 29, "票數": 13}, {"班級": "美三忠", "座號": 30, "票數": 13}, {"班級": "美三忠", "座號": 31, "票數": 13}, {"班級": "美三忠", "座號": 32, "票數": 14}, {"班級": "美三忠", "座號": 34, "票數": 11}, {"班級": "美三忠", "座號": 36, "票數": 14}, {"班級": "美三忠", "座號": 37, "票數": 14}, {"班級": "美三忠", "座號": 38, "票數": 11}, {"班級": "美三忠", "座號": 39, "票數": 10}, {"班級": "美三忠", "座號": 40, "票數": 13}, {"班級": "美三忠", "座號": 41, "票數": 13}, {"班級": "美三忠", "座號": 43, "票數": 12}, {"班級": "美三忠", "座號": 44, "票數": 13}, {"班級": "美三仁", "座號": 1, "票數": 15}, {"班級": "美三仁", "座號": 2, "票數": 2}, {"班級": "美三仁", "座號": 3, "票數": 4}, {"班級": "美三仁", "座號": 4, "票數": 17}, {"班級": "美三仁", "座號": 6, "票數": 9}, {"班級": "美三仁", "座號": 7, "票數": 10}, {"班級": "美三仁", "座號": 8, "票數": 127}, {"班級": "美三仁", "座號": 9, "票數": 28}, {"班級": "美三仁", "座號": 10, "票數": 15}, {"班級": "美三仁", "座號": 11, "票數": 13}, {"班級": "美三仁", "座號": 12, "票數": 13}, {"班級": "美三仁", "座號": 13, "票數": 7}, {"班級": "美三仁", "座號": 17, "票數": 15}, {"班級": "美三仁", "座號": 18, "票數": 15}, {"班級": "美三仁", "座號": 20, "票數": 15}, {"班級": "美三仁", "座號": 22, "票數": 16}, {"班級": "美三仁", "座號": 23, "票數": 16}, {"班級": "美三仁", "座號": 24, "票數": 16}, {"班級": "美三仁", "座號": 25, "票數": 10}, {"班級": "美三仁", "座號": 26, "票數": 147}, {"班級": "美三仁", "座號": 27, "票數": 11}, {"班級": "美三仁", "座號": 29, "票數": 17}, {"班級": "美三仁", "座號": 30, "票數": 16}, {"班級": "美三仁", "座號": 32, "票數": 7}, {"班級": "美三仁", "座號": 33, "票數": 17}, {"班級": "美三仁", "座號": 35, "票數": 20}, {"班級": "資訊三忠", "座號": 1, "票數": 13}, {"班級": "資訊三忠", "座號": 2, "票數": 12}, {"班級": "資訊三忠", "座號": 3, "票數": 10}, {"班級": "資訊三忠", "座號": 4, "票數": 13}, {"班級": "資訊三忠", "座號": 5, "票數": 13}, {"班級": "資訊三忠", "座號": 6, "票數": 13}, {"班級": "資訊三忠", "座號": 7, "票數": 10}, {"班級": "資訊三忠", "座號": 8, "票數": 12}, {"班級": "資訊三忠", "座號": 9, "票數": 12}, {"班級": "資訊三忠", "座號": 10, "票數": 13}, {"班級": "資訊三忠", "座號": 11, "票數": 16}, {"班級": "資訊三忠", "座號": 12, "票數": 8}, {"班級": "資訊三忠", "座號": 13, "票數": 10}, {"班級": "資訊三忠", "座號": 14, "票數": 12}, {"班級": "資訊三忠", "座號": 15, "票數": 10}, {"班級": "資訊三忠", "座號": 16, "票數": 13}, {"班級": "資訊三忠", "座號": 17, "票數": 12}, {"班級": "資訊三忠", "座號": 18, "票數": 7}, {"班級": "資訊三忠", "座號": 19, "票數": 9}, {"班級": "資訊三忠", "座號": 20, "票數": 13}, {"班級": "資訊三忠", "座號": 21, "票數": 10}, {"班級": "資訊三忠", "座號": 22, "票數": 12}, {"班級": "資訊三忠", "座號": 23, "票數": 13}, {"班級": "資訊三忠", "座號": 24, "票數": 13}, {"班級": "資訊三忠", "座號": 25, "票數": 12}, {"班級": "資訊三忠", "座號": 26, "票數": 12}, {"班級": "資訊三忠", "座號": 27, "票數": 12}, {"班級": "資訊三忠", "座號": 28, "票數": 13}, {"班級": "資訊三忠", "座號": 29, "票數": 10}, {"班級": "資訊三忠", "座號": 31, "票數": 11}, {"班級": "資訊三忠", "座號": 32, "票數": 11}, {"班級": "資訊三忠", "座號": 33, "票數": 13}, {"班級": "資訊三忠", "座號": 34, "票數": 13}, {"班級": "資訊三忠", "座號": 35, "票數": 13}, {"班級": "資訊三忠", "座號": 36, "票數": 5}, {"班級": "資訊三忠", "座號": 38, "票數": 13}, {"班級": "資訊三忠", "座號": 39, "票數": 12}, {"班級": "資訊三忠", "座號": 40, "票數": 14}, {"班級": "資訊三忠", "座號": 41, "票數": 4}, {"班級": "資訊三忠", "座號": 42, "票數": 8}, {"班級": "資訊三忠", "座號": 43, "票數": 13}, {"班級": "資訊三忠", "座號": 44, "票數": 13}, {"班級": "資訊三忠", "座號": 46, "票數": 10}];
-const FULLATT = [{"班級": "商一忠", "座號": 10, "票數": 28}, {"班級": "商一忠", "座號": 15, "票數": 20}, {"班級": "商一忠", "座號": 27, "票數": 42}, {"班級": "商一忠", "座號": 34, "票數": 1123}, {"班級": "幼一忠", "座號": 9, "票數": 81}, {"班級": "幼一忠", "座號": 16, "票數": 195}, {"班級": "幼一忠", "座號": 20, "票數": 69}, {"班級": "幼一忠", "座號": 26, "票數": 137}, {"班級": "幼一忠", "座號": 32, "票數": 274}, {"班級": "幼一忠", "座號": 40, "票數": 72}, {"班級": "觀二忠", "座號": 1, "票數": 570}, {"班級": "觀二忠", "座號": 3, "票數": 135}, {"班級": "觀二忠", "座號": 5, "票數": 48}, {"班級": "觀二忠", "座號": 6, "票數": 131}, {"班級": "觀二忠", "座號": 9, "票數": 295}, {"班級": "觀二忠", "座號": 11, "票數": 36}, {"班級": "觀二忠", "座號": 13, "票數": 132}, {"班級": "觀二忠", "座號": 16, "票數": 35}, {"班級": "觀二忠", "座號": 21, "票數": 38}, {"班級": "觀二忠", "座號": 24, "票數": 41}, {"班級": "觀二忠", "座號": 26, "票數": 52}, {"班級": "觀二忠", "座號": 27, "票數": 49}, {"班級": "觀二忠", "座號": 28, "票數": 187}, {"班級": "觀二忠", "座號": 30, "票數": 36}, {"班級": "觀二忠", "座號": 32, "票數": 46}, {"班級": "觀二忠", "座號": 40, "票數": 39}, {"班級": "餐二愛", "座號": 1, "票數": 22}, {"班級": "餐二愛", "座號": 8, "票數": 22}, {"班級": "餐二愛", "座號": 12, "票數": 45}, {"班級": "餐二愛", "座號": 25, "票數": 20}, {"班級": "餐二愛", "座號": 44, "票數": 24}, {"班級": "幼二忠", "座號": 2, "票數": 120}, {"班級": "幼二忠", "座號": 4, "票數": 90}, {"班級": "幼二忠", "座號": 12, "票數": 136}, {"班級": "幼二忠", "座號": 13, "票數": 38}, {"班級": "幼二忠", "座號": 14, "票數": 87}, {"班級": "幼二忠", "座號": 16, "票數": 47}, {"班級": "幼二忠", "座號": 19, "票數": 72}, {"班級": "幼二忠", "座號": 20, "票數": 124}, {"班級": "幼二忠", "座號": 21, "票數": 126}, {"班級": "幼二忠", "座號": 22, "票數": 37}, {"班級": "幼二忠", "座號": 23, "票數": 47}, {"班級": "幼二忠", "座號": 24, "票數": 92}, {"班級": "幼二忠", "座號": 26, "票數": 122}, {"班級": "幼二忠", "座號": 27, "票數": 188}, {"班級": "幼二忠", "座號": 28, "票數": 76}, {"班級": "幼二忠", "座號": 30, "票數": 44}, {"班級": "幼二忠", "座號": 31, "票數": 50}, {"班級": "幼二忠", "座號": 33, "票數": 60}, {"班級": "幼二忠", "座號": 36, "票數": 175}, {"班級": "幼二忠", "座號": 37, "票數": 98}, {"班級": "幼二忠", "座號": 38, "票數": 108}, {"班級": "幼二忠", "座號": 39, "票數": 57}, {"班級": "幼二忠", "座號": 42, "票數": 41}, {"班級": "幼二忠", "座號": 43, "票數": 88}, {"班級": "幼二忠", "座號": 44, "票數": 33}, {"班級": "幼二忠", "座號": 48, "票數": 41}, {"班級": "美二忠", "座號": 1, "票數": 58}, {"班級": "美二忠", "座號": 2, "票數": 58}, {"班級": "美二忠", "座號": 3, "票數": 61}, {"班級": "美二忠", "座號": 4, "票數": 57}, {"班級": "美二忠", "座號": 6, "票數": 121}, {"班級": "美二忠", "座號": 8, "票數": 65}, {"班級": "美二忠", "座號": 9, "票數": 77}, {"班級": "美二忠", "座號": 10, "票數": 92}, {"班級": "美二忠", "座號": 11, "票數": 963}, {"班級": "美二忠", "座號": 12, "票數": 71}, {"班級": "美二忠", "座號": 13, "票數": 54}, {"班級": "美二忠", "座號": 14, "票數": 62}, {"班級": "美二忠", "座號": 18, "票數": 105}, {"班級": "美二忠", "座號": 19, "票數": 248}, {"班級": "美二忠", "座號": 20, "票數": 56}, {"班級": "美二忠", "座號": 21, "票數": 57}, {"班級": "美二忠", "座號": 23, "票數": 55}, {"班級": "美二忠", "座號": 25, "票數": 78}, {"班級": "美二忠", "座號": 26, "票數": 84}, {"班級": "美二忠", "座號": 27, "票數": 57}, {"班級": "美二忠", "座號": 28, "票數": 59}, {"班級": "美二忠", "座號": 30, "票數": 382}, {"班級": "美二忠", "座號": 31, "票數": 930}, {"班級": "美二忠", "座號": 32, "票數": 57}, {"班級": "美二忠", "座號": 33, "票數": 65}, {"班級": "美二忠", "座號": 35, "票數": 58}, {"班級": "美二忠", "座號": 36, "票數": 62}, {"班級": "美二忠", "座號": 37, "票數": 55}, {"班級": "美二忠", "座號": 38, "票數": 60}, {"班級": "美二忠", "座號": 41, "票數": 68}, {"班級": "美二忠", "座號": 42, "票數": 419}, {"班級": "美二忠", "座號": 44, "票數": 92}, {"班級": "商三忠", "座號": 2, "票數": 19}, {"班級": "商三忠", "座號": 3, "票數": 19}, {"班級": "商三忠", "座號": 4, "票數": 19}, {"班級": "商三忠", "座號": 5, "票數": 28}, {"班級": "商三忠", "座號": 7, "票數": 19}, {"班級": "商三忠", "座號": 8, "票數": 20}, {"班級": "商三忠", "座號": 10, "票數": 19}, {"班級": "商三忠", "座號": 11, "票數": 19}, {"班級": "商三忠", "座號": 14, "票數": 73}, {"班級": "商三忠", "座號": 16, "票數": 19}, {"班級": "商三忠", "座號": 17, "票數": 424}, {"班級": "商三忠", "座號": 19, "票數": 19}, {"班級": "商三忠", "座號": 22, "票數": 21}, {"班級": "商三忠", "座號": 23, "票數": 19}, {"班級": "商三忠", "座號": 24, "票數": 19}, {"班級": "商三忠", "座號": 25, "票數": 20}, {"班級": "商三忠", "座號": 26, "票數": 19}, {"班級": "商三忠", "座號": 28, "票數": 34}, {"班級": "商三忠", "座號": 29, "票數": 19}, {"班級": "商三忠", "座號": 35, "票數": 19}, {"班級": "商三忠", "座號": 36, "票數": 22}, {"班級": "商三忠", "座號": 39, "票數": 19}, {"班級": "商三忠", "座號": 42, "票數": 19}];
+// ══ DATA ══
+const B64 = "H4sIAE6fwGkC/7Vdy+ovx3F+FaO1F9NVfc2rGC9EkDcRBCIZE4xBBmPjIEIIaGFEIIuA40UWxhvf8zKSrbxFzrF0pqd+/XX3VE/X7s9h+E7/quvedfnhez/44IN/+PCf3/u7b33nh+/9/YcfvfnjvS8/++kXv/3ky//9z/e+/a33Pvrg/Y/f/KN78+fH//jx+x+++Zvf/P0D9+4PevPH8fYP/uaP733/w7dffe/9Dz/64Eff/tYQlhAsvYN1q7D+AuvSO9z4Dje9w/VK3HTFze9wQ4Mblbj5gnse1zdkICWsOy64lPt0cKEif/xP358DO0iIkx/KKiHclSFCg3tSwmlxrxxBLUe4iqzltb/R7oQ++kROShrHK41P4XDvcAPAvXdgwcUN7rIsu2wjzHSg8x7Pca+8Fvs6jbW4bENfEjzc4K7TIUBt6U5K0Kr+oYhOTM8pceVgX4F9K85KoaNspOGp2JCCj7Gpi++Agxb4ysUtIWhVE7OwzY6qM8Enw4VcTd5RdDfIwUb6+MrL/lTzVOWPV3mDhUL2zR2GO5ro//7r34ZOWzo1XEyNmT6UwNBKn5TgO7yBYPm5jCBYwXHncXNDXlLiXjnN930V7XETtPv+8aUVyGW+0RRey2VCBVFDiLAMvCHogLhkw2dug+GHuH7oFNMybrC6uGjFagkFSvxY8QjXNfZdbTWFi42KIPfc1Ya4BFUlN+5P0AJ7G5GjYCNywnOthPCqDAIEvnJwqdr9JIW/F4lC7DwMaHiZGMXm8oTvuhP3Kh1/O/zXXFHlg1b5mMmG34S33WaAlq9OeNuVFHRGz3nZV7tKXmlOTKs+q/Czq1E6vTW/TIqr5HH1WuuRl9UmZ2Sg/WN1zMVGzfuJx5ZWPWLvjDx4IXZVoo/nJzby2bw3sqQ+GJE4IlfFL+D+5Sefd2LQ0iTvyipshAxRk4LLwMLYLWYbv8b9659/tdlT+fJ3fxzG+K7K8te6ns6s2N9YLSuxRYL0dChSi8xeiXyVuljN0snGVINyp4T2SGceqmAJwYrrc/0gLChxd6RIAazIxVNzde4Edtqru8pHrmno00DT6VLw6FUJsbLwB4+TLdJ57HSKdSCtnIiQKTUJzfPUxFrkq5j4ljWqt0la5pAZBaqR6ak30gnu1RTBvmFsE5pFiyxslDuTpeGS4T2xtUpJJhdKbEOofNIkOSUHJvhgyhvERqQYXCvpt5ItEFjkGGLjMLu4rErFy1s6r7GalpNDOOkILRIYrTAuqz2RwKhSfp7YnSbLacVcPOuFo6XzugYR2RGuzJHqud3JH84lLXyAXF0Dn3tPnQhZvlGf0Mm16QxSWgORKaneB/BrWKv55CtfaJ28sMx/wns8aorylHOu5jFqnaarOAbXGoOLpdHyiMiZVA50ymd2hCyy7SkA5j7OaChnHZPIV8oaGNZ3ytNj8Gof1UO7frTaTy2RHGy8PvlIWRq9WhmbtGZXpk/aHPlFQWndBZE+yY2vuk6NYhNyifRJ4sYSVJ7TesAif5KbE9Oqj9DJn/jG+dBenUhzVNm+1I6cesOryRyEVewXmTktL3ssJlVr1PoR0toWnyBzXNKMtGwAfBnmGW8x9F///K/DaDz1PVMtbLCBjc+lGsEmG1gR1LZPln4Z19lQV0SzO3Hzc5MHccvzx3GEK2Kf0JyXl3GdEe6GUmqI65FJ4sf8QMGGH0RIspMOyUaOKRvRt6DHYHp8XnY252W20b+8oWoW4iYj+mYjOpTnxVQIVzjDG/nB0/NiBojLRrhG3o7wVdtaSw2f/c9/9N6NUr/AJSpxaUMBNcK9Xpu/5CJrurrU5Gz2SnShJFxz6nKn1wLhCiMXBil2LTkSBE7DAvh7fCFqA2K/dk97YmfFcbKcs00m15xv1iLzOGwuy0f2sJg8t6mlokUORvInn13aJHJeBhaJJW5lpCaWSAud4QtX2sAZwruiNhVLtSJFq4tE5BGPNhV7wWYttpnaF0JI/S44LUOLZ5ead4xtgkmN7MccnVZVKAUrYFEs4FtNR8vIaXx99eFTzRiiEuEYPE+qkQtsvGxf9LXE6PRU8eP7E08hvu1EqalBF7TQ2IPx7QWqDx3gkypQok7t0yUjbcRY8fuW6bRKQ4RRvn0Sr6/ATqub/TGmRly9QfGqEH1bBFxLdtRXKF8WNl6hiNNSvUJgBdV+gfdGTpIIAl3saw41cLQiMw4kfGtS5pLyxR9+3AkwvQeP1eHW+w2CFu2HETzflFvPNwiaoYZGD6hBiezh430EZ45K5PC8YhXBRlzKUFuL063yTwQtcqntXIpaNMJOiZwhlev9VddZy88FMl1sbTdp2VmE3P4YZAlISw75SlRfIwsotFULuPBm8oijWQstyjqqHj2Zmo9laZHdlKhk5AG5w7D4+FadFcSNsF76JDWndXIIWSSgTGvBkppDMrQBILTXc4gQx1ZRX2ratHqvU/VI4AWftIpPvv7RSGaSFlqI4yiPojaKIgYv1fuIQGTUttzD8lWk/NQUCbDMA6lsraCLSLzamdwGRWq1KoebAILEde4Tb0u1pCbWZ0xaViQiHPdgxFJeFnYRkNeLBEVGaq9MPGeGNNIjaleSYMFwaENyVp9a2MdaRZDAsbUCKTIJoe0EuxBby9oMJ2a4x+ZR5BF8m3Bz606OiPdDGqQf1XZGlhG2hPbrHqWI+H2bwXpAEBHwJ+A+sV+nCMOS79q4zbRsw0TMX80jigy0xkBE/aFNy1587GHh5p9+Pezuo8VmNgALa4XcY1hvAxtsiBBtYLMNEYoNrIg9d+LyhqF9CHfHEDyEG4zokIxwjdjMGfEZHUaabMNADohrxL9kpMzwqMXnckFG/EvZ5rx4pswGXPe8DOvt7L/ff9o38DX1l5RJcoSMRzlR8zoalLgMx9OReuDkK24wwt0hGAA2wXkA7cgw7XEzxFW2CQNc2ZjY4NLd4ZUNAx9jYL96YFkv5vsMoT4x3+zE1l6d8E12snBnUN+GE0crGm+aMd3gbugigbjF6Ork8OqNFCYr8ZAeFfeZTQ3MaBRQqyhYi+uHwxv57vTqBjdYESJaMVtCtfhtb5GWwrI5fH0Ce4NrxWqymWSjcLC3OrGViudodWIrD4izFSkmPlBc1RSdeXqtatPSWORxd16eLNvaeHlynt7RB9a6g7Jma6NIy5qtncA71PxXv/nZV7/47C12t3unnX53i8gdZI/amA7VrPQO8obMRwcZtkgdKgegg5zQg9WhmjfdQc7PTWqPN45hEYp7QA43fo9wD+iBh7JvYQ+cM95z6mDGIC7aESQNoY8nHFKGBKEH0Dv2APWgyYxDRNTTEsQ/ObUdX1Owo3U0gxbJ39g3XgsEEREF9wV95dR5eGr/QGSEY7pXGr03I4hwnFZ9kF9+Msy1h1rYx7W0JVVfIXJ/dBMCF0/qtSwitvUFUXlsmXAPbTFsqPs0iu7QQoFw08ySV48cYD1OnYFUyxxHmwcRcsQVbHye2Wc08O0OdIbjpnJbiDhczICQRaNaCW39pDuqsvZZd2yZgA/9tqGgFRcHOy9L2xqivUSZga/jieuUxOBWWdrhcC406lRNjgj3B6DRoqQ8ssikHEc7DtuXW/VaELzA9uoEbtEroeUWmgxmRnqEfUub0qRzm5aFkXBTf3is9AjPi7x0PMVlckxyFPlWwI+AI6xHd6Ag3SXlmRMessegVVKp8l62NNaq3ZMgqWbGDiV2gZ12QZUOgmb8wAM0j+cKRObnF99gITDBWnTUHOKU/pJsWG57odOygMvEdOgPu1TfYN7Q3QmBy4aMN/TvDuiVltYp1V6f38hy/cymb5tvaueXP5TQDCcR+DVL2E2a+mNUf+6UyAHucWgn0LiiBI7QWHnl1HiEnKyOnMdjzNOtccwIGE/QRx0PWlrI1s4wmNgxrPGH0A4OAwF5XtYiX7V+KW3A6dOtMnyIzTDKAg3WTk1rOyl0uP3eqabbQGA8d6Udn6dWSbL3sp0YQHFZXGRIcQwEUUsOkeLltiWmjjXTQ7vxSJB0q9ASIvN4NkNWWO9+fpdHM13UV7glv4tw8YSiNhmh5mdKG57CIXCG8208aEBVU6OYaSTZEkkDZ4a0BBHRBDDgeZkeIpzgONqUpKYHj+eYpGXGYz9Mzx+rfCebIds935cWYq3iEIEKD4hBamKU8ZipeMt6v92PN0rOk+svac9K3Mk80mVcNsLFc7xSQ2AtbjA6bxyOM79VbIBg04YsLsLFIXx6jFugn39ZOexveS5QMnARWLscOGqBCaYdQnN5amC+t6dCrSP8OHV7azAfBA7D9cu0fOBoJHUybqirEmsGNJ9skbwWPEOHNjZCoiZzgZm5+Fj66Bgnbf2y9cBV9klVtA6BxQMHaHXPq8KHy+z1i7mHzxut7NGqpic8My+qimchsJXwyVAk9oHVJ87DHRPrJMZyFx6TWE5KbUeAhVVNwVjuoqpdDQITMk26xZMQF78qpueU8HCKDGfVgxREFgFIHaCbL1PkL3uwtEwnGg9i29pa3yy12n72wLNsn0TcdHnB1a5NhtiTd8VlBsELOMJjD1xOje3jaiVFtB7UpIgDc5GcljM63QdBVQoOgUUqrg7rSTVldvXw1TQJw6VFGodZU57sFXfYnyi8E5cRLx+Nypjj9mfRLg4xQLC89KJ/CzrC2eZxIdLpT151ru8JaM+7YWsRgp0EDLcaXSBDHLvcgMG8VVf69xa1wN4KOAz357n7qmcwstT106Zq3DT2DMP9+GYwrDT34xv1gcvzBVkIV4amrk8INTDZyAbuhPDPcb2N7pGB6UaRo/R8iAHEzcNc7DIHy0UbayNUoPl048g/rmp3Hu8w5VUjt2NHIcSdWOW4DJyNWJiLDQtjx5Ifs5rflpEejH4EN0f3WfgvP/m89xxG/YV0g8pZBMtQ4kpz3KA8rt+leSRsGC/iUTyGSdw41A9u9dKyfgfWnUsrw7kpvMxiB05Bt1VNWvJ2RjcdDfdq2czhBUpo88f1AfoOkd3kQTfej7hegP2upO4LbthljF5w43BIMy/jpm3PmC/AeTiaj1eVj8PjQvix4NExpLBb5YjOY1VYiJZfgGlIYXc/5HrB5V0x4guuH6Yu13GDfuPcHd1DO8awQeBkBTweE3ussrB8UFpszoLA4/mdx6poyBFWj0oSXoDZxmzwhqEBEDeOH8CWWU3EMKVvNtSEwCP/wkIi6cUXPmy0pXc2Bt/z+BF3+ebEown5wVJRZRQjoq7FiX9f4/71z7/q7URfK4pGsNuyBhIWj6KLqjEJCDfbHNeNJzMrjPILrh97PQq/UgJLaw8W8dzaPAyRy4Z2XshphxEHE17M4cA+tqDF9s/nHEHcsMu5fMGFRTpuIePzgls2DNn83R/HBdDVaSVut7/GQWICQTPuDgYrPkl7alFs1nraVEuWnO7Mgivq+r9Q9WYNk7Ly0HhCBGj2c1rkNNlZeFmuFZXQedJkxLdKXhBygc3HUdntgZCFLSnULgeuS4jUpJZV0fVZvwpMhKVLd5hPdj+CYh1YJX4L+Sowua3Z5TMx5kmJLGdPgH2Ivu4W1zKfTDalduhORjxy69gF7rWkqqjhkuA70LLauDq2oQYlGW2Nu4UtfNDqdXCth615p6TEJtjpFoCoK7lPPu0C5Iw6jm4heyjpVBk7oF3Bt6AD3L9Wy3e4hmqsNboiGiawVrX2UI8mlEBskdTJNWA7WTvWzo2oxBbOTWwnd3FEhuYWNG6GBLpPbQ5kMyQINNOqFpFpowMMsYnL0PR8gB7EZVh3e/HK0qpykq56GTk4pD217LAPrb5Op75OSqsrntdLa3WrCglZiSxi5QNA1+SJUll3Fk/Wa8RbiO9Ay6kwo3WZw141CI0XTyaw31gr5LJu2A1sjFPeoqw6rfRI49W1t6A9nL4WwEADJX943DbT9vgGLZ0j7Ar0uoU+CBgPhkEz3bTm1uPC/Ti2La9kfrvbczgzNINl8e6OF4mQCSOj7dSHDlkYANDFQO4OOyNkj3VSGE/KuYMscm3VzwuXgQZVVNxsE/hwamjtqqbSTkMZeUwIWkTm3Pbx1dXoLitPLeYC14eE3CZBtPcoYiNwj97f0aVQXnBkTrmlh9eKohgNFmubRKneadWnHLQnF0WDDgikvxNpQGiGC4KrV12hnZL9RNwfCQh7vBPUQeiAoQPQUEHJ2nKYqm8H04Vb4/8gdJp1Zbhb/UUQW/p7QCbrpFbW8p8oqfTA1tTp1C4qTYJIWYTYxjFEq5qbnJlRoI6NLC20WrmKlEUIQCaP5WN7fOzUEtsV7bFF0iKD+Yi07JBcZTJ7cJH+Tt4TQic7Hsk4NZ6e+1EiY3Gx7X4D+8lpsBloV8eXBKVSl4i0Rakj2r4ZPv71q0+dBBCU7oNsot56nTJ7EYDIh2Voj61w2HGdYebNr1MkQjN8SWQvKyqRGLnoQN4Qg2SchUrg1FruE+9Kl9xqqdOi6vATp7xJWb3jhlyidR9kS3UGHn1AHtWtyExmR8C7pouXxyWlK+g7Wfj6/s+rbo9sfQZbBvKdKotvkLuThEN/i8ihhKXnO2YQLNvA+uf7qRBsep67RrD5eW0igi3D09IqrNvQBQ9x6XklCMRlI1z/fIERxA027LBjsxrENZIKERlu1A10GOE6Gz6brFJbVmbkh5bCL+MGG34QgdpOXCP+pWzED+X5njBoig+b87Izch3Ixr6xN6JDMDpvfL7WEuIa8S8XG3nzzsZuyhhjn/713saP8hsqgL/806+Hb4KgU/RWUz3CJSNcNsL1RrjBCDca4SYj3GyEW4xw3WEFbCVxItKqWarcVraOC5oQtJXUOTwhHIzPUyNbCZ6zkjxnJXrOSvbISkbIzCpZmSWykhCyMkxkJSBkJSBkJSA7YjqIa2WcRFC3VW2yleSxmUO4YwUqBLYSELYSELYSEDkhq9004XjZ7bYyId6Kkb0VI3uz0MbKhPiwYb3sN8Dd165n+rj72vWQDt3nro3H9UbUTUa42YobnBUwWQGzFbAVTzgzUY572mw+++kXv/15P3WVm971W9tMEOzCEJymxwHAsg2st4ENcD1tHo6LuIObbI6b9RPG78C6w+a4ncnaz3F5w1JvCCzm/tV5d6C3WXvkLYoHAUcjGiexaeTSalstfqjPrOlQwuNkjVfN4ILAxYYesyRQXD0wuR1NYQiYxmsJlylhpOLJSMd3JgA+1ppkJHmd/I/XRfoIOMMGDtTMF5RHNhI6+aof+0OXtKTgYHTgCMcJJ820SYibNsReCNdKDbMRR/hjw/swwp0s7PSrWthv8LO/+s3PvvrFZ8PAYLEkroNMkBiHagtfB1rsfHag0qG2hBevh/fPyzM6yMEMOQ5LjG4NJ+sgp2GxFT9ALma8547nFSs9aDuJETmWGv8f7fpuWgDn8Wz2W1q6h+2fF7j1oAOaAnuoRlv3oNPz8s8edDYTdNkuGvoz9l1c0NkH9O5AaWVZABfb2PLRqu06go+GncW9/2BicuIDFsfbdVtoXoD2Y8n0t1qie+DBzgyL4IVa23BzhGAPPT2vFu1Bb3jE7kGX5zWNPa8HL7tuNfgKn7AzI4l4zt5rMcWDNg0k3i2I/I4BtT3oYAedh6s0/QOD6e28Ku8MeduTmaH3vJMk3Yfd3F+t5PXIvFPUu8+wixuLOsjB7MzR7MzFDNk5M3I4er70rwdtd4niBSP3NwOs0DoNBZF1nt+NBj9SbYzoQNNhdo1Ezweh96ChOiVVJ08P2g+h3QNNTWEY/j7hkB0tfz1oO74W/rXvC/oCNB87Pad+m95mi0tmpoDtrPmOlUE96PB8d1sPesMC6h70eNGue6CeuJgZMH/Y+Xtk5v76ONw0do/5fvnJ+FlikRgAlm1gvQ1stIEtNrDuMMJ1RrhGPOaMmMwZcdkWfx/hGrGvM+JfMuJfMuIzMuIzMro3Ska4RvzARvzARvqMrWymkd5hI73DRvzLRnzmjfjM7+OzfitL6tcRRSUuwX3O7TJcUuLyhlAUwHrYQJbbCjstHeQKtIYOy/TNw8zKMh3KuG7vXsECYrNjuFjWKyKLQScL9fnMa4GDkbxFlMgj1aREiDvZPn2rGhkC5w05PIRbbAhMh42GICMFTGQjybQjkYRwhWC4vsSxFjga6Z5J5cGxTIkyfPVdN3HHWKelVQozbaiTQLg8zLTGVQKzN9JpHDeUuSDcPL65cOfAb/fVjiqGQzu39+ZyCIRMcFEc6JynQ4ksLPPFBazLFU8d5FmJ7fH6kNAuPmEttFyOU7tOLquoL8txtOhCx1UlV0d1c/UISYmd8N5oDwZeJyW04GvPw0Hdhxa84HODXTAUtXKDlxUW5dJkCI1l8jJf/Lg14R5ii3qA2sPn68GPgpYo3UMXkll3k9alu+Gs5Q9q8M7gf1bu44DYAe+IcGDjnVYw5XLcMhiNTlq5FK451cWFsXYXnSYyqC1DhiPdQeTq1FdZ4H7Byz7OvIwti54LWBzkb03+h9jCUz9qVoMC1WFzp3RyVP8HV/HMpZWfuheGvRa7syrnADyuJvqWaXYQOeA1eAfQ4VrzIOICuCbXoV1h97AzXhLBYHG1miayaeD0BvMJnk+iZC0LypKMNLhKp1VXcnIyEPvLbja1TyhmQF7Mw9Xa18CpqM8udr63HF5u1SZDZNGgVov6vzHEX9P80jWgpsxVgi4e1tFuElYrW9nc6tt3/WojtAIk+ltr/FCAGldTvOA1P0fr5KujHpmlj8B7c9VAeK37JnL1lzVZaJmflsNF9UftFkLzarQEl3XVrr3LuMyBcjUvODWvQ+MpAa3Iq4GFR5hHlviOJ/vvn846gJ0qI4VgvQ3shtHeCDbawCYb2GwDW2yuzB1GuEacK2LSxfpmiGvEu86IeZ0R97psc29kxGdkxGdERrhshGuk0ikY4UYj3GSEa6TWyUivT9ba3GoggLhsQwc24l824gc20pPeSE/6DXrny9/98V67Ygt7KGE3dNYgWPzsxg1uVOJuKFFAsG681jIu47LReYMNN8jZq0dzbzWJlZTIwi0ZdDZrT4yrf59TQrgPGwWDNmyLhLhGHCHXotdyRGrzsU4rzGQkzbgCWEeLtxu1Rm/+rk3a3aocRLi4MrPlCS0uw6EnTjUoFeF6qNyPx7hhTN9bg2sQbjTCzbDuyqlqSxBuMcKVHUShf3FFC+zG43WWJUPYT6oPe3XiaJ0GdqjBvRFfyFRE6ANnLXCCmsKp5oBB4Gx0gYTHjjpVLhgCOygk7UQnNTCNLy+tcgVZqWPCpfIOpPJJC40rQI9mCKuWk2miO5dtnvQpFqefQWN6GF0fOytgMtJvsgp0o4FiK0vNyQo4j9VQXCZFGTuFyzT2Ez4Oq6TwVnzseexvrp/YbzvxF3/4cS9QCE0UvYxLezYbv8LCcTNOvYj5FXayeUZxbRIXjqpyqiJ/BJvG/XH+vm8lcWUqrL5an6/48XSCvJbEBS5duZRfHqtE7sQKtKAxX4CxmqAFjfkCTGPgtHqBk5fQsCp20pt/5Gm+AOex/smrlKDDSrHReA3NMrcR3qvFj2ksx9UuLs6BwGGsh8KdByUILKPS2ieW22Daq0+doB/Ej7Wn9OcX26Gh0TuMLpBp2E/Kq/aJrViZcb3WpU3l7til//6Xcc50cStGB5rG237CA2iGes6rbFQH2tsRJIxFJT6Ajht4rwOdxrROD5gvb7AqHegyZr5blrAnMocdsTt75LwqH9fDJmgDvHp6G8LmcePpI3r7DWvDetj4TcOrwvgedtwxKaSDnex0iXBPSz/1t8ImZdwKzw9I0llbt8eU7QiKethkp6qIDWmyw8PuYRuaSjK0ldLN3nyX2fAuy46hMB1fzdmp2E4KfYvZYUPZYUMvU84V24wdn8dOPWhD9pbJ+sW8SC9eOMYeW35wbtkW1Z904xagCUp8a+VXjm0oOd7baVjRv1StfFsV2Zz7u9/8w/sfv8X5jlyT+Mlr+NAsUnz9Isy+oDT7gn1ThfXyRZl94OLsCzqmX0wxmGZf+ON1iszvP3856ewDnn0QZh/E2QdlesjpKd30mG56DJr+L+SnX8z/lzT9Ik/vZHqtkjXQF5I13pZ7//7Tv/zk8x5roA/yFIFmX1CYfeEbaWzoNftgiuCmEJK/4Bfz/yVOvyjT33pMv3DTL6a/lqa/lua3Mv21L5oYfZFnX/CUHjylB09/LU9/C89/y/T2/ZzVp79lLk8+v6bVh0YDfUCzD3j2gZ99EGcfTH9Fmf7MY/rFlBJuSgo3pYWbEsPNr2z6a2n6a2l+79PfIhU+/GJ6s1JxwC+m9ODpr+Xpr+U5m0/pwVN68JQePKUHT+nhp7/WT3/ti2oBe85puhF+uil99kGYfZBmH+TZByAM+flIL8Avpj/kxV1AX0x/yotDgW5keiU0vROa3/v0Vmj6a2l6LzT9tTw9B0/PwdP/5Y2kfPdH/w9I0nASgX8BAA==";
 
-const TOTAL_TICKETS = WEEKLY.reduce((s, p) => s + p.票數, 0);
-
-let results = [];
-let drawing = false;
-let jpDone = false;
-
-function weightedPickRandom() {
-  let r = Math.random() * TOTAL_TICKETS;
-  for (const p of WEEKLY) {
-    r -= p.票數;
-    if (r <= 0) return p;
-  }
-  return WEEKLY[WEEKLY.length - 1];
+function loadData() {
+  const bin = atob(B64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  const ds = new DecompressionStream('gzip');
+  const writer = ds.writable.getWriter();
+  writer.write(bytes); writer.close();
+  return new Response(ds.readable).json();
 }
 
-function startDraw() {
-  if (drawing) return;
-  const n = Math.min(Math.max(1, parseInt(document.getElementById('drawN').value) || 60), 300);
-  drawing = true;
-  document.getElementById('drawBtn').disabled = true;
-  document.getElementById('weeklyEmpty').style.display = 'none';
+let WEEKLY = [], FULLATT = [];
+let weekFilter = [true, true, true];
+let weeklyWinners = [];
+let faWinner = null;
+let drawing = false;
 
-  let idx = 0;
-  const countMap = {};
+// Load data
+loadData().then(d => {
+  WEEKLY = d.weekly;
+  FULLATT = d.fullatt;
+  buildFAClassList();
+  updateWeekStats();
+});
 
-  function drawOne() {
-    if (idx >= n) {
-      drawing = false;
-      document.getElementById('drawBtn').disabled = false;
-      const uniq = Object.keys(countMap).length;
-      const repeats = results.length - uniq;
-      let msg = '抽獎完成！共 ' + n + ' 名次';
-      if (repeats > 0) msg += '　其中重複中獎 ' + repeats + ' 次';
-      document.getElementById('weeklyStatus').textContent = msg;
-      document.getElementById('progBar').style.width = '100%';
-      return;
-    }
+// ══ Tab switching ══
+function switchTab(t) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.remove('active'); b.classList.add('inactive');
+  });
+  document.getElementById('page-' + t).classList.add('active');
+  const idx = ['weekly','fullatt','ann'].indexOf(t);
+  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+  document.querySelectorAll('.tab-btn')[idx].classList.remove('inactive');
+  if (t === 'ann') buildAnnouncement();
+}
 
-    const w = weightedPickRandom();
-    const key = w.班級 + '-' + w.座號;
-    countMap[key] = (countMap[key] || 0) + 1;
-    const cnt = countMap[key];
-    results.push({ ...w, seq: idx + 1, count: cnt });
-    idx++;
+// ══ Week filter ══
+function toggleWeek(n) {
+  weekFilter[n-1] = !weekFilter[n-1];
+  const btn = document.getElementById('wbtn' + n);
+  btn.className = 'week-btn ' + (weekFilter[n-1] ? 'on' : 'off');
+  updateWeekStats();
+}
 
-    const pct = Math.round((idx / n) * 100);
-    document.getElementById('progBar').style.width = pct + '%';
-    document.getElementById('weeklyStatus').textContent = '抽獎中... 第 ' + idx + ' / ' + n + ' 名';
+function updateWeekStats() {
+  if (!WEEKLY.length) return;
+  const cands = WEEKLY.filter(p => {
+    return (weekFilter[0] && p.w1 > 0) || (weekFilter[1] && p.w2 > 0) || (weekFilter[2] && p.w3 > 0);
+  });
+  const pool = cands.reduce((s, p) => {
+    let v = 0;
+    if (weekFilter[0]) v += p.w1;
+    if (weekFilter[1]) v += p.w2;
+    if (weekFilter[2]) v += p.w3;
+    return s + v;
+  }, 0);
+  document.getElementById('cand-count').textContent = cands.length.toLocaleString();
+  document.getElementById('pool-count').textContent = pool.toLocaleString();
+  document.getElementById('w-cand').textContent = cands.length.toLocaleString();
+  document.getElementById('w-pool').textContent = pool.toLocaleString();
+}
 
-    const chip = document.createElement('div');
-    const isRepeat = cnt > 1;
-    chip.className = 'chip new' + (isRepeat ? ' repeat' : '');
-    chip.innerHTML =
-      '<div class="chip-seq">第 ' + (idx) + ' 名</div>' +
-      '<div class="chip-class">' + w.班級 + '</div>' +
-      '<div class="chip-num">座號 ' + w.座號 + '</div>' +
-      '<div class="chip-tickets">' + w.票數 + ' 票</div>' +
-      (isRepeat ? '<span class="repeat-badge">第' + cnt + '次</span>' : '');
-    document.getElementById('weeklyGrid').appendChild(chip);
-    setTimeout(() => {
-      chip.classList.remove('new');
-    }, 900);
-
-    const delay = idx < 10 ? 220 : idx < 30 ? 110 : idx < 60 ? 55 : 22;
-    setTimeout(drawOne, delay);
+// ══ Weighted random ══
+function weightedDraw(pool) {
+  // pool: [{p, weight}]
+  const total = pool.reduce((s, x) => s + x.weight, 0);
+  let r = Math.random() * total;
+  for (const x of pool) {
+    r -= x.weight;
+    if (r <= 0) return x.p;
   }
-  drawOne();
+  return pool[pool.length - 1].p;
+}
+
+// ══ Weekly lottery ══
+async function startDrawWeekly() {
+  if (drawing) return;
+  const n = parseInt(document.getElementById('draw-count').value) || 60;
+  if (n < 1 || n > 500) { alert('請輸入 1~500 之間的數量'); return; }
+
+  drawing = true;
+  document.getElementById('btn-draw-weekly').disabled = true;
+  weeklyWinners = [];
+  document.getElementById('weekly-winners-grid').innerHTML = '';
+  document.getElementById('weekly-winners-area').style.display = 'none';
+  document.getElementById('prog-bar').style.display = 'block';
+
+  // Build candidate pool
+  const cands = WEEKLY.filter(p =>
+    (weekFilter[0] && p.w1 > 0) || (weekFilter[1] && p.w2 > 0) || (weekFilter[2] && p.w3 > 0)
+  );
+  if (!cands.length) { alert('目前篩選條件下沒有候選人！'); drawing = false; return; }
+
+  const pool = cands.map(p => {
+    let w = 0;
+    if (weekFilter[0]) w += p.w1;
+    if (weekFilter[1]) w += p.w2;
+    if (weekFilter[2]) w += p.w3;
+    return { p, weight: w };
+  });
+
+  const drum = document.getElementById('drum-display');
+  drum.classList.remove('reveal');
+  drum.className = 'drum-text spinning';
+
+  for (let i = 0; i < n; i++) {
+    // Spin animation
+    for (let s = 0; s < 8; s++) {
+      const rand = cands[Math.floor(Math.random() * cands.length)];
+      drum.textContent = rand.cls + ' 座號 ' + String(rand.seat).padStart(2,'0');
+      await sleep(50 + i * 0.5);
+    }
+    // Pick winner
+    const winner = weightedDraw(pool);
+    drum.className = 'drum-text reveal';
+    drum.textContent = winner.cls + ' 座號 ' + String(winner.seat).padStart(2,'0');
+    await sleep(180);
+    drum.className = 'drum-text spinning';
+
+    const dupTimes = weeklyWinners.filter(w => w.cls === winner.cls && w.seat === winner.seat).length;
+    weeklyWinners.push({ ...winner, dupIdx: dupTimes });
+    addWinnerCard(winner, dupTimes, i);
+
+    // Progress
+    const pct = ((i+1)/n*100).toFixed(0);
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('prog-text').textContent = `已抽出 ${i+1} / ${n} 名`;
+    document.getElementById('w-drawn').textContent = i+1;
+  }
+
+  // Final reveal
+  drum.className = 'drum-text';
+  drum.textContent = `✅ 抽籤完成！共 ${n} 名`;
+  document.getElementById('prog-bar').style.display = 'none';
+  document.getElementById('weekly-winners-area').style.display = 'block';
+  document.getElementById('winners-count-label').textContent = `中獎名單（共 ${n} 名，其中 ${weeklyWinners.filter(w=>w.dupIdx>0).length} 人重複中獎）`;
+  shootConfetti();
+  drawing = false;
+  document.getElementById('btn-draw-weekly').disabled = false;
+}
+
+function addWinnerCard(p, dupIdx, idx) {
+  const grid = document.getElementById('weekly-winners-grid');
+  grid.style.display = 'grid';
+  const c = document.createElement('div');
+  c.className = 'winner-card' + (dupIdx > 0 ? ' dup' : '') + (p.full ? ' full-att' : '');
+  c.style.animationDelay = (idx % 10 * 0.03) + 's';
+  c.innerHTML = `
+    <div class="w-cls">${p.cls}</div>
+    <div class="w-seat">座號 ${String(p.seat).padStart(2,'0')}</div>
+    <div class="w-votes">累計 ${p.total} 票</div>
+    ${p.full ? '<div class="w-fa-badge">💯 全勤鐵粉</div>' : ''}
+    ${dupIdx > 0 ? `<div class="w-dup-badge">第${dupIdx+1}次</div>` : ''}
+  `;
+  grid.appendChild(c);
+  c.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function resetWeekly() {
-  if (drawing) return;
-  results = [];
-  document.getElementById('weeklyGrid').innerHTML = '';
-  document.getElementById('weeklyEmpty').style.display = 'block';
-  document.getElementById('weeklyStatus').textContent = '';
-  document.getElementById('progBar').style.width = '0%';
-  document.getElementById('drawBtn').disabled = false;
+  weeklyWinners = [];
+  document.getElementById('weekly-winners-grid').innerHTML = '';
+  document.getElementById('weekly-winners-area').style.display = 'none';
+  document.getElementById('drum-display').className = 'drum-text';
+  document.getElementById('drum-display').textContent = '準備就緒 · 點擊開始抽籤';
+  document.getElementById('prog-bar').style.display = 'none';
+  document.getElementById('prog-text').textContent = '';
+  document.getElementById('w-drawn').textContent = '0';
 }
 
-function exportWeekly() {
-  if (!results.length) { alert('尚未抽獎'); return; }
-  const lines = [
-    '【2026 樹人家商 校服創意Show — 週週好禮得獎名單】',
-    '（三週合併抽獎，共 ' + results.length + ' 名次，不限重複中獎）',
-    ''
-  ];
-  results.forEach((w) => {
-    const repeat = w.count > 1 ? '（第' + w.count + '次中獎）' : '';
-    lines.push('第' + w.seq + '名　' + w.班級 + '  座號 ' + w.座號 + '（' + w.票數 + ' 票）' + repeat);
+function copyWeeklyWinners() {
+  const lines = weeklyWinners.map((w, i) => {
+    const dup = w.dupIdx > 0 ? `（第${w.dupIdx+1}次中獎）` : '';
+    return `${i+1}. ${w.cls} 座號${String(w.seat).padStart(2,'0')}${dup}`;
   });
-  const txt = lines.join('\n');
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(txt).then(() => alert('已複製到剪貼板！'));
-  } else {
-    const ta = document.createElement('textarea');
-    ta.value = txt;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    alert('已複製！');
+  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    const btn = document.querySelector('.btn-copy');
+    const orig = btn.textContent;
+    btn.textContent = '✅ 已複製！';
+    setTimeout(() => btn.textContent = orig, 1500);
+  });
+}
+
+// ══ Full Attendance ══
+function buildFAClassList() {
+  const byClass = {};
+  FULLATT.forEach(p => {
+    byClass[p.cls] = (byClass[p.cls] || 0) + 1;
+  });
+  const el = document.getElementById('fa-class-list');
+  Object.entries(byClass).sort((a,b) => b[1]-a[1]).forEach(([cls,n]) => {
+    const tag = document.createElement('div');
+    tag.style.cssText = 'padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;background:rgba(5,150,105,0.12);border:1px solid rgba(5,150,105,0.3);color:#34D399';
+    tag.textContent = `${cls}  ${n}人`;
+    el.appendChild(tag);
+  });
+}
+
+async function startDrawFA() {
+  if (drawing || !FULLATT.length) return;
+  drawing = true;
+  document.getElementById('btn-draw-fa').disabled = true;
+  document.getElementById('fa-winner-area').style.display = 'none';
+
+  const drum = document.getElementById('fa-drum-display');
+  drum.className = 'drum-text spinning';
+  drum.style.color = '#34D399';
+
+  for (let s = 0; s < 40; s++) {
+    const r = FULLATT[Math.floor(Math.random() * FULLATT.length)];
+    drum.textContent = r.cls + ' 座號 ' + String(r.seat).padStart(2,'0');
+    await sleep(40 + s * 3);
   }
+
+  const winner = FULLATT[Math.floor(Math.random() * FULLATT.length)];
+  faWinner = winner;
+  drum.className = 'drum-text reveal';
+  drum.style.color = '#34D399';
+  drum.textContent = winner.cls + ' 座號 ' + String(winner.seat).padStart(2,'0');
+
+  document.getElementById('fa-winner-cls').textContent = winner.cls;
+  document.getElementById('fa-winner-seat').textContent = '座號 ' + String(winner.seat).padStart(2,'0');
+  document.getElementById('fa-winner-area').style.display = 'block';
+  shootConfetti(true);
+  drawing = false;
+  document.getElementById('btn-draw-fa').disabled = false;
 }
 
-function startJackpot() {
-  if (jpDone) return;
-  const stage = document.getElementById('jpStage');
-  stage.innerHTML = '<div class="jp-spin" id="jpSpin">抽獎中...</div>';
-  let frame = 0;
-  const totalFrames = 48;
-  const timer = setInterval(() => {
-    const p = FULLATT[Math.floor(Math.random() * FULLATT.length)];
-    document.getElementById('jpSpin').textContent = p.班級 + '　座號 ' + p.座號;
-    frame++;
-    if (frame >= totalFrames) {
-      clearInterval(timer);
-      const winner = FULLATT[Math.floor(Math.random() * FULLATT.length)];
-      stage.innerHTML =
-        '<div class="jp-winner">' +
-        '<div class="jp-label">終極大獎得主</div>' +
-        '<div class="jp-name">' + winner.班級 + '&nbsp;&nbsp;座號 ' + winner.座號 + '</div>' +
-        '<div class="jp-detail">活動期間累積投票 <strong>' + winner.票數 + '</strong> 票</div>' +
-        '<div class="jp-prize">獎品：品牌禮券 $1,000 元</div>' +
-        '</div>';
-      document.getElementById('jpBtn').style.display = 'none';
-      document.getElementById('jpReset').style.display = 'inline-block';
-      jpDone = true;
-    }
-  }, 65);
+function resetFA() {
+  faWinner = null;
+  const drum = document.getElementById('fa-drum-display');
+  drum.className = 'drum-text';
+  drum.style.color = '#34D399';
+  drum.textContent = '準備就緒 · 點擊開始抽籤';
+  document.getElementById('fa-winner-area').style.display = 'none';
 }
 
-function resetJackpot() {
-  jpDone = false;
-  document.getElementById('jpStage').innerHTML = '<div class="jp-idle">按下按鈕開始抽獎</div>';
-  document.getElementById('jpBtn').style.display = 'inline-block';
-  document.getElementById('jpReset').style.display = 'none';
+// ══ Confetti ══
+function shootConfetti(big = false) {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const pieces = [];
+  const colors = ['#F59E0B','#3B82F6','#EF4444','#10B981','#8B5CF6','#EC4899','#FFFFFF'];
+  const count = big ? 200 : 100;
+  for (let i = 0; i < count; i++) {
+    pieces.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height * 0.3 - canvas.height * 0.1,
+      w: Math.random() * 10 + 5,
+      h: Math.random() * 5 + 3,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rot: Math.random() * 360,
+      vx: (Math.random() - 0.5) * 4,
+      vy: Math.random() * 3 + 2,
+      vr: (Math.random() - 0.5) * 8,
+      alpha: 1,
+    });
+  }
+  let frame;
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    pieces.forEach(p => {
+      if (p.alpha <= 0) return;
+      alive = true;
+      p.x += p.vx; p.y += p.vy;
+      p.rot += p.vr;
+      if (p.y > canvas.height * 0.8) p.alpha -= 0.03;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, p.alpha);
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+    });
+    if (alive) frame = requestAnimationFrame(animate);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  if (frame) cancelAnimationFrame(frame);
+  animate();
 }
+
+// ══ Announcement ══
+const ANNOUNCEMENTS = [
+  {
+    title: '🏫 導師群組（完整版）',
+    body: `🎉 2026 樹人家商「校服創意 Show」
+活動圓滿結束，以下為完整獎勵公告！
+感謝全體師生全力投入 🙌
+全校累積票數：39,666 票
+
+━━━━━━━━━━━━━━━━━━
+🌟 全校人氣神助攻獎
+━━━━━━━━━━━━━━━━━━
+🥇 全校第1名｜二年 美二忠
+　累積 5,895 票｜投票率 134.0%
+　班級獎品：雞排＋珍奶（一人一份）
+　　　　　＋ 尊榮披薩/速食大餐（全班）
+　生活教育競賽總加分：+98 分
+　　（日報 +93 ＋ 神助攻 +5）
+　🕓 導師無公務 16:00 下班 3 次
+
+🥈 全校第2名｜三年 餐三忠
+　累積 5,204 票｜投票率 118.3%
+　班級獎品：雞排＋珍奶（一人一份）
+　　　　　＋ 零食禮箱＋知名手搖飲（一人一份）
+　生活教育競賽總加分：+91 分
+　　（日報 +88 ＋ 神助攻 +3）
+　🕓 導師無公務 16:00 下班 2 次
+
+🥉 全校第3名｜二年 幼二忠
+　累積 3,089 票｜投票率 73.5%
+　班級獎品：珍奶（一人一份）
+　　　　　＋ 全班挫冰甜點（一人一份）
+　生活教育競賽總加分：+64 分
+　　（日報 +63 ＋ 神助攻 +1）
+　🕓 導師無公務 16:00 下班 1 次
+
+※ 美二忠同時獲得二年級第1名與全校第1名
+
+━━━━━━━━━━━━━━━━━━
+🏆 一年級｜各班獎勵（10班有票）
+━━━━━━━━━━━━━━━━━━
+🥇 #1 幼一忠｜3,038票｜67.5%
+　🍱 雞排＋珍奶（一人一份）｜生教 +81分
+　💯 全勤鐵粉 6人（座號 9、16、20、26、32、40）
+
+🥈 #2 美一仁｜2,588票｜64.7%
+　🧋 珍奶（一人一份）｜生教 +75分
+
+🥉 #3 美一孝｜1,581票｜39.5%
+　🍦 甜筒或雪糕（一人一份）｜生教 +52分
+
+4️⃣ #4 商一忠｜1,457票｜39.4%
+　🍡 消暑冰棒（一人一份）｜生教 +55分
+　💯 全勤鐵粉 4人（座號 10、15、27、34）
+
+5️⃣ #5 餐一忠｜519票｜11.8%
+　🍿 休閒零食（一人一份）｜生教 +17分
+
+— 以下班級無班級獎品，但仍計生教分 —
+#6 美一忠｜144票｜生教 +1分
+#7 影一忠｜57票｜生教 +1分
+#8 資訊一忠｜39票｜生教 +1分
+#9 餐一愛｜29票
+#10 餐一義｜1票
+
+━━━━━━━━━━━━━━━━━━
+🏆 二年級｜各班獎勵（16班有票）
+━━━━━━━━━━━━━━━━━━
+🥇 #1 美二忠｜5,895票｜134.0%
+　🍱 雞排＋珍奶（一人一份）｜生教 +93分
+　💯 全勤鐵粉 32人
+　＋ 全校第1名追加（見上方）
+
+🥈 #2 幼二忠｜3,089票｜73.5%
+　🧋 珍奶（一人一份）｜生教 +63分
+　💯 全勤鐵粉 26人
+　＋ 全校第3名追加（見上方）
+
+🥉 #3 觀二忠｜2,292票｜69.5%
+　🍦 甜筒或雪糕（一人一份）｜生教 +57分
+　💯 全勤鐵粉 16人
+
+4️⃣ #4 美二仁｜1,561票｜53.8%
+　🍡 消暑冰棒（一人一份）｜生教 +30分
+
+5️⃣ #5 餐二忠｜1,870票｜42.5%
+　🍿 休閒零食（一人一份）｜生教 +24分
+
+— 以下班級無班級獎品，但仍計生教分 —
+#6 觀二孝｜1,179票｜生教 +17分
+#7 影二忠｜795票
+#8 影二孝｜185票｜生教 +1分
+#9 資處二忠｜650票
+#10 商二忠｜548票
+#11 餐二愛｜469票｜💯 全勤 5人
+#12 餐二仁｜290票
+#13 餐二義｜150票
+#14 美二孝｜118票
+#15 資處二孝｜123票
+#16 餐二孝｜16票
+
+━━━━━━━━━━━━━━━━━━
+🏆 三年級｜各班獎勵（12班有票）
+━━━━━━━━━━━━━━━━━━
+🥇 #1 餐三忠｜5,204票｜118.3%
+　🍱 雞排＋珍奶（一人一份）｜生教 +88分
+　＋ 全校第2名追加（見上方）
+
+🥈 #2 商三忠｜1,086票｜32.9%
+　🧋 珍奶（一人一份）｜生教 +62分
+　💯 全勤鐵粉 23人
+
+🥉 #3 美三仁｜634票｜24.4%
+　🍦 甜筒或雪糕（一人一份）｜生教 +40分
+
+4️⃣ #4 資處三忠｜928票｜23.2%
+　🍡 消暑冰棒（一人一份）｜生教 +17分
+
+5️⃣ #5 美三忠｜737票｜21.1%
+　🍿 休閒零食（一人一份）｜生教 +40分
+
+— 以下班級無班級獎品，但仍計生教分 —
+#6 資訊三忠｜659票｜生教 +8分
+#7 幼三忠｜601票｜生教 +13分
+#8 幼三孝｜397票｜生教 +8分
+#9 觀三孝｜237票
+#10 觀三忠｜217票｜生教 +3分
+#11 餐三和｜122票｜生教 +4分
+#12 資處三孝｜161票
+
+━━━━━━━━━━━━━━━━━━
+💯 全勤鐵粉（共 112 人）
+━━━━━━━━━━━━━━━━━━
+認定期間：3/3（一）～ 3/21（六），共 19 天
+以下同學可參加 $1,000 元品牌禮券終極大獎抽籤：
+
+美二忠 32人、幼二忠 26人、商三忠 23人
+觀二忠 16人、幼一忠 6人、餐二愛 5人、商一忠 4人
+
+━━━━━━━━━━━━━━━━━━
+🎟 抽獎活動
+━━━━━━━━━━━━━━━━━━
+週週好禮（三週合併抽）：
+　60名 × 便利商店 $50 商品卡
+　（加權抽籤，票多機率高，不限重複中獎）
+
+全勤鐵粉終極大獎：
+　1名 × 品牌禮券 $1,000
+　（從 112 位全勤學生中抽出）
+
+📌 獎品發放時間另行公告
+　請各班導師留意後續通知。
+
+學務處 敬啟`
+  },
+  {
+    title: '1️⃣ 一年級群組',
+    body: `🎉 校服創意 Show｜一年級完整獎勵公告
+感謝一年級所有同學的熱情參與！
+
+━━━━━━━━━━━━━━━━━━
+🏆 一年級各班獎勵（10班有票）
+━━━━━━━━━━━━━━━━━━
+🥇 #1 幼一忠｜3,038票｜67.5%
+　🍱 雞排＋珍奶（一人一份）
+　生活教育 +81分
+　💯 全勤鐵粉 6人
+
+🥈 #2 美一仁｜2,588票｜64.7%
+　🧋 珍奶（一人一份）
+　生活教育 +75分
+
+🥉 #3 美一孝｜1,581票｜39.5%
+　🍦 甜筒或雪糕（一人一份）
+　生活教育 +52分
+
+4️⃣ #4 商一忠｜1,457票｜39.4%
+　🍡 消暑冰棒（一人一份）
+　生活教育 +55分
+　💯 全勤鐵粉 4人
+
+5️⃣ #5 餐一忠｜519票｜11.8%
+　🍿 休閒零食（一人一份）
+　生活教育 +17分
+
+— 有票數紀錄、計生教分 —
+#6 美一忠｜144票｜生教 +1分
+#7 影一忠｜57票｜生教 +1分
+#8 資訊一忠｜39票｜生教 +1分
+#9 餐一愛｜29票
+#10 餐一義｜1票
+
+━━━━━━━━━━━━━━━━━━
+💯 一年級全勤鐵粉
+━━━━━━━━━━━━━━━━━━
+認定期間：3/3 ～ 3/21（共 19 天）
+
+商一忠 4人
+座號：10、15、27、34
+
+幼一忠 6人
+座號：9、16、20、26、32、40
+
+👉 以上同學可參加 $1,000 元品牌禮券終極大獎抽籤！
+
+📌 班級獎品及抽獎日期另行公告。`
+  },
+  {
+    title: '2️⃣ 二年級群組',
+    body: `🎉 校服創意 Show｜二年級完整獎勵公告
+感謝二年級所有同學的超強表現！🔥
+
+━━━━━━━━━━━━━━━━━━
+🌟 全校神助攻獎（二年級班級）
+━━━━━━━━━━━━━━━━━━
+🥇 全校第1名｜美二忠
+　5,895票｜134.0%
+　追加獎品：尊榮披薩/速食大餐（全班）
+　生教總分 +98分｜導師 16:00 下班 3次
+
+🥉 全校第3名｜幼二忠
+　3,089票｜73.5%
+　追加獎品：全班挫冰甜點（一人一份）
+　生教總分 +64分｜導師 16:00 下班 1次
+
+━━━━━━━━━━━━━━━━━━
+🏆 二年級各班獎勵（16班有票）
+━━━━━━━━━━━━━━━━━━
+🥇 #1 美二忠｜5,895票｜134.0%
+　🍱 雞排＋珍奶（一人一份）
+　生活教育 +93分｜💯 全勤鐵粉 32人
+　＋ 全校第1名追加（見上方）
+
+🥈 #2 幼二忠｜3,089票｜73.5%
+　🧋 珍奶（一人一份）
+　生活教育 +63分｜💯 全勤鐵粉 26人
+　＋ 全校第3名追加（見上方）
+
+🥉 #3 觀二忠｜2,292票｜69.5%
+　🍦 甜筒或雪糕（一人一份）
+　生活教育 +57分｜💯 全勤鐵粉 16人
+
+4️⃣ #4 美二仁｜1,561票｜53.8%
+　🍡 消暑冰棒（一人一份）
+　生活教育 +30分
+
+5️⃣ #5 餐二忠｜1,870票｜42.5%
+　🍿 休閒零食（一人一份）
+　生活教育 +24分
+
+— 有票數紀錄、計生教分 —
+#6 觀二孝｜1,179票｜生教 +17分
+#7 影二忠｜795票
+#8 影二孝｜185票｜生教 +1分
+#9 資處二忠｜650票
+#10 商二忠｜548票
+#11 餐二愛｜469票｜💯 全勤 5人
+#12 餐二仁｜290票
+#13 餐二義｜150票
+#14 美二孝｜118票
+#15 資處二孝｜123票
+#16 餐二孝｜16票
+
+━━━━━━━━━━━━━━━━━━
+💯 二年級全勤鐵粉（共 79 人）
+━━━━━━━━━━━━━━━━━━
+認定期間：3/3 ～ 3/21（共 19 天）
+
+美二忠 32人、幼二忠 26人
+觀二忠 16人、餐二愛 5人
+
+👉 以上同學可參加 $1,000 元品牌禮券終極大獎抽籤！
+
+📌 班級獎品及抽獎日期另行公告。`
+  },
+  {
+    title: '3️⃣ 三年級群組',
+    body: `🎉 校服創意 Show｜三年級完整獎勵公告
+感謝三年級所有同學，畢業前留下精彩紀錄！🎓
+
+━━━━━━━━━━━━━━━━━━
+🌟 全校神助攻獎（三年級班級）
+━━━━━━━━━━━━━━━━━━
+🥈 全校第2名｜餐三忠
+　5,204票｜118.3%
+　追加獎品：零食禮箱＋知名手搖飲（一人一份）
+　生教總分 +91分｜導師 16:00 下班 2次
+
+━━━━━━━━━━━━━━━━━━
+🏆 三年級各班獎勵（12班有票）
+━━━━━━━━━━━━━━━━━━
+🥇 #1 餐三忠｜5,204票｜118.3%
+　🍱 雞排＋珍奶（一人一份）
+　生活教育 +88分
+　＋ 全校第2名追加（見上方）
+
+🥈 #2 商三忠｜1,086票｜32.9%
+　🧋 珍奶（一人一份）
+　生活教育 +62分
+　💯 全勤鐵粉 23人
+
+🥉 #3 美三仁｜634票｜24.4%
+　🍦 甜筒或雪糕（一人一份）
+　生活教育 +40分
+
+4️⃣ #4 資處三忠｜928票｜23.2%
+　🍡 消暑冰棒（一人一份）
+　生活教育 +17分
+
+5️⃣ #5 美三忠｜737票｜21.1%
+　🍿 休閒零食（一人一份）
+　生活教育 +40分
+
+— 有票數紀錄、計生教分 —
+#6 資訊三忠｜659票｜生教 +8分
+#7 幼三忠｜601票｜生教 +13分
+#8 幼三孝｜397票｜生教 +8分
+#9 觀三孝｜237票
+#10 觀三忠｜217票｜生教 +3分
+#11 餐三和｜122票｜生教 +4分
+#12 資處三孝｜161票
+
+━━━━━━━━━━━━━━━━━━
+💯 三年級全勤鐵粉
+━━━━━━━━━━━━━━━━━━
+認定期間：3/3 ～ 3/21（共 19 天）
+
+商三忠 23人
+座號：2-5、7-8、10-11、14
+　　　16-17、19、22-26
+　　　28-29、35-36、39、42
+
+👉 以上同學可參加 $1,000 元品牌禮券終極大獎抽籤！
+
+📌 班級獎品及抽獎日期另行公告。`
+  },
+];
+
+let annBuilt = false;
+function buildAnnouncement() {
+  if (annBuilt) return;
+  annBuilt = true;
+  const container = document.getElementById('ann-container');
+  ANNOUNCEMENTS.forEach((a, i) => {
+    const sec = document.createElement('div');
+    sec.className = 'ann-section';
+    sec.innerHTML = `
+      <div class="ann-section-hdr" onclick="toggleAnn(this)">
+        <span>${a.title}</span>
+        <span class="arr">▸</span>
+      </div>
+      <div class="ann-body ${i===0?'open':''}">
+        <pre class="ann-pre">${a.body}</pre>
+        <button class="ann-copy-btn" onclick="copyAnn(${i})">📋 複製此公告</button>
+      </div>
+    `;
+    container.appendChild(sec);
+  });
+}
+
+function toggleAnn(hdr) {
+  const body = hdr.nextElementSibling;
+  const arr = hdr.querySelector('.arr');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  arr.textContent = isOpen ? '▸' : '▾';
+}
+
+function copyAnn(idx) {
+  navigator.clipboard.writeText(ANNOUNCEMENTS[idx].body).then(() => {
+    const btns = document.querySelectorAll('.ann-copy-btn');
+    const orig = btns[idx].textContent;
+    btns[idx].textContent = '✅ 已複製！';
+    setTimeout(() => btns[idx].textContent = orig, 1500);
+  });
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 </script>
 </body>
 </html>
