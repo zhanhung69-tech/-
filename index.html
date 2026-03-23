@@ -7,350 +7,248 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
   :root {
-    --navy: #1C3356;
-    --navy2: #243D5C;
-    --blue: #1A56C4;
-    --sky: #3B82F6;
-    --gold: #D97706;
-    --amber: #F59E0B;
-    --yellow: #FEF9C3;
-    --green: #065F46;
-    --teal: #0E7490;
-    --red: #B91C1C;
-    --white: #FFFFFF;
-    --gray1: #F8FAFC;
-    --gray2: #E2E8F0;
-    --gray3: #B8C8DC;
-    --text: #0F172A;
+    --bg:     #F0F4F8;
+    --bg2:    #E2EAF4;
+    --card:   #FFFFFF;
+    --navy:   #1E3A5F;
+    --blue:   #1D4ED8;
+    --sky:    #3B82F6;
+    --gold:   #B45309;
+    --amber:  #D97706;
+    --green:  #065F46;
+    --teal:   #0E7490;
+    --red:    #B91C1C;
+    --text:   #0F172A;
+    --text2:  #374151;
+    --text3:  #6B7280;
+    --border: #CBD5E1;
+    --bord2:  #E2E8F0;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: 'Noto Sans TC', sans-serif;
-    background: linear-gradient(180deg, #1C3356 0%, #162840 100%);
-    color: var(--white);
+    background: var(--bg);
+    color: var(--text);
     min-height: 100vh;
     overflow-x: hidden;
   }
-
-  /* ── Stars background ── */
-  .stars {
-    position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    background: radial-gradient(ellipse at 20% 30%, rgba(59,130,246,0.08) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 70%, rgba(217,119,6,0.06) 0%, transparent 50%);
-  }
-
-  /* ── Top banner ── */
+  /* ── Banner ── */
   .banner {
-    background: linear-gradient(135deg, #1C3356 0%, #243D5C 50%, #1C3356 100%);
-    border-bottom: 2px solid rgba(245,158,11,0.3);
-    padding: 20px 0 16px;
-    text-align: center;
+    background: linear-gradient(135deg, var(--navy) 0%, #2A4A7F 100%);
+    padding: 20px 0 16px; text-align: center;
+    border-bottom: 3px solid #D97706;
     position: relative; z-index: 1;
   }
-  .banner h1 { font-size: clamp(18px,3vw,28px); font-weight:900; letter-spacing:0.05em; }
-  .banner h1 span { color: var(--amber); }
-  .banner p { font-size: 13px; color: var(--gray3); margin-top: 4px; }
+  .banner h1 { font-size: clamp(18px,3vw,28px); font-weight:900; letter-spacing:.05em; color:#FFFFFF; }
+  .banner h1 span { color: #FCD34D; }
+  .banner p { font-size: 13px; color: #B8D0F0; margin-top: 4px; }
   .badge-row { display:flex; justify-content:center; gap:10px; margin-top:10px; flex-wrap:wrap; }
   .badge {
     font-size:12px; font-weight:700; padding:3px 10px; border-radius:20px;
-    background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.4);
-    color: var(--amber);
+    background: rgba(252,211,77,0.2); border: 1px solid rgba(252,211,77,0.5);
+    color: #FCD34D;
   }
-
-  /* ── Tab nav ── */
-  .tabs {
-    display: flex; justify-content: center; gap: 0;
-    padding: 20px 16px 0; position: relative; z-index: 1;
-  }
+  /* ── Tabs ── */
+  .tabs { display:flex; justify-content:center; padding:20px 16px 0; position:relative; z-index:1; }
   .tab-btn {
-    padding: 11px 28px; font-size: 14px; font-weight: 700;
-    border: none; cursor: pointer; transition: all .2s;
-    font-family: inherit;
+    padding:11px 28px; font-size:14px; font-weight:700;
+    border:none; cursor:pointer; transition:all .2s; font-family:inherit;
   }
-  .tab-btn:first-child { border-radius: 10px 0 0 10px; }
-  .tab-btn:last-child  { border-radius: 0 10px 10px 0; }
+  .tab-btn:first-child { border-radius:10px 0 0 10px; }
+  .tab-btn:last-child  { border-radius:0 10px 10px 0; }
   .tab-btn.inactive {
-    background: rgba(255,255,255,0.1);
-    color: var(--gray3);
-    border: 1px solid rgba(255,255,255,0.18);
+    background: var(--card); color: var(--text3);
+    border: 1px solid var(--border);
   }
-  .tab-btn.active {
-    background: var(--blue);
-    color: var(--white);
-    border: 1px solid var(--sky);
-  }
-  .tab-btn.active.green-tab { background: var(--green); border-color: #059669; }
-
-  /* ── Main content ── */
-  .content { max-width: 900px; margin: 0 auto; padding: 20px 16px 60px; position: relative; z-index: 1; }
-
-  /* ── Section header ── */
+  .tab-btn.inactive:hover { background: var(--bg2); color: var(--text); }
+  .tab-btn.active { background: var(--blue); color: #FFFFFF; border: 1px solid #1e40af; }
+  .tab-btn.active.green-tab { background: #047857; border-color: #065f46; }
+  /* ── Content ── */
+  .content { max-width:900px; margin:0 auto; padding:20px 16px 60px; }
+  /* ── Cards / Sections ── */
   .section-header {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.18);
-    border-radius: 14px;
-    padding: 20px 24px;
-    margin-bottom: 20px;
+    background: var(--card); border: 1px solid var(--bord2);
+    border-radius:14px; padding:20px 24px; margin-bottom:20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   }
-  .section-header h2 { font-size: 18px; font-weight: 900; }
-  .section-header p { font-size: 13px; color: var(--gray3); margin-top: 5px; line-height:1.6; }
+  .section-header h2 { font-size:18px; font-weight:900; color:var(--navy); }
+  .section-header p  { font-size:13px; color:var(--text2); margin-top:5px; line-height:1.6; }
   .prize-tag {
-    display: inline-block; margin-top: 10px;
-    background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.5);
-    color: var(--amber); font-size: 13px; font-weight: 700;
-    padding: 5px 14px; border-radius: 20px;
+    display:inline-block; margin-top:10px;
+    background: #FFFBEB; border: 1px solid #FCD34D;
+    color: var(--gold); font-size:13px; font-weight:700;
+    padding:5px 14px; border-radius:20px;
   }
-
-  /* ── Drum machine ── */
+  /* ── Stats ── */
+  .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--bord2);
+    border-radius:12px; padding:14px; text-align:center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .stat-card .sv { font-size:26px; font-weight:900; color:var(--blue); }
+  .stat-card .sl { font-size:11px; color:var(--text3); margin-top:2px; }
+  /* ── Drum ── */
   .drum-area {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.18);
-    border-radius: 16px;
-    padding: 28px 24px;
-    margin-bottom: 20px;
-    text-align: center;
+    background: var(--card); border: 1px solid var(--bord2);
+    border-radius:16px; padding:28px 24px; margin-bottom:20px; text-align:center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   }
   .drum-screen {
-    background: #0D1E35;
-    border: 2px solid rgba(59,130,246,0.3);
-    border-radius: 10px;
-    padding: 18px;
-    min-height: 80px;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 20px;
-    position: relative; overflow: hidden;
+    background: #0F172A;
+    border: 2px solid rgba(59,130,246,0.5);
+    border-radius:10px; padding:18px;
+    min-height:80px; display:flex; align-items:center; justify-content:center;
+    margin-bottom:20px; position:relative; overflow:hidden;
   }
   .drum-screen::before {
-    content: ''; position: absolute; inset: 0;
-    background: repeating-linear-gradient(
-      0deg, transparent, transparent 2px, rgba(59,130,246,0.02) 2px, rgba(59,130,246,0.04) 4px
-    );
-    pointer-events: none;
+    content:''; position:absolute; inset:0;
+    background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(59,130,246,0.04) 2px,rgba(59,130,246,0.04) 4px);
+    pointer-events:none;
   }
   .drum-text {
-    font-size: clamp(22px,4vw,36px); font-weight: 900;
-    color: var(--amber); letter-spacing: 0.08em;
-    text-shadow: 0 0 20px rgba(245,158,11,0.5);
-    transition: all .1s;
-    line-height: 1.3;
+    font-size:clamp(22px,4vw,36px); font-weight:900;
+    color:#FCD34D; letter-spacing:.08em;
+    text-shadow:0 0 20px rgba(252,211,77,0.6);
+    transition:all .1s; line-height:1.3;
   }
-  .drum-text.spinning { animation: spinText 0.08s steps(1) infinite; }
+  .drum-text.spinning { animation:spinText .08s steps(1) infinite; }
   @keyframes spinText {
-    0%  { opacity:1; transform: translateY(0); }
-    50% { opacity:0.3; transform: translateY(-4px); }
+    0%  { opacity:1; transform:translateY(0); }
+    50% { opacity:0.3; transform:translateY(-4px); }
   }
-  .drum-text.reveal { animation: revealPop 0.4s ease-out forwards; }
+  .drum-text.reveal { animation:revealPop .4s ease-out forwards; }
   @keyframes revealPop {
-    0%   { transform: scale(0.8); opacity:0; }
-    60%  { transform: scale(1.1); }
-    100% { transform: scale(1); opacity:1; }
+    0%   { transform:scale(.8); opacity:0; }
+    60%  { transform:scale(1.1); }
+    100% { transform:scale(1); opacity:1; }
   }
-  .drum-hint { font-size: 12px; color: #B8C8DC; margin-bottom: 14px; }
-
+  .drum-hint { font-size:12px; color:var(--text3); margin-bottom:14px; }
   /* Count input */
-  .count-row {
-    display: flex; align-items: center; justify-content: center; gap: 12px;
-    margin-bottom: 18px; flex-wrap: wrap;
-  }
-  .count-row label { font-size: 13px; color: var(--gray3); }
+  .count-row { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
+  .count-row label { font-size:13px; color:var(--text2); }
   .count-input {
-    width: 70px; padding: 7px 10px; text-align: center;
-    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 8px; color: var(--white); font-size: 15px; font-weight: 700;
-    font-family: inherit;
+    width:70px; padding:7px 10px; text-align:center;
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:8px; color:var(--text); font-size:15px; font-weight:700;
+    font-family:inherit;
   }
-  .count-input:focus { outline: none; border-color: var(--sky); }
-
+  .count-input:focus { outline:none; border-color:var(--sky); }
   /* Buttons */
-  .btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .btn-row { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
   .btn {
-    padding: 12px 28px; font-size: 14px; font-weight: 700;
-    border: none; border-radius: 10px; cursor: pointer;
-    font-family: inherit; transition: all .15s; letter-spacing: 0.03em;
+    padding:12px 28px; font-size:14px; font-weight:700;
+    border:none; border-radius:10px; cursor:pointer;
+    font-family:inherit; transition:all .15s; letter-spacing:.03em;
   }
   .btn-draw {
-    background: linear-gradient(135deg, var(--blue), #2563EB);
-    color: var(--white); border: 1px solid var(--sky);
-    box-shadow: 0 4px 16px rgba(59,130,246,0.3);
+    background: linear-gradient(135deg,#1D4ED8,#2563EB);
+    color:#FFFFFF; border:1px solid #1e40af;
+    box-shadow:0 4px 12px rgba(29,78,216,0.35);
   }
-  .btn-draw:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(59,130,246,0.5); }
-  .btn-draw:active { transform: translateY(0); }
+  .btn-draw:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(29,78,216,0.5); }
   .btn-draw.green-btn {
-    background: linear-gradient(135deg, #065F46, #047857);
-    border-color: #059669;
-    box-shadow: 0 4px 16px rgba(5,150,105,0.3);
+    background:linear-gradient(135deg,#047857,#059669);
+    border-color:#065f46; box-shadow:0 4px 12px rgba(5,150,105,0.35);
   }
-  .btn-draw.green-btn:hover { box-shadow: 0 6px 20px rgba(5,150,105,0.5); }
   .btn-reset {
-    background: rgba(255,255,255,0.1);
-    color: var(--gray3); border: 1px solid rgba(255,255,255,0.15);
+    background:var(--bg2); color:var(--text2); border:1px solid var(--border);
   }
-  .btn-reset:hover { background: rgba(255,255,255,0.1); color: var(--white); }
+  .btn-reset:hover { background:var(--border); color:var(--text); }
   .btn-copy {
-    background: rgba(245,158,11,0.12);
-    color: var(--amber); border: 1px solid rgba(245,158,11,0.4);
-    font-size: 12px; padding: 8px 16px;
+    background:#FFFBEB; color:var(--gold); border:1px solid #FCD34D;
+    font-size:12px; padding:8px 16px;
   }
-  .btn-copy:hover { background: rgba(245,158,11,0.2); }
-
-  /* Progress bar */
-  .progress-bar {
-    background: rgba(255,255,255,0.08);
-    border-radius: 6px; height: 6px; margin-bottom: 16px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%; border-radius: 6px;
-    background: linear-gradient(90deg, var(--sky), var(--amber));
-    transition: width .3s ease;
-  }
-  .progress-text { font-size: 12px; color: var(--gray3); margin-bottom: 8px; }
-
-  /* ── Winner cards ── */
-  .winners-area { margin-top: 20px; }
+  .btn-copy:hover { background:#FEF3C7; }
+  /* Progress */
+  .progress-bar { background:var(--bg2); border-radius:6px; height:6px; margin-bottom:16px; overflow:hidden; }
+  .progress-fill { height:100%; border-radius:6px; background:linear-gradient(90deg,var(--sky),var(--amber)); transition:width .3s ease; }
+  .progress-text { font-size:12px; color:var(--text2); margin-bottom:8px; }
+  /* Winner cards */
+  .winners-area { margin-top:20px; }
   .winners-title {
-    font-size: 13px; font-weight: 700; color: var(--gray3);
-    margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+    font-size:13px; font-weight:700; color:var(--text2);
+    margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;
   }
-  .winners-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 8px;
-  }
+  .winners-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; }
   .winner-card {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.18);
-    border-radius: 10px; padding: 10px 12px;
-    animation: cardIn 0.3s ease-out backwards;
-    position: relative;
+    background:var(--card); border:1px solid var(--bord2);
+    border-radius:10px; padding:10px 12px;
+    animation:cardIn .3s ease-out backwards; position:relative;
+    box-shadow:0 1px 3px rgba(0,0,0,0.05);
   }
   @keyframes cardIn {
-    from { opacity:0; transform: scale(0.9) translateY(8px); }
-    to   { opacity:1; transform: none; }
+    from { opacity:0; transform:scale(.9) translateY(8px); }
+    to   { opacity:1; transform:none; }
   }
-  .winner-card.dup {
-    background: rgba(217,119,6,0.12);
-    border-color: rgba(217,119,6,0.4);
-  }
-  .winner-card .w-cls {
-    font-size: 13px; font-weight: 700; color: var(--sky);
-  }
-  .winner-card .w-seat {
-    font-size: 20px; font-weight: 900; color: var(--white);
-    margin: 2px 0;
-  }
-  .winner-card .w-votes {
-    font-size: 11px; color: var(--gray3);
-  }
+  .winner-card.dup { background:#FFFBEB; border-color:#FCD34D; }
+  .winner-card .w-cls  { font-size:13px; font-weight:700; color:var(--blue); }
+  .winner-card .w-seat { font-size:20px; font-weight:900; color:var(--text); margin:2px 0; }
+  .winner-card .w-votes { font-size:11px; color:var(--text3); }
   .winner-card .w-dup-badge {
-    position: absolute; top: 6px; right: 6px;
-    font-size: 9px; font-weight: 700;
-    background: var(--gold); color: #fff;
-    padding: 2px 5px; border-radius: 4px;
+    position:absolute; top:6px; right:6px;
+    font-size:9px; font-weight:700;
+    background:var(--amber); color:#fff;
+    padding:2px 5px; border-radius:4px;
   }
-  .winner-card.full-att { border-color: rgba(5,150,105,0.5); }
-  .winner-card .w-fa-badge {
-    font-size: 9px; color: #059669; font-weight: 700;
-    margin-top: 1px;
+  .winner-card.full-att { border-color:#6EE7B7; }
+  .winner-card .w-fa-badge { font-size:9px; color:#047857; font-weight:700; margin-top:1px; }
+  /* Grade section in winner list */
+  .grade-section-title {
+    font-size:13px; font-weight:900; color:var(--navy);
+    padding:8px 0 4px; border-bottom:2px solid var(--border);
+    margin-bottom:8px; margin-top:12px;
   }
-
-  /* ── Confetti canvas ── */
-  #confetti-canvas {
-    position: fixed; inset: 0; pointer-events: none;
-    z-index: 9999;
-  }
-
-  /* ── Stats row ── */
-  .stats-row {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
-    margin-bottom: 20px;
-  }
-  .stat-card {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.18);
-    border-radius: 12px; padding: 14px; text-align: center;
-  }
-  .stat-card .sv { font-size: 26px; font-weight: 900; color: var(--amber); }
-  .stat-card .sl { font-size: 11px; color: var(--gray3); margin-top: 2px; }
-
-  /* ── Week toggle ── */
+  .grade-section-title:first-child { margin-top:0; }
+  /* Confetti */
+  #confetti-canvas { position:fixed; inset:0; pointer-events:none; z-index:9999; }
+  /* Week btns */
   .week-btns { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px; }
   .week-btn {
-    padding: 6px 16px; font-size: 12px; font-weight: 700;
-    border-radius: 20px; cursor: pointer; border: none; font-family: inherit;
-    transition: all .15s;
+    padding:6px 16px; font-size:12px; font-weight:700;
+    border-radius:20px; cursor:pointer; border:none; font-family:inherit; transition:all .15s;
   }
-  .week-btn.off {
-    background: rgba(255,255,255,0.1); color: var(--gray3);
-    border: 1px solid rgba(255,255,255,0.18);
-  }
-  .week-btn.on {
-    background: var(--blue); color: var(--white);
-    border: 1px solid var(--sky);
-  }
-  .week-info { font-size: 12px; color: #C8D8EC; margin-bottom: 16px; }
-
-  /* ── Page visibility ── */
-  .page { display: none; }
-  .page.active { display: block; }
-
-  /* announcement */
-  .ann-wrap {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 14px; overflow: hidden;
-  }
-  .ann-section {
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-  }
-  .ann-section:last-child { border-bottom: none; }
+  .week-btn.off { background:var(--bg2); color:var(--text3); border:1px solid var(--border); }
+  .week-btn.on  { background:var(--blue); color:#FFFFFF; border:1px solid #1e40af; }
+  .week-info { font-size:12px; color:var(--text2); margin-bottom:16px; }
+  /* Pages */
+  .page { display:none; }
+  .page.active { display:block; }
+  /* Announcement */
+  .ann-wrap { background:var(--card); border:1px solid var(--bord2); border-radius:14px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+  .ann-section { border-bottom:1px solid var(--bord2); }
+  .ann-section:last-child { border-bottom:none; }
   .ann-section-hdr {
-    padding: 14px 20px; font-size: 13px; font-weight: 700;
-    color: var(--amber); letter-spacing: 0.05em;
-    background: rgba(245,158,11,0.05); cursor: pointer;
-    display: flex; justify-content: space-between; align-items: center;
-    user-select: none;
+    padding:14px 20px; font-size:13px; font-weight:700;
+    color:var(--navy); background:var(--bg2); cursor:pointer;
+    display:flex; justify-content:space-between; align-items:center;
+    user-select:none; letter-spacing:.03em;
   }
-  .ann-section-hdr:hover { background: rgba(245,158,11,0.09); }
-  .ann-body {
-    padding: 16px 20px; display: none;
-  }
-  .ann-body.open { display: block; }
-  .ann-pre {
-    white-space: pre-wrap; font-size: 13px; line-height: 1.75;
-    color: #E2EDF8; font-family: 'Noto Sans TC', sans-serif;
-  }
+  .ann-section-hdr:hover { background:var(--border); }
+  .ann-body { padding:16px 20px; display:none; }
+  .ann-body.open { display:block; }
+  .ann-pre { white-space:pre-wrap; font-size:13px; line-height:1.75; color:var(--text2); font-family:'Noto Sans TC',sans-serif; }
   .ann-copy-btn {
-    margin-top: 10px;
-    padding: 7px 18px; font-size: 12px; font-weight: 700;
-    background: rgba(59,130,246,0.15); color: var(--sky);
-    border: 1px solid rgba(59,130,246,0.4);
-    border-radius: 8px; cursor: pointer; font-family: inherit;
+    margin-top:10px; padding:7px 18px; font-size:12px; font-weight:700;
+    background:#EFF6FF; color:var(--blue);
+    border:1px solid #BFDBFE; border-radius:8px; cursor:pointer; font-family:inherit;
   }
-  .ann-copy-btn:hover { background: rgba(59,130,246,0.25); }
-
-  /* scrollable winners */
-  .winners-scroll {
-    max-height: 300px; overflow-y: auto;
-    padding-right: 4px;
-  }
-  .winners-scroll::-webkit-scrollbar { width: 4px; }
-  .winners-scroll::-webkit-scrollbar-track { background: transparent; }
-  .winners-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
-
-  /* mobile */
+  .ann-copy-btn:hover { background:#DBEAFE; }
+  /* Scroll */
+  .winners-scroll { max-height:340px; overflow-y:auto; padding-right:4px; }
+  .winners-scroll::-webkit-scrollbar { width:4px; }
+  .winners-scroll::-webkit-scrollbar-track { background:var(--bg2); }
+  .winners-scroll::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+  /* Mobile */
   @media (max-width:520px) {
-    .tab-btn { padding: 10px 16px; font-size: 13px; }
-    .stats-row { grid-template-columns: repeat(3,1fr); }
-    .stat-card .sv { font-size: 20px; }
-    .winners-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+    .tab-btn { padding:10px 14px; font-size:12px; }
+    .stat-card .sv { font-size:20px; }
+    .winners-grid { grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); }
   }
 </style>
 </head>
 <body>
 <canvas id="confetti-canvas"></canvas>
-<div class="stars"></div>
-
 <div class="banner">
   <h1>🎽 樹人家商 <span>校服創意 Show</span> 抽獎系統</h1>
   <p>2026 活動成果・網路投票獎勵抽籤</p>
@@ -432,36 +330,36 @@
 <div id="page-fullatt" class="page">
 <div class="content">
 
-  <div class="section-header" style="border-color:rgba(5,150,105,0.3)">
+  <div class="section-header" style="border-color:#A7F3D0">
     <h2>💯 全勤鐵粉終極大獎</h2>
     <p>活動期間 3/3（一）至 3/21（六）共 <strong>19 天</strong>，每天都有投票紀錄的同學。<br>
        共 <strong>112 位</strong>全勤鐵粉參加終極大獎抽籤，純隨機抽出 1 名。</p>
-    <span class="prize-tag" style="background:rgba(5,150,105,0.15);border-color:rgba(5,150,105,0.5);color:#34D399">🏆 獎品：品牌禮券 $1,000 元</span>
+    <span class="prize-tag" style="background:#ECFDF5;border-color:#6EE7B7;color:#047857">🏆 獎品：品牌禮券 $1,000 元</span>
   </div>
 
   <div class="stats-row">
     <div class="stat-card">
-      <div class="sv" style="color:#34D399">112</div>
+      <div class="sv" style="color:#047857">112</div>
       <div class="sl">全勤候選人</div>
     </div>
     <div class="stat-card">
-      <div class="sv" style="color:#34D399">19</div>
+      <div class="sv" style="color:#047857">19</div>
       <div class="sl">連續天數</div>
     </div>
     <div class="stat-card">
-      <div class="sv" style="color:#34D399">7</div>
+      <div class="sv" style="color:#047857">7</div>
       <div class="sl">全勤班級數</div>
     </div>
   </div>
 
   <!-- Full att class list -->
-  <div style="background:rgba(5,150,105,0.05);border:1px solid rgba(5,150,105,0.2);border-radius:12px;padding:16px;margin-bottom:20px">
-    <div style="font-size:12px;font-weight:700;color:#34D399;margin-bottom:10px;">全勤班級一覽</div>
+  <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:12px;padding:16px;margin-bottom:20px">
+    <div style="font-size:12px;font-weight:700;color:#047857;margin-bottom:10px;">全勤班級一覽</div>
     <div id="fa-class-list" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
   </div>
 
-  <div class="drum-area" style="border-color:rgba(5,150,105,0.2)">
-    <div class="drum-screen" style="border-color:rgba(5,150,105,0.3)">
+  <div class="drum-area" style="border-color:#A7F3D0">
+    <div class="drum-screen" style="border-color:#A7F3D0">
       <div class="drum-text" id="fa-drum-display" style="color:#34D399">準備就緒 · 點擊開始抽籤</div>
     </div>
     <div class="btn-row">
@@ -472,10 +370,10 @@
 
   <div id="fa-winner-area" style="display:none;margin-top:20px">
     <div style="text-align:center;padding:24px;background:rgba(5,150,105,0.1);border:1px solid rgba(5,150,105,0.4);border-radius:14px">
-      <div style="font-size:13px;color:#34D399;font-weight:700;margin-bottom:6px;">🏆 終極大獎得主</div>
-      <div id="fa-winner-cls" style="font-size:16px;color:#A7F3D0;font-weight:700;"></div>
-      <div id="fa-winner-seat" style="font-size:52px;font-weight:900;color:#FFFFFF;line-height:1.1;margin:4px 0;"></div>
-      <div style="font-size:13px;color:#6EE7B7;">恭喜獲得品牌禮券 $1,000 元 🎉</div>
+      <div style="font-size:13px;color:#047857;font-weight:700;margin-bottom:6px;">🏆 終極大獎得主</div>
+      <div id="fa-winner-cls" style="font-size:16px;color:#065F46;font-weight:700;"></div>
+      <div id="fa-winner-seat" style="font-size:52px;font-weight:900;color:#0F172A;line-height:1.1;margin:4px 0;"></div>
+      <div style="font-size:13px;color:#047857;">恭喜獲得品牌禮券 $1,000 元 🎉</div>
     </div>
   </div>
 
@@ -569,7 +467,9 @@ async function startDrawWeekly() {
   drawing = true;
   document.getElementById('btn-draw-weekly').disabled = true;
   weeklyWinners = [];
+  lastGradeShown = '';
   document.getElementById('weekly-winners-grid').innerHTML = '';
+  lastGradeShown = '';
   document.getElementById('weekly-winners-area').style.display = 'none';
   document.getElementById('prog-bar').style.display = 'block';
 
@@ -627,9 +527,25 @@ async function startDrawWeekly() {
   document.getElementById('btn-draw-weekly').disabled = false;
 }
 
+let lastGradeShown = '';
 function addWinnerCard(p, dupIdx, idx) {
   const grid = document.getElementById('weekly-winners-grid');
   grid.style.display = 'grid';
+
+  // Insert grade header if grade changed
+  const thisGrade = getGrade(p.cls);
+  if (thisGrade !== lastGradeShown) {
+    lastGradeShown = thisGrade;
+    // Temporarily switch grid to block for the title
+    const titleWrap = document.createElement('div');
+    titleWrap.style.gridColumn = '1 / -1';
+    const title = document.createElement('div');
+    title.className = 'grade-section-title';
+    title.textContent = '【' + thisGrade + '】';
+    titleWrap.appendChild(title);
+    grid.appendChild(titleWrap);
+  }
+
   const c = document.createElement('div');
   c.className = 'winner-card' + (dupIdx > 0 ? ' dup' : '') + (p.full ? ' full-att' : '');
   c.style.animationDelay = (idx % 10 * 0.03) + 's';
@@ -646,6 +562,7 @@ function addWinnerCard(p, dupIdx, idx) {
 
 function resetWeekly() {
   weeklyWinners = [];
+  lastGradeShown = '';
   document.getElementById('weekly-winners-grid').innerHTML = '';
   document.getElementById('weekly-winners-area').style.display = 'none';
   document.getElementById('drum-display').className = 'drum-text';
@@ -655,12 +572,52 @@ function resetWeekly() {
   document.getElementById('w-drawn').textContent = '0';
 }
 
+function getGrade(cls) {
+  if (cls.includes('一')) return '一年級';
+  if (cls.includes('二')) return '二年級';
+  if (cls.includes('三')) return '三年級';
+  return '其他';
+}
+
 function copyWeeklyWinners() {
-  const lines = weeklyWinners.map((w, i) => {
-    const dup = w.dupIdx > 0 ? `（第${w.dupIdx+1}次中獎）` : '';
-    return `${i+1}. ${w.cls} 座號${String(w.seat).padStart(2,'0')}${dup}`;
+  // Group by grade → class → seats (with dup counts)
+  const gradeOrder = ['一年級','二年級','三年級'];
+  const grouped = {};
+  weeklyWinners.forEach(w => {
+    const g = getGrade(w.cls);
+    if (!grouped[g]) grouped[g] = {};
+    if (!grouped[g][w.cls]) grouped[g][w.cls] = {};
+    const seat = w.seat;
+    grouped[g][w.cls][seat] = (grouped[g][w.cls][seat] || 0) + 1;
   });
-  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+
+  const lines = [];
+  const total = weeklyWinners.length;
+  const dupCount = weeklyWinners.filter(w => w.dupIdx > 0).length;
+  lines.push(`🎟 週週好禮抽獎結果 — 共 ${total} 名（其中 ${dupCount} 人次重複中獎）`);
+  lines.push('');
+
+  gradeOrder.forEach(grade => {
+    if (!grouped[grade]) return;
+    lines.push(`【${grade}】`);
+    // Sort classes
+    const sortedCls = Object.keys(grouped[grade]).sort();
+    sortedCls.forEach(cls => {
+      const seats = grouped[grade][cls];
+      const seatStrs = Object.entries(seats)
+        .sort((a,b) => Number(a[0])-Number(b[0]))
+        .map(([seat, cnt]) => {
+          const seatNum = String(seat).padStart(2,'0');
+          if (cnt === 1) return seatNum;
+          const cnText = ['','','兩','三','四','五','六','七','八','九','十'][cnt] || String(cnt);
+          return `${seatNum}（中獎${cnText}次）`;
+        });
+      lines.push(`　${cls}：${seatStrs.join('、')}`);
+    });
+    lines.push('');
+  });
+
+  navigator.clipboard.writeText(lines.join('\n').trimEnd()).then(() => {
     const btn = document.querySelector('.btn-copy');
     const orig = btn.textContent;
     btn.textContent = '✅ 已複製！';
@@ -677,7 +634,7 @@ function buildFAClassList() {
   const el = document.getElementById('fa-class-list');
   Object.entries(byClass).sort((a,b) => b[1]-a[1]).forEach(([cls,n]) => {
     const tag = document.createElement('div');
-    tag.style.cssText = 'padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;background:rgba(5,150,105,0.12);border:1px solid rgba(5,150,105,0.3);color:#34D399';
+    tag.style.cssText = 'padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;background:#ECFDF5;border:1px solid #6EE7B7;color:#047857';
     tag.textContent = `${cls}  ${n}人`;
     el.appendChild(tag);
   });
