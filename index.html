@@ -5,391 +5,245 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🎽 樹人家商 校服創意Show 抽獎系統</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
-  :root {
-    --bg:     #F0F4F8;
-    --bg2:    #E2EAF4;
-    --card:   #FFFFFF;
-    --navy:   #1E3A5F;
-    --blue:   #1D4ED8;
-    --sky:    #3B82F6;
-    --gold:   #B45309;
-    --amber:  #D97706;
-    --green:  #065F46;
-    --teal:   #0E7490;
-    --red:    #B91C1C;
-    --text:   #0F172A;
-    --text2:  #374151;
-    --text3:  #6B7280;
-    --border: #CBD5E1;
-    --bord2:  #E2E8F0;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Noto Sans TC', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-  /* ── Banner ── */
-  .banner {
-    background: linear-gradient(135deg, var(--navy) 0%, #2A4A7F 100%);
-    padding: 20px 0 16px; text-align: center;
-    border-bottom: 3px solid #D97706;
-    position: relative; z-index: 1;
-  }
-  .banner h1 { font-size: clamp(18px,3vw,28px); font-weight:900; letter-spacing:.05em; color:#FFFFFF; }
-  .banner h1 span { color: #FCD34D; }
-  .banner p { font-size: 13px; color: #B8D0F0; margin-top: 4px; }
-  .badge-row { display:flex; justify-content:center; gap:10px; margin-top:10px; flex-wrap:wrap; }
-  .badge {
-    font-size:12px; font-weight:700; padding:3px 10px; border-radius:20px;
-    background: rgba(252,211,77,0.2); border: 1px solid rgba(252,211,77,0.5);
-    color: #FCD34D;
-  }
-  /* ── Tabs ── */
-  .tabs { display:flex; justify-content:center; padding:20px 16px 0; position:relative; z-index:1; }
-  .tab-btn {
-    padding:11px 28px; font-size:14px; font-weight:700;
-    border:none; cursor:pointer; transition:all .2s; font-family:inherit;
-  }
-  .tab-btn:first-child { border-radius:10px 0 0 10px; }
-  .tab-btn:last-child  { border-radius:0 10px 10px 0; }
-  .tab-btn.inactive {
-    background: var(--card); color: var(--text3);
-    border: 1px solid var(--border);
-  }
-  .tab-btn.inactive:hover { background: var(--bg2); color: var(--text); }
-  .tab-btn.active { background: var(--blue); color: #FFFFFF; border: 1px solid #1e40af; }
-  .tab-btn.active.green-tab { background: #047857; border-color: #065f46; }
-  /* ── Content ── */
-  .content { max-width:900px; margin:0 auto; padding:20px 16px 60px; }
-  /* ── Cards / Sections ── */
-  .section-header {
-    background: var(--card); border: 1px solid var(--bord2);
-    border-radius:14px; padding:20px 24px; margin-bottom:20px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-  }
-  .section-header h2 { font-size:18px; font-weight:900; color:var(--navy); }
-  .section-header p  { font-size:13px; color:var(--text2); margin-top:5px; line-height:1.6; }
-  .prize-tag {
-    display:inline-block; margin-top:10px;
-    background: #FFFBEB; border: 1px solid #FCD34D;
-    color: var(--gold); font-size:13px; font-weight:700;
-    padding:5px 14px; border-radius:20px;
-  }
-  /* ── Stats ── */
-  .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
-  .stat-card {
-    background: var(--card); border: 1px solid var(--bord2);
-    border-radius:12px; padding:14px; text-align:center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  }
-  .stat-card .sv { font-size:26px; font-weight:900; color:var(--blue); }
-  .stat-card .sl { font-size:11px; color:var(--text3); margin-top:2px; }
-  /* ── Drum ── */
-  .drum-area {
-    background: var(--card); border: 1px solid var(--bord2);
-    border-radius:16px; padding:28px 24px; margin-bottom:20px; text-align:center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  }
-  .drum-screen {
-    background: #0F172A;
-    border: 2px solid rgba(59,130,246,0.5);
-    border-radius:10px; padding:18px;
-    min-height:80px; display:flex; align-items:center; justify-content:center;
-    margin-bottom:20px; position:relative; overflow:hidden;
-  }
-  .drum-screen::before {
-    content:''; position:absolute; inset:0;
-    background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(59,130,246,0.04) 2px,rgba(59,130,246,0.04) 4px);
-    pointer-events:none;
-  }
-  .drum-text {
-    font-size:clamp(22px,4vw,36px); font-weight:900;
-    color:#FCD34D; letter-spacing:.08em;
-    text-shadow:0 0 20px rgba(252,211,77,0.6);
-    transition:all .1s; line-height:1.3;
-  }
-  .drum-text.spinning { animation:spinText .08s steps(1) infinite; }
-  @keyframes spinText {
-    0%  { opacity:1; transform:translateY(0); }
-    50% { opacity:0.3; transform:translateY(-4px); }
-  }
-  .drum-text.reveal { animation:revealPop .4s ease-out forwards; }
-  @keyframes revealPop {
-    0%   { transform:scale(.8); opacity:0; }
-    60%  { transform:scale(1.1); }
-    100% { transform:scale(1); opacity:1; }
-  }
-  .drum-hint { font-size:12px; color:var(--text3); margin-bottom:14px; }
-  /* Count input */
-  .count-row { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
-  .count-row label { font-size:13px; color:var(--text2); }
-  .count-input {
-    width:70px; padding:7px 10px; text-align:center;
-    background:var(--bg2); border:1px solid var(--border);
-    border-radius:8px; color:var(--text); font-size:15px; font-weight:700;
-    font-family:inherit;
-  }
-  .count-input:focus { outline:none; border-color:var(--sky); }
-  /* Buttons */
-  .btn-row { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
-  .btn {
-    padding:12px 28px; font-size:14px; font-weight:700;
-    border:none; border-radius:10px; cursor:pointer;
-    font-family:inherit; transition:all .15s; letter-spacing:.03em;
-  }
-  .btn-draw {
-    background: linear-gradient(135deg,#1D4ED8,#2563EB);
-    color:#FFFFFF; border:1px solid #1e40af;
-    box-shadow:0 4px 12px rgba(29,78,216,0.35);
-  }
-  .btn-draw:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(29,78,216,0.5); }
-  .btn-draw.green-btn {
-    background:linear-gradient(135deg,#047857,#059669);
-    border-color:#065f46; box-shadow:0 4px 12px rgba(5,150,105,0.35);
-  }
-  .btn-reset {
-    background:var(--bg2); color:var(--text2); border:1px solid var(--border);
-  }
-  .btn-reset:hover { background:var(--border); color:var(--text); }
-  .btn-copy {
-    background:#FFFBEB; color:var(--gold); border:1px solid #FCD34D;
-    font-size:12px; padding:8px 16px;
-  }
-  .btn-copy:hover { background:#FEF3C7; }
-  /* Progress */
-  .progress-bar { background:var(--bg2); border-radius:6px; height:6px; margin-bottom:16px; overflow:hidden; }
-  .progress-fill { height:100%; border-radius:6px; background:linear-gradient(90deg,var(--sky),var(--amber)); transition:width .3s ease; }
-  .progress-text { font-size:12px; color:var(--text2); margin-bottom:8px; }
-  /* Winner cards */
-  .winners-area { margin-top:20px; }
-  .winners-title {
-    font-size:13px; font-weight:700; color:var(--text2);
-    margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;
-  }
-  .winners-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; }
-  .winner-card {
-    background:var(--card); border:1px solid var(--bord2);
-    border-radius:10px; padding:10px 12px;
-    animation:cardIn .3s ease-out backwards; position:relative;
-    box-shadow:0 1px 3px rgba(0,0,0,0.05);
-  }
-  @keyframes cardIn {
-    from { opacity:0; transform:scale(.9) translateY(8px); }
-    to   { opacity:1; transform:none; }
-  }
-  .winner-card.dup { background:#FFFBEB; border-color:#FCD34D; }
-  .winner-card .w-cls  { font-size:13px; font-weight:700; color:var(--blue); }
-  .winner-card .w-seat { font-size:20px; font-weight:900; color:var(--text); margin:2px 0; }
-  .winner-card .w-votes { font-size:11px; color:var(--text3); }
-  .winner-card .w-dup-badge {
-    position:absolute; top:6px; right:6px;
-    font-size:9px; font-weight:700;
-    background:var(--amber); color:#fff;
-    padding:2px 5px; border-radius:4px;
-  }
-  .winner-card.full-att { border-color:#6EE7B7; }
-  .winner-card .w-fa-badge { font-size:9px; color:#047857; font-weight:700; margin-top:1px; }
-  /* Grade section in winner list */
-  .grade-section-title {
-    font-size:13px; font-weight:900; color:var(--navy);
-    padding:8px 0 4px; border-bottom:2px solid var(--border);
-    margin-bottom:8px; margin-top:12px;
-  }
-  .grade-section-title:first-child { margin-top:0; }
-  /* Confetti */
-  #confetti-canvas { position:fixed; inset:0; pointer-events:none; z-index:9999; }
-  /* Week btns */
-  .week-btns { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px; }
-  .week-btn {
-    padding:6px 16px; font-size:12px; font-weight:700;
-    border-radius:20px; cursor:pointer; border:none; font-family:inherit; transition:all .15s;
-  }
-  .week-btn.off { background:var(--bg2); color:var(--text3); border:1px solid var(--border); }
-  .week-btn.on  { background:var(--blue); color:#FFFFFF; border:1px solid #1e40af; }
-  .week-info { font-size:12px; color:var(--text2); margin-bottom:16px; }
-  /* Pages */
-  .page { display:none; }
-  .page.active { display:block; }
-  /* Announcement */
-  .ann-wrap { background:var(--card); border:1px solid var(--bord2); border-radius:14px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-  .ann-section { border-bottom:1px solid var(--bord2); }
-  .ann-section:last-child { border-bottom:none; }
-  .ann-section-hdr {
-    padding:14px 20px; font-size:13px; font-weight:700;
-    color:var(--navy); background:var(--bg2); cursor:pointer;
-    display:flex; justify-content:space-between; align-items:center;
-    user-select:none; letter-spacing:.03em;
-  }
-  .ann-section-hdr:hover { background:var(--border); }
-  .ann-body { padding:16px 20px; display:none; }
-  .ann-body.open { display:block; }
-  .ann-pre { white-space:pre-wrap; font-size:13px; line-height:1.75; color:var(--text2); font-family:'Noto Sans TC',sans-serif; }
-  .ann-copy-btn {
-    margin-top:10px; padding:7px 18px; font-size:12px; font-weight:700;
-    background:#EFF6FF; color:var(--blue);
-    border:1px solid #BFDBFE; border-radius:8px; cursor:pointer; font-family:inherit;
-  }
-  .ann-copy-btn:hover { background:#DBEAFE; }
-  /* Scroll */
-  .winners-scroll { max-height:340px; overflow-y:auto; padding-right:4px; }
-  .winners-scroll::-webkit-scrollbar { width:4px; }
-  .winners-scroll::-webkit-scrollbar-track { background:var(--bg2); }
-  .winners-scroll::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
-  /* Mobile */
-  @media (max-width:520px) {
-    .tab-btn { padding:10px 14px; font-size:12px; }
-    .stat-card .sv { font-size:20px; }
-    .winners-grid { grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); }
-  }
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:#F7F8FA;color:#111;min-height:100vh}
+
+/* Banner */
+.banner{background:#1E3A5F;padding:18px 16px 14px;text-align:center;border-bottom:3px solid #D97706}
+.banner h1{font-size:clamp(16px,3vw,26px);font-weight:900;color:#fff;letter-spacing:.04em}
+.banner h1 span{color:#FCD34D}
+.banner p{font-size:12px;color:#94B8D8;margin-top:3px}
+.badges{display:flex;justify-content:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.badges span{font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;background:rgba(252,211,77,.18);border:1px solid rgba(252,211,77,.45);color:#FCD34D}
+
+/* Tabs */
+.tabs{display:flex;justify-content:center;padding:18px 16px 0;background:#fff;gap:0}
+.tab-btn{padding:10px 32px;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:all .15s}
+.tab-btn:first-child{border-radius:10px 0 0 10px}
+.tab-btn:last-child{border-radius:0 10px 10px 0}
+.tab-btn.off{background:#F0F0F0;color:#666;border:1px solid #CCC}
+.tab-btn.off:hover{background:#E4E4E4;color:#111}
+.tab-btn.on{background:#1D4ED8;color:#fff;border:1px solid #1e40af}
+.tab-btn.on.green{background:#047857;border-color:#065f46}
+
+/* Content */
+.page{display:none}.page.on{display:block}
+.wrap{max-width:860px;margin:0 auto;padding:18px 14px 60px}
+
+/* Cards */
+.card{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:18px 20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.card h2{font-size:16px;font-weight:900;color:#1E3A5F;margin-bottom:6px}
+.card p{font-size:13px;color:#444;line-height:1.65}
+.tag{display:inline-block;margin-top:8px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;background:#FFFBEB;border:1px solid #FCD34D;color:#92400E}
+.tag.green{background:#ECFDF5;border-color:#6EE7B7;color:#065F46}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.stat{background:#fff;border:1px solid #E2E8F0;border-radius:10px;padding:12px;text-align:center}
+.stat .v{font-size:22px;font-weight:900;color:#1D4ED8}
+.stat .v.green{color:#047857}
+.stat .l{font-size:11px;color:#888;margin-top:2px}
+
+/* Drum */
+.drum-wrap{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:20px 18px;margin-bottom:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.screen{background:#0F172A;border:2px solid #334155;border-radius:10px;padding:14px 18px;min-height:76px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;position:relative;overflow:hidden}
+.screen::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(59,130,246,.04) 2px,rgba(59,130,246,.04) 4px);pointer-events:none}
+.drum{font-size:clamp(20px,4vw,32px);font-weight:900;color:#FCD34D;letter-spacing:.07em;text-shadow:0 0 16px rgba(252,211,77,.5);transition:all .1s;line-height:1.3;text-align:center}
+.drum.spin{animation:spin .07s steps(1) infinite}
+@keyframes spin{0%{opacity:1;transform:translateY(0)}50%{opacity:.25;transform:translateY(-4px)}}
+.drum.pop{animation:pop .35s ease-out forwards}
+@keyframes pop{0%{transform:scale(.8);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+
+/* Week selector */
+.week-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.wk{padding:5px 14px;font-size:12px;font-weight:700;border-radius:20px;cursor:pointer;border:none;font-family:inherit;transition:all .15s}
+.wk.off{background:#F0F0F0;color:#666;border:1px solid #CCC}
+.wk.on{background:#1D4ED8;color:#fff;border:1px solid #1e40af}
+.week-info{font-size:12px;color:#555;margin-bottom:12px}
+.week-progress{margin-bottom:12px}
+.wp-label{font-size:11px;color:#888;margin-bottom:4px;display:flex;justify-content:space-between}
+.wp-bar{background:#EEE;border-radius:4px;height:5px;overflow:hidden}
+.wp-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#3B82F6,#F59E0B);transition:width .3s}
+
+/* Count row */
+.count-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.count-row label{font-size:13px;color:#444}
+.count-input{width:66px;padding:6px 8px;text-align:center;background:#F5F5F5;border:1px solid #CCC;border-radius:8px;color:#111;font-size:15px;font-weight:700;font-family:inherit}
+.count-input:focus{outline:none;border-color:#3B82F6}
+
+/* Buttons */
+.btn-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.btn{padding:10px 26px;font-size:14px;font-weight:700;border:none;border-radius:10px;cursor:pointer;font-family:inherit;transition:all .15s;letter-spacing:.02em}
+.btn-primary{background:#1D4ED8;color:#fff;border:1px solid #1e40af;box-shadow:0 2px 8px rgba(29,78,216,.3)}
+.btn-primary:hover{background:#1e40af}
+.btn-primary:disabled{background:#9CA3AF;border-color:#9CA3AF;cursor:not-allowed;box-shadow:none}
+.btn-green{background:#047857;color:#fff;border:1px solid #065f46;box-shadow:0 2px 8px rgba(4,120,87,.3)}
+.btn-green:hover{background:#065f46}
+.btn-green:disabled{background:#9CA3AF;border-color:#9CA3AF;cursor:not-allowed;box-shadow:none}
+.btn-gray{background:#F0F0F0;color:#444;border:1px solid #CCC}
+.btn-gray:hover{background:#E0E0E0}
+.btn-amber{background:#FFFBEB;color:#92400E;border:1px solid #FCD34D;font-size:12px;padding:7px 14px}
+.btn-amber:hover{background:#FEF3C7}
+
+/* Progress bar */
+.prog-wrap{margin-bottom:12px;display:none}
+.prog-text{font-size:12px;color:#555;margin-bottom:4px}
+.prog-bar{background:#EEE;border-radius:4px;height:5px;overflow:hidden}
+.prog-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#3B82F6,#F59E0B);transition:width .3s}
+
+/* Winners */
+.winners-area{margin-top:14px;display:none}
+.winners-hdr{font-size:13px;font-weight:700;color:#333;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.winners-scroll{max-height:320px;overflow-y:auto;padding-right:3px}
+.winners-scroll::-webkit-scrollbar{width:4px}
+.winners-scroll::-webkit-scrollbar-track{background:#F5F5F5}
+.winners-scroll::-webkit-scrollbar-thumb{background:#CCC;border-radius:2px}
+.grade-hdr{font-size:12px;font-weight:900;color:#1E3A5F;padding:6px 0 3px;border-bottom:2px solid #E2E8F0;margin-bottom:6px;margin-top:10px;grid-column:1/-1}
+.grade-hdr:first-child{margin-top:0}
+.winners-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(144px,1fr));gap:6px}
+.wcard{background:#fff;border:1px solid #E2E8F0;border-radius:9px;padding:9px 11px;animation:cardIn .25s ease-out backwards;position:relative}
+@keyframes cardIn{from{opacity:0;transform:scale(.9) translateY(6px)}to{opacity:1;transform:none}}
+.wcard.dup{background:#FFFBEB;border-color:#FCD34D}
+.wcard.fa{border-color:#6EE7B7}
+.wcard .wc{font-size:12px;font-weight:700;color:#1D4ED8}
+.wcard .ws{font-size:18px;font-weight:900;color:#111;margin:1px 0}
+.wcard .wt{font-size:10px;color:#888}
+.wcard .wf{font-size:9px;color:#047857;font-weight:700;margin-top:1px}
+.wcard .wd{position:absolute;top:5px;right:5px;font-size:8px;font-weight:700;background:#D97706;color:#fff;padding:2px 4px;border-radius:3px}
+
+/* FA section */
+.fa-class-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.fa-cls-tag{padding:5px 13px;border-radius:20px;font-size:12px;font-weight:700;background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46}
+.fa-winner-box{text-align:center;padding:20px;background:#ECFDF5;border:1px solid #6EE7B7;border-radius:12px;margin-top:14px;display:none}
+.fa-winner-box .title{font-size:13px;font-weight:700;color:#065F46;margin-bottom:4px}
+.fa-winner-box .cls{font-size:15px;font-weight:700;color:#047857}
+.fa-winner-box .seat{font-size:48px;font-weight:900;color:#111;line-height:1.1;margin:3px 0}
+.fa-winner-box .prize{font-size:13px;color:#047857}
+
+/* Confetti */
+#cvs{position:fixed;inset:0;pointer-events:none;z-index:9999}
+
+/* Mobile */
+@media(max-width:500px){
+  .tab-btn{padding:9px 16px;font-size:12px}
+  .stat .v{font-size:18px}
+  .winners-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+}
 </style>
 </head>
 <body>
-<canvas id="confetti-canvas"></canvas>
+<canvas id="cvs"></canvas>
+
 <div class="banner">
   <h1>🎽 樹人家商 <span>校服創意 Show</span> 抽獎系統</h1>
-  <p>2026 活動成果・網路投票獎勵抽籤</p>
-  <div class="badge-row">
-    <span class="badge">週週好禮 1,054人候選</span>
-    <span class="badge">全勤鐵粉 112人</span>
-    <span class="badge">全校總票數 35,884票</span>
+  <p>2026 活動成果 · 投票獎勵抽籤</p>
+  <div class="badges">
+    <span>週週好禮 三週合併抽60名</span>
+    <span>全勤鐵粉 112人</span>
+    <span>全校總票數 39,666票</span>
   </div>
 </div>
 
 <div class="tabs">
-  <button class="tab-btn active" onclick="switchTab('weekly')">🎟 週週好禮</button>
-  <button class="tab-btn inactive green-tab" onclick="switchTab('fullatt')">💯 全勤大獎</button>
-  <button class="tab-btn inactive" onclick="switchTab('ann')">📢 公告訊息</button>
+  <button class="tab-btn on" onclick="switchTab('weekly',this)">🎟 週週好禮</button>
+  <button class="tab-btn off green" onclick="switchTab('fa',this)">💯 全勤大獎</button>
 </div>
 
-<!-- ══ PAGE: Weekly ══ -->
-<div id="page-weekly" class="page active">
-<div class="content">
+<!-- ══ 週週好禮 ══ -->
+<div id="page-weekly" class="page on">
+<div class="wrap">
 
-  <div class="section-header">
-    <h2>🎟 週週好禮抽獎</h2>
-    <p>全活動期間（3/3–3/21）共 3 週投票，合併一次抽出得獎名單。<br>
-       <strong>加權抽籤：票數越多中獎機率越高</strong>，不限重複中獎。<br>
-       可依週篩選候選資格（打勾=該週有票才可參加）。</p>
-    <span class="prize-tag">🎁 獎品：便利商店 $50 商品卡 × 60 名</span>
+  <div class="card">
+    <h2>🎟 個人專屬「手氣爆棚」抽獎 — 週週好禮</h2>
+    <p>三週合併一次抽出 <strong>60 名</strong>得獎。<br>
+       <strong>加權抽籤：投票越多，中獎機率越高</strong>（親友票也算）。<br>
+       只要活動期間任一週有票即可參加。</p>
+    <span class="tag">🎁 獎品：便利商店 $50 商品卡</span>
   </div>
 
-  <div class="stats-row">
-    <div class="stat-card"><div class="sv" id="w-cand">1,054</div><div class="sl">候選人數</div></div>
-    <div class="stat-card"><div class="sv" id="w-pool">35,884</div><div class="sl">抽籤票數池</div></div>
-    <div class="stat-card"><div class="sv" id="w-drawn">0</div><div class="sl">已抽出人數</div></div>
+  <div class="stats">
+    <div class="stat"><div class="v" id="s-cand">1,054</div><div class="l">候選人數</div></div>
+    <div class="stat"><div class="v" id="s-pool">—</div><div class="l">票數池</div></div>
+    <div class="stat"><div class="v" id="s-drawn">0</div><div class="l">已抽出人數</div></div>
   </div>
 
-  <div class="drum-area">
-    <p class="drum-hint">週別資格篩選（可複選）</p>
-    <div class="week-btns">
-      <button class="week-btn on" id="wbtn1" onclick="toggleWeek(1)">第1週 3/3–3/7 (835人)</button>
-      <button class="week-btn on" id="wbtn2" onclick="toggleWeek(2)">第2週 3/8–3/14 (950人)</button>
-      <button class="week-btn on" id="wbtn3" onclick="toggleWeek(3)">第3週 3/15–3/21 (815人)</button>
-    </div>
-    <p class="week-info" id="week-info">目前候選：<strong id="cand-count">1,054</strong> 人 · 票數池：<strong id="pool-count">35,884</strong> 票</p>
+  <div class="drum-wrap">
+    <p class="week-info" id="week-info">候選：<strong id="wk-cand">—</strong> 人 · 票數池：<strong id="wk-pool">—</strong> 票（3/3–3/21 任一週有票皆可參加）</p>
 
     <div class="count-row">
-      <label>抽出人數</label>
-      <input type="number" class="count-input" id="draw-count" value="60" min="1" max="200">
+      <label>本次抽出</label>
+      <input type="number" class="count-input" id="draw-n" value="60" min="1" max="200">
       <label>名</label>
     </div>
 
-    <div class="progress-text" id="prog-text"></div>
-    <div class="progress-bar" id="prog-bar" style="display:none">
-      <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+    <div class="prog-wrap" id="prog-wrap">
+      <div class="prog-text" id="prog-text"></div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
     </div>
 
-    <div class="drum-screen">
-      <div class="drum-text" id="drum-display">準備就緒 · 點擊開始抽籤</div>
+    <div class="screen">
+      <div class="drum" id="drum">準備就緒 · 選週別後開始抽籤</div>
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-draw" id="btn-draw-weekly" onclick="startDrawWeekly()">🎰 開始抽籤</button>
-      <button class="btn btn-reset" onclick="resetWeekly()">↺ 重置</button>
+      <button class="btn btn-primary" id="btn-draw" onclick="startDraw()">🎰 開始抽籤</button>
+      <button class="btn btn-gray" onclick="resetAll()">↺ 重置</button>
     </div>
   </div>
 
-  <div class="winners-area" id="weekly-winners-area" style="display:none">
-    <div class="winners-title">
-      <span id="winners-count-label">中獎名單</span>
-      <button class="btn btn-copy" onclick="copyWeeklyWinners()">📋 複製名單</button>
+  <div class="winners-area" id="winners-area">
+    <div class="winners-hdr">
+      <span id="winners-label">中獎名單</span>
+      <button class="btn btn-amber" onclick="copyWinners()">📋 複製名單</button>
     </div>
     <div class="winners-scroll">
-      <div class="winners-grid" id="weekly-winners-grid"></div>
+      <div class="winners-grid" id="winners-grid"></div>
     </div>
   </div>
 
 </div>
 </div>
 
-<!-- ══ PAGE: Full Attendance ══ -->
-<div id="page-fullatt" class="page">
-<div class="content">
+<!-- ══ 全勤大獎 ══ -->
+<div id="page-fa" class="page">
+<div class="wrap">
 
-  <div class="section-header" style="border-color:#A7F3D0">
+  <div class="card" style="border-color:#A7F3D0">
     <h2>💯 全勤鐵粉終極大獎</h2>
-    <p>活動期間 3/3（一）至 3/21（六）共 <strong>19 天</strong>，每天都有投票紀錄的同學。<br>
-       共 <strong>112 位</strong>全勤鐵粉參加終極大獎抽籤，純隨機抽出 1 名。</p>
-    <span class="prize-tag" style="background:#ECFDF5;border-color:#6EE7B7;color:#047857">🏆 獎品：品牌禮券 $1,000 元</span>
+    <p>認定期間：<strong>3/3（二）至 3/21（六）</strong>，共 <strong>19 天</strong>。<br>
+       天天皆有投票紀錄的同學，共 <strong>112 位</strong>參加終極大獎抽籤。<br>
+       純隨機抽出 1 名得主。</p>
+    <span class="tag green">🏆 獎品：品牌禮券 $1,000 元</span>
   </div>
 
-  <div class="stats-row">
-    <div class="stat-card">
-      <div class="sv" style="color:#047857">112</div>
-      <div class="sl">全勤候選人</div>
-    </div>
-    <div class="stat-card">
-      <div class="sv" style="color:#047857">19</div>
-      <div class="sl">連續天數</div>
-    </div>
-    <div class="stat-card">
-      <div class="sv" style="color:#047857">7</div>
-      <div class="sl">全勤班級數</div>
-    </div>
+  <div class="stats">
+    <div class="stat"><div class="v green">112</div><div class="l">全勤候選人</div></div>
+    <div class="stat"><div class="v green">19</div><div class="l">連續天數</div></div>
+    <div class="stat"><div class="v green">7</div><div class="l">全勤班級數</div></div>
   </div>
 
-  <!-- Full att class list -->
-  <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:12px;padding:16px;margin-bottom:20px">
-    <div style="font-size:12px;font-weight:700;color:#047857;margin-bottom:10px;">全勤班級一覽</div>
-    <div id="fa-class-list" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+  <div class="card" style="border-color:#A7F3D0;padding:14px 16px">
+    <div style="font-size:11px;font-weight:700;color:#065F46;margin-bottom:8px">全勤班級一覽</div>
+    <div class="fa-class-grid" id="fa-cls-grid"></div>
   </div>
 
-  <div class="drum-area" style="border-color:#A7F3D0">
-    <div class="drum-screen" style="border-color:#A7F3D0">
-      <div class="drum-text" id="fa-drum-display" style="color:#34D399">準備就緒 · 點擊開始抽籤</div>
+  <div class="drum-wrap" style="border-color:#A7F3D0">
+    <div class="screen" style="border-color:#166534">
+      <div class="drum" id="fa-drum" style="color:#4ADE80">準備就緒 · 點擊開始抽籤</div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-draw green-btn" id="btn-draw-fa" onclick="startDrawFA()">🏆 抽出終極大獎得主</button>
-      <button class="btn btn-reset" onclick="resetFA()">↺ 重置</button>
+      <button class="btn btn-green" id="btn-fa" onclick="drawFA()">🏆 抽出終極大獎得主</button>
+      <button class="btn btn-gray" onclick="resetFA()">↺ 重置</button>
     </div>
   </div>
 
-  <div id="fa-winner-area" style="display:none;margin-top:20px">
-    <div style="text-align:center;padding:24px;background:rgba(5,150,105,0.1);border:1px solid rgba(5,150,105,0.4);border-radius:14px">
-      <div style="font-size:13px;color:#047857;font-weight:700;margin-bottom:6px;">🏆 終極大獎得主</div>
-      <div id="fa-winner-cls" style="font-size:16px;color:#065F46;font-weight:700;"></div>
-      <div id="fa-winner-seat" style="font-size:52px;font-weight:900;color:#0F172A;line-height:1.1;margin:4px 0;"></div>
-      <div style="font-size:13px;color:#047857;">恭喜獲得品牌禮券 $1,000 元 🎉</div>
-    </div>
+  <div class="fa-winner-box" id="fa-winner">
+    <div class="title">🏆 終極大獎得主</div>
+    <div class="cls" id="fa-cls"></div>
+    <div class="seat" id="fa-seat"></div>
+    <div class="prize">恭喜獲得品牌禮券 $1,000 元 🎉</div>
   </div>
-
-</div>
-</div>
-
-<!-- ══ PAGE: Announcement ══ -->
-<div id="page-ann" class="page">
-<div class="content">
-
-  <div class="section-header" style="margin-bottom:16px">
-    <h2>📢 完整公告訊息</h2>
-    <p>點擊展開各群組公告，可直接複製貼到 LINE 發送。</p>
-  </div>
-
-  <div class="ann-wrap" id="ann-container"></div>
 
 </div>
 </div>
@@ -398,713 +252,261 @@
 // ══ DATA ══
 const DATA = {"weekly":[{"cls":"商一忠","seat":1,"total":3,"w1":3,"w2":0,"w3":0,"full":false},{"cls":"商一忠","seat":2,"total":3,"w1":2,"w2":1,"w3":0,"full":false},{"cls":"商一忠","seat":4,"total":17,"w1":6,"w2":7,"w3":4,"full":false},{"cls":"商一忠","seat":7,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"商一忠","seat":8,"total":7,"w1":4,"w2":1,"w3":2,"full":false},{"cls":"商一忠","seat":10,"total":28,"w1":6,"w2":7,"w3":15,"full":true},{"cls":"商一忠","seat":11,"total":18,"w1":3,"w2":9,"w3":6,"full":false},{"cls":"商一忠","seat":12,"total":5,"w1":3,"w2":1,"w3":1,"full":false},{"cls":"商一忠","seat":14,"total":27,"w1":6,"w2":11,"w3":10,"full":false},{"cls":"商一忠","seat":15,"total":20,"w1":6,"w2":7,"w3":7,"full":true},{"cls":"商一忠","seat":16,"total":13,"w1":1,"w2":5,"w3":7,"full":false},{"cls":"商一忠","seat":17,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"商一忠","seat":18,"total":3,"w1":2,"w2":1,"w3":0,"full":false},{"cls":"商一忠","seat":20,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"商一忠","seat":22,"total":6,"w1":3,"w2":0,"w3":3,"full":false},{"cls":"商一忠","seat":23,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"商一忠","seat":24,"total":2,"w1":1,"w2":1,"w3":0,"full":false},{"cls":"商一忠","seat":25,"total":17,"w1":13,"w2":2,"w3":2,"full":false},{"cls":"商一忠","seat":26,"total":2,"w1":2,"w2":0,"w3":0,"full":false},{"cls":"商一忠","seat":27,"total":42,"w1":24,"w2":11,"w3":7,"full":true},{"cls":"商一忠","seat":28,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"商一忠","seat":29,"total":2,"w1":2,"w2":0,"w3":0,"full":false},{"cls":"商一忠","seat":30,"total":17,"w1":6,"w2":6,"w3":5,"full":false},{"cls":"商一忠","seat":33,"total":8,"w1":5,"w2":2,"w3":1,"full":false},{"cls":"商一忠","seat":34,"total":1123,"w1":333,"w2":581,"w3":209,"full":true},{"cls":"商一忠","seat":35,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"商一忠","seat":36,"total":40,"w1":21,"w2":13,"w3":6,"full":false},{"cls":"商一忠","seat":37,"total":14,"w1":6,"w2":5,"w3":3,"full":false},{"cls":"餐一忠","seat":1,"total":76,"w1":67,"w2":9,"w3":0,"full":false},{"cls":"餐一忠","seat":2,"total":5,"w1":1,"w2":3,"w3":1,"full":false},{"cls":"餐一忠","seat":3,"total":2,"w1":2,"w2":0,"w3":0,"full":false},{"cls":"餐一忠","seat":4,"total":15,"w1":8,"w2":5,"w3":2,"full":false},{"cls":"餐一忠","seat":5,"total":4,"w1":3,"w2":1,"w3":0,"full":false},{"cls":"餐一忠","seat":7,"total":13,"w1":4,"w2":9,"w3":0,"full":false},{"cls":"餐一忠","seat":9,"total":14,"w1":4,"w2":6,"w3":4,"full":false},{"cls":"餐一忠","seat":10,"total":12,"w1":3,"w2":5,"w3":4,"full":false},{"cls":"餐一忠","seat":11,"total":3,"w1":3,"w2":0,"w3":0,"full":false},{"cls":"餐一忠","seat":12,"total":2,"w1":2,"w2":0,"w3":0,"full":false},{"cls":"餐一忠","seat":13,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"餐一忠","seat":14,"total":5,"w1":3,"w2":2,"w3":0,"full":false},{"cls":"餐一忠","seat":15,"total":12,"w1":3,"w2":5,"w3":4,"full":false},{"cls":"餐一忠","seat":16,"total":14,"w1":4,"w2":6,"w3":4,"full":false},{"cls":"餐一忠","seat":17,"total":7,"w1":3,"w2":3,"w3":1,"full":false},{"cls":"餐一忠","seat":18,"total":6,"w1":1,"w2":5,"w3":0,"full":false},{"cls":"餐一忠","seat":19,"total":4,"w1":3,"w2":1,"w3":0,"full":false},{"cls":"餐一忠","seat":21,"total":3,"w1":2,"w2":1,"w3":0,"full":false},{"cls":"餐一忠","seat":22,"total":15,"w1":3,"w2":7,"w3":5,"full":false},{"cls":"餐一忠","seat":24,"total":2,"w1":2,"w2":0,"w3":0,"full":false},{"cls":"餐一忠","seat":25,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"餐一忠","seat":26,"total":15,"w1":4,"w2":7,"w3":4,"full":false},{"cls":"餐一忠","seat":27,"total":93,"w1":42,"w2":41,"w3":10,"full":false},{"cls":"餐一忠","seat":28,"total":6,"w1":3,"w2":3,"w3":0,"full":false},{"cls":"餐一忠","seat":29,"total":2,"w1":2,"w2":0,"w3":0,"full":false},{"cls":"餐一忠","seat":30,"total":2,"w1":2,"w2":0,"w3":0,"full":false},{"cls":"餐一忠","seat":31,"total":29,"w1":12,"w2":12,"w3":5,"full":false},{"cls":"餐一忠","seat":32,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"餐一忠","seat":33,"total":7,"w1":4,"w2":3,"w3":0,"full":false},{"cls":"餐一忠","seat":34,"total":29,"w1":20,"w2":8,"w3":1,"full":false},{"cls":"餐一忠","seat":35,"total":9,"w1":4,"w2":2,"w3":3,"full":false},{"cls":"餐一忠","seat":36,"total":12,"w1":8,"w2":4,"w3":0,"full":false},{"cls":"餐一忠","seat":37,"total":35,"w1":14,"w2":21,"w3":0,"full":false},{"cls":"餐一忠","seat":38,"total":5,"w1":4,"w2":1,"w3":0,"full":false},{"cls":"餐一忠","seat":39,"total":3,"w1":2,"w2":1,"w3":0,"full":false},{"cls":"餐一忠","seat":40,"total":12,"w1":3,"w2":7,"w3":2,"full":false},{"cls":"餐一忠","seat":41,"total":2,"w1":2,"w2":0,"w3":0,"full":false},{"cls":"餐一忠","seat":42,"total":19,"w1":10,"w2":7,"w3":2,"full":false},{"cls":"餐一忠","seat":43,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"餐一忠","seat":44,"total":15,"w1":3,"w2":7,"w3":5,"full":false},{"cls":"餐一忠","seat":45,"total":2,"w1":2,"w2":0,"w3":0,"full":false},{"cls":"餐一忠","seat":46,"total":4,"w1":4,"w2":0,"w3":0,"full":false},{"cls":"餐一愛","seat":1,"total":9,"w1":0,"w2":9,"w3":0,"full":false},{"cls":"餐一愛","seat":6,"total":19,"w1":0,"w2":19,"w3":0,"full":false},{"cls":"餐一愛","seat":29,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"餐一義","seat":25,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"幼一忠","seat":1,"total":112,"w1":29,"w2":24,"w3":58,"full":false},{"cls":"幼一忠","seat":2,"total":66,"w1":7,"w2":24,"w3":34,"full":false},{"cls":"幼一忠","seat":3,"total":69,"w1":22,"w2":25,"w3":21,"full":false},{"cls":"幼一忠","seat":4,"total":3,"w1":0,"w2":2,"w3":0,"full":false},{"cls":"幼一忠","seat":5,"total":11,"w1":3,"w2":2,"w3":5,"full":false},{"cls":"幼一忠","seat":6,"total":2,"w1":2,"w2":0,"w3":0,"full":false},{"cls":"幼一忠","seat":8,"total":32,"w1":7,"w2":10,"w3":14,"full":false},{"cls":"幼一忠","seat":9,"total":82,"w1":18,"w2":28,"w3":35,"full":true},{"cls":"幼一忠","seat":10,"total":209,"w1":77,"w2":79,"w3":52,"full":false},{"cls":"幼一忠","seat":11,"total":37,"w1":5,"w2":8,"w3":23,"full":false},{"cls":"幼一忠","seat":12,"total":41,"w1":3,"w2":12,"w3":25,"full":false},{"cls":"幼一忠","seat":13,"total":126,"w1":11,"w2":72,"w3":42,"full":false},{"cls":"幼一忠","seat":14,"total":29,"w1":6,"w2":13,"w3":9,"full":false},{"cls":"幼一忠","seat":15,"total":210,"w1":53,"w2":58,"w3":98,"full":false},{"cls":"幼一忠","seat":16,"total":196,"w1":42,"w2":82,"w3":71,"full":true},{"cls":"幼一忠","seat":17,"total":28,"w1":3,"w2":10,"w3":14,"full":false},{"cls":"幼一忠","seat":18,"total":12,"w1":2,"w2":5,"w3":4,"full":false},{"cls":"幼一忠","seat":19,"total":46,"w1":8,"w2":16,"w3":21,"full":false},{"cls":"幼一忠","seat":20,"total":70,"w1":9,"w2":23,"w3":37,"full":true},{"cls":"幼一忠","seat":21,"total":7,"w1":5,"w2":0,"w3":0,"full":false},{"cls":"幼一忠","seat":22,"total":37,"w1":9,"w2":14,"w3":13,"full":false},{"cls":"幼一忠","seat":23,"total":50,"w1":8,"w2":18,"w3":23,"full":false},{"cls":"幼一忠","seat":24,"total":312,"w1":79,"w2":115,"w3":117,"full":false},{"cls":"幼一忠","seat":25,"total":28,"w1":4,"w2":20,"w3":3,"full":false},{"cls":"幼一忠","seat":26,"total":138,"w1":71,"w2":41,"w3":25,"full":true},{"cls":"幼一忠","seat":27,"total":66,"w1":9,"w2":24,"w3":32,"full":false},{"cls":"幼一忠","seat":28,"total":15,"w1":0,"w2":15,"w3":0,"full":false},{"cls":"幼一忠","seat":29,"total":107,"w1":32,"w2":38,"w3":36,"full":false},{"cls":"幼一忠","seat":30,"total":51,"w1":11,"w2":12,"w3":27,"full":false},{"cls":"幼一忠","seat":31,"total":12,"w1":10,"w2":1,"w3":0,"full":false},{"cls":"幼一忠","seat":32,"total":275,"w1":79,"w2":107,"w3":88,"full":true},{"cls":"幼一忠","seat":33,"total":89,"w1":15,"w2":29,"w3":44,"full":false},{"cls":"幼一忠","seat":34,"total":41,"w1":0,"w2":23,"w3":17,"full":false},{"cls":"幼一忠","seat":35,"total":2,"w1":2,"w2":0,"w3":0,"full":false},{"cls":"幼一忠","seat":36,"total":49,"w1":5,"w2":15,"w3":28,"full":false},{"cls":"幼一忠","seat":37,"total":36,"w1":1,"w2":15,"w3":19,"full":false},{"cls":"幼一忠","seat":38,"total":8,"w1":7,"w2":0,"w3":0,"full":false},{"cls":"幼一忠","seat":39,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"幼一忠","seat":40,"total":73,"w1":8,"w2":29,"w3":35,"full":true},{"cls":"幼一忠","seat":41,"total":8,"w1":1,"w2":2,"w3":4,"full":false},{"cls":"幼一忠","seat":42,"total":19,"w1":4,"w2":5,"w3":9,"full":false},{"cls":"幼一忠","seat":44,"total":75,"w1":13,"w2":21,"w3":40,"full":false},{"cls":"幼一忠","seat":45,"total":31,"w1":3,"w2":9,"w3":18,"full":false},{"cls":"幼一忠","seat":46,"total":49,"w1":15,"w2":11,"w3":22,"full":false},{"cls":"幼一忠","seat":47,"total":73,"w1":14,"w2":22,"w3":36,"full":false},{"cls":"幼一忠","seat":49,"total":5,"w1":4,"w2":0,"w3":0,"full":false},{"cls":"美一忠","seat":3,"total":7,"w1":2,"w2":5,"w3":0,"full":false},{"cls":"美一忠","seat":5,"total":7,"w1":2,"w2":5,"w3":0,"full":false},{"cls":"美一忠","seat":6,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"美一忠","seat":7,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"美一忠","seat":10,"total":7,"w1":3,"w2":4,"w3":0,"full":false},{"cls":"美一忠","seat":11,"total":7,"w1":2,"w2":5,"w3":0,"full":false},{"cls":"美一忠","seat":12,"total":7,"w1":2,"w2":5,"w3":0,"full":false},{"cls":"美一忠","seat":18,"total":2,"w1":2,"w2":0,"w3":0,"full":false},{"cls":"美一忠","seat":19,"total":5,"w1":3,"w2":2,"w3":0,"full":false},{"cls":"美一忠","seat":20,"total":5,"w1":2,"w2":3,"w3":0,"full":false},{"cls":"美一忠","seat":21,"total":5,"w1":2,"w2":3,"w3":0,"full":false},{"cls":"美一忠","seat":22,"total":3,"w1":2,"w2":1,"w3":0,"full":false},{"cls":"美一忠","seat":24,"total":8,"w1":3,"w2":5,"w3":0,"full":false},{"cls":"美一忠","seat":25,"total":2,"w1":2,"w2":0,"w3":0,"full":false},{"cls":"美一忠","seat":26,"total":3,"w1":2,"w2":1,"w3":0,"full":false},{"cls":"美一忠","seat":27,"total":7,"w1":3,"w2":4,"w3":0,"full":false},{"cls":"美一忠","seat":28,"total":8,"w1":3,"w2":5,"w3":0,"full":false},{"cls":"美一忠","seat":29,"total":6,"w1":2,"w2":4,"w3":0,"full":false},{"cls":"美一忠","seat":31,"total":8,"w1":3,"w2":5,"w3":0,"full":false},{"cls":"美一忠","seat":33,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"美一忠","seat":34,"total":2,"w1":1,"w2":1,"w3":0,"full":false},{"cls":"美一忠","seat":37,"total":6,"w1":2,"w2":4,"w3":0,"full":false},{"cls":"美一忠","seat":38,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"美一忠","seat":39,"total":3,"w1":3,"w2":0,"w3":0,"full":false},{"cls":"美一忠","seat":40,"total":8,"w1":3,"w2":5,"w3":0,"full":false},{"cls":"美一忠","seat":42,"total":6,"w1":3,"w2":3,"w3":0,"full":false},{"cls":"美一忠","seat":43,"total":6,"w1":3,"w2":3,"w3":0,"full":false},{"cls":"美一忠","seat":45,"total":7,"w1":2,"w2":5,"w3":0,"full":false},{"cls":"美一忠","seat":46,"total":5,"w1":1,"w2":4,"w3":0,"full":false},{"cls":"美一孝","seat":1,"total":17,"w1":4,"w2":7,"w3":6,"full":false},{"cls":"美一孝","seat":2,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"美一孝","seat":3,"total":470,"w1":96,"w2":190,"w3":184,"full":false},{"cls":"美一孝","seat":4,"total":21,"w1":5,"w2":9,"w3":7,"full":false},{"cls":"美一孝","seat":5,"total":25,"w1":6,"w2":13,"w3":6,"full":false},{"cls":"美一孝","seat":7,"total":25,"w1":7,"w2":11,"w3":7,"full":false},{"cls":"美一孝","seat":10,"total":16,"w1":4,"w2":6,"w3":6,"full":false},{"cls":"美一孝","seat":11,"total":17,"w1":4,"w2":7,"w3":6,"full":false},{"cls":"美一孝","seat":12,"total":27,"w1":5,"w2":14,"w3":8,"full":false},{"cls":"美一孝","seat":13,"total":19,"w1":4,"w2":9,"w3":6,"full":false},{"cls":"美一孝","seat":14,"total":40,"w1":8,"w2":23,"w3":9,"full":false},{"cls":"美一孝","seat":15,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"美一孝","seat":16,"total":18,"w1":4,"w2":8,"w3":6,"full":false},{"cls":"美一孝","seat":17,"total":33,"w1":6,"w2":15,"w3":12,"full":false},{"cls":"美一孝","seat":18,"total":29,"w1":7,"w2":14,"w3":8,"full":false},{"cls":"美一孝","seat":19,"total":62,"w1":11,"w2":27,"w3":24,"full":false},{"cls":"美一孝","seat":20,"total":60,"w1":10,"w2":27,"w3":23,"full":false},{"cls":"美一孝","seat":21,"total":17,"w1":4,"w2":7,"w3":6,"full":false},{"cls":"美一孝","seat":22,"total":22,"w1":6,"w2":7,"w3":9,"full":false},{"cls":"美一孝","seat":23,"total":36,"w1":6,"w2":21,"w3":9,"full":false},{"cls":"美一孝","seat":24,"total":18,"w1":4,"w2":7,"w3":7,"full":false},{"cls":"美一孝","seat":25,"total":18,"w1":4,"w2":7,"w3":7,"full":false},{"cls":"美一孝","seat":26,"total":24,"w1":5,"w2":12,"w3":7,"full":false},{"cls":"美一孝","seat":27,"total":22,"w1":6,"w2":10,"w3":6,"full":false},{"cls":"美一孝","seat":28,"total":30,"w1":8,"w2":16,"w3":6,"full":false},{"cls":"美一孝","seat":29,"total":20,"w1":5,"w2":8,"w3":7,"full":false},{"cls":"美一孝","seat":30,"total":17,"w1":3,"w2":7,"w3":7,"full":false},{"cls":"美一孝","seat":32,"total":45,"w1":8,"w2":22,"w3":15,"full":false},{"cls":"美一孝","seat":34,"total":21,"w1":4,"w2":10,"w3":7,"full":false},{"cls":"美一孝","seat":35,"total":37,"w1":7,"w2":14,"w3":16,"full":false},{"cls":"美一孝","seat":37,"total":17,"w1":4,"w2":7,"w3":6,"full":false},{"cls":"美一孝","seat":38,"total":29,"w1":4,"w2":16,"w3":9,"full":false},{"cls":"美一孝","seat":39,"total":40,"w1":9,"w2":18,"w3":13,"full":false},{"cls":"美一孝","seat":40,"total":17,"w1":4,"w2":6,"w3":7,"full":false},{"cls":"美一孝","seat":41,"total":64,"w1":20,"w2":28,"w3":16,"full":false},{"cls":"美一孝","seat":42,"total":17,"w1":4,"w2":7,"w3":6,"full":false},{"cls":"美一孝","seat":43,"total":79,"w1":40,"w2":27,"w3":12,"full":false},{"cls":"美一孝","seat":44,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"美一孝","seat":45,"total":16,"w1":3,"w2":7,"w3":6,"full":false},{"cls":"美一孝","seat":46,"total":17,"w1":4,"w2":7,"w3":6,"full":false},{"cls":"美一孝","seat":47,"total":25,"w1":4,"w2":12,"w3":9,"full":false},{"cls":"美一仁","seat":1,"total":44,"w1":11,"w2":15,"w3":18,"full":false},{"cls":"美一仁","seat":2,"total":56,"w1":15,"w2":19,"w3":22,"full":false},{"cls":"美一仁","seat":3,"total":45,"w1":5,"w2":15,"w3":25,"full":false},{"cls":"美一仁","seat":4,"total":51,"w1":6,"w2":19,"w3":26,"full":false},{"cls":"美一仁","seat":5,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"美一仁","seat":6,"total":107,"w1":6,"w2":67,"w3":34,"full":false},{"cls":"美一仁","seat":7,"total":78,"w1":6,"w2":41,"w3":31,"full":false},{"cls":"美一仁","seat":8,"total":51,"w1":5,"w2":17,"w3":29,"full":false},{"cls":"美一仁","seat":9,"total":56,"w1":6,"w2":22,"w3":28,"full":false},{"cls":"美一仁","seat":10,"total":40,"w1":6,"w2":13,"w3":21,"full":false},{"cls":"美一仁","seat":11,"total":73,"w1":19,"w2":25,"w3":29,"full":false},{"cls":"美一仁","seat":12,"total":48,"w1":6,"w2":19,"w3":23,"full":false},{"cls":"美一仁","seat":13,"total":86,"w1":30,"w2":30,"w3":26,"full":false},{"cls":"美一仁","seat":14,"total":59,"w1":15,"w2":23,"w3":21,"full":false},{"cls":"美一仁","seat":15,"total":3,"w1":0,"w2":0,"w3":3,"full":false},{"cls":"美一仁","seat":16,"total":69,"w1":6,"w2":37,"w3":26,"full":false},{"cls":"美一仁","seat":17,"total":72,"w1":15,"w2":18,"w3":39,"full":false},{"cls":"美一仁","seat":18,"total":44,"w1":6,"w2":15,"w3":23,"full":false},{"cls":"美一仁","seat":19,"total":55,"w1":5,"w2":20,"w3":30,"full":false},{"cls":"美一仁","seat":20,"total":70,"w1":24,"w2":22,"w3":24,"full":false},{"cls":"美一仁","seat":21,"total":52,"w1":6,"w2":19,"w3":27,"full":false},{"cls":"美一仁","seat":22,"total":43,"w1":6,"w2":15,"w3":22,"full":false},{"cls":"美一仁","seat":23,"total":97,"w1":46,"w2":23,"w3":28,"full":false},{"cls":"美一仁","seat":24,"total":46,"w1":6,"w2":13,"w3":27,"full":false},{"cls":"美一仁","seat":25,"total":49,"w1":6,"w2":22,"w3":21,"full":false},{"cls":"美一仁","seat":26,"total":51,"w1":8,"w2":14,"w3":29,"full":false},{"cls":"美一仁","seat":27,"total":46,"w1":6,"w2":16,"w3":24,"full":false},{"cls":"美一仁","seat":28,"total":131,"w1":63,"w2":42,"w3":26,"full":false},{"cls":"美一仁","seat":29,"total":47,"w1":6,"w2":18,"w3":23,"full":false},{"cls":"美一仁","seat":30,"total":49,"w1":3,"w2":21,"w3":25,"full":false},{"cls":"美一仁","seat":31,"total":57,"w1":5,"w2":20,"w3":32,"full":false},{"cls":"美一仁","seat":32,"total":50,"w1":5,"w2":10,"w3":35,"full":false},{"cls":"美一仁","seat":33,"total":85,"w1":27,"w2":20,"w3":38,"full":false},{"cls":"美一仁","seat":34,"total":54,"w1":4,"w2":21,"w3":29,"full":false},{"cls":"美一仁","seat":35,"total":4,"w1":1,"w2":0,"w3":3,"full":false},{"cls":"美一仁","seat":37,"total":48,"w1":4,"w2":15,"w3":29,"full":false},{"cls":"美一仁","seat":39,"total":57,"w1":6,"w2":21,"w3":30,"full":false},{"cls":"美一仁","seat":40,"total":74,"w1":4,"w2":42,"w3":28,"full":false},{"cls":"美一仁","seat":41,"total":47,"w1":3,"w2":15,"w3":29,"full":false},{"cls":"美一仁","seat":42,"total":79,"w1":15,"w2":34,"w3":30,"full":false},{"cls":"美一仁","seat":43,"total":66,"w1":12,"w2":32,"w3":22,"full":false},{"cls":"美一仁","seat":44,"total":43,"w1":5,"w2":17,"w3":21,"full":false},{"cls":"美一仁","seat":45,"total":54,"w1":5,"w2":25,"w3":24,"full":false},{"cls":"影一忠","seat":1,"total":2,"w1":0,"w2":2,"w3":0,"full":false},{"cls":"影一忠","seat":2,"total":3,"w1":1,"w2":2,"w3":0,"full":false},{"cls":"影一忠","seat":4,"total":3,"w1":1,"w2":2,"w3":0,"full":false},{"cls":"影一忠","seat":5,"total":2,"w1":0,"w2":2,"w3":0,"full":false},{"cls":"影一忠","seat":6,"total":2,"w1":0,"w2":2,"w3":0,"full":false},{"cls":"影一忠","seat":8,"total":3,"w1":1,"w2":2,"w3":0,"full":false},{"cls":"影一忠","seat":9,"total":3,"w1":1,"w2":2,"w3":0,"full":false},{"cls":"影一忠","seat":10,"total":3,"w1":1,"w2":2,"w3":0,"full":false},{"cls":"影一忠","seat":13,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"影一忠","seat":14,"total":2,"w1":1,"w2":1,"w3":0,"full":false},{"cls":"影一忠","seat":15,"total":3,"w1":1,"w2":2,"w3":0,"full":false},{"cls":"影一忠","seat":17,"total":3,"w1":1,"w2":2,"w3":0,"full":false},{"cls":"影一忠","seat":18,"total":3,"w1":1,"w2":2,"w3":0,"full":false},{"cls":"影一忠","seat":19,"total":3,"w1":1,"w2":2,"w3":0,"full":false},{"cls":"影一忠","seat":20,"total":2,"w1":0,"w2":2,"w3":0,"full":false},{"cls":"影一忠","seat":22,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"影一忠","seat":23,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"影一忠","seat":25,"total":2,"w1":0,"w2":2,"w3":0,"full":false},{"cls":"影一忠","seat":26,"total":2,"w1":1,"w2":1,"w3":0,"full":false},{"cls":"影一忠","seat":27,"total":3,"w1":1,"w2":2,"w3":0,"full":false},{"cls":"影一忠","seat":28,"total":2,"w1":1,"w2":1,"w3":0,"full":false},{"cls":"影一忠","seat":30,"total":2,"w1":1,"w2":1,"w3":0,"full":false},{"cls":"影一忠","seat":31,"total":5,"w1":1,"w2":4,"w3":0,"full":false},{"cls":"商二忠","seat":1,"total":40,"w1":7,"w2":15,"w3":18,"full":false},{"cls":"商二忠","seat":2,"total":15,"w1":2,"w2":8,"w3":5,"full":false},{"cls":"商二忠","seat":3,"total":13,"w1":2,"w2":6,"w3":5,"full":false},{"cls":"商二忠","seat":5,"total":13,"w1":2,"w2":6,"w3":5,"full":false},{"cls":"商二忠","seat":6,"total":2,"w1":1,"w2":1,"w3":0,"full":false},{"cls":"商二忠","seat":7,"total":11,"w1":1,"w2":5,"w3":5,"full":false},{"cls":"商二忠","seat":8,"total":11,"w1":2,"w2":5,"w3":4,"full":false},{"cls":"商二忠","seat":9,"total":10,"w1":2,"w2":2,"w3":6,"full":false},{"cls":"商二忠","seat":10,"total":10,"w1":2,"w2":4,"w3":4,"full":false},{"cls":"商二忠","seat":11,"total":14,"w1":2,"w2":6,"w3":6,"full":false},{"cls":"商二忠","seat":13,"total":12,"w1":2,"w2":5,"w3":5,"full":false},{"cls":"商二忠","seat":14,"total":13,"w1":2,"w2":6,"w3":5,"full":false},{"cls":"商二忠","seat":15,"total":12,"w1":2,"w2":5,"w3":5,"full":false},{"cls":"商二忠","seat":16,"total":14,"w1":2,"w2":6,"w3":6,"full":false},{"cls":"商二忠","seat":17,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"商二忠","seat":18,"total":2,"w1":2,"w2":0,"w3":0,"full":false},{"cls":"商二忠","seat":19,"total":13,"w1":2,"w2":6,"w3":5,"full":false},{"cls":"商二忠","seat":20,"total":14,"w1":2,"w2":6,"w3":6,"full":false},{"cls":"商二忠","seat":21,"total":14,"w1":2,"w2":6,"w3":6,"full":false},{"cls":"商二忠","seat":22,"total":13,"w1":2,"w2":5,"w3":6,"full":false},{"cls":"商二忠","seat":23,"total":9,"w1":2,"w2":4,"w3":3,"full":false},{"cls":"商二忠","seat":24,"total":6,"w1":1,"w2":3,"w3":2,"full":false},{"cls":"商二忠","seat":25,"total":13,"w1":2,"w2":5,"w3":6,"full":false},{"cls":"商二忠","seat":26,"total":13,"w1":2,"w2":6,"w3":5,"full":false},{"cls":"商二忠","seat":27,"total":8,"w1":2,"w2":3,"w3":3,"full":false},{"cls":"商二忠","seat":31,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"商二忠","seat":32,"total":13,"w1":2,"w2":5,"w3":6,"full":false},{"cls":"商二忠","seat":33,"total":14,"w1":2,"w2":6,"w3":6,"full":false},{"cls":"商二忠","seat":34,"total":13,"w1":2,"w2":5,"w3":6,"full":false},{"cls":"商二忠","seat":35,"total":12,"w1":2,"w2":5,"w3":5,"full":false},{"cls":"商二忠","seat":36,"total":13,"w1":2,"w2":5,"w3":6,"full":false},{"cls":"商二忠","seat":37,"total":11,"w1":1,"w2":5,"w3":5,"full":false},{"cls":"商二忠","seat":38,"total":12,"w1":2,"w2":5,"w3":5,"full":false},{"cls":"商二忠","seat":39,"total":10,"w1":2,"w2":6,"w3":2,"full":false},{"cls":"商二忠","seat":40,"total":12,"w1":2,"w2":4,"w3":6,"full":false},{"cls":"商二忠","seat":41,"total":13,"w1":2,"w2":5,"w3":6,"full":false},{"cls":"商二忠","seat":42,"total":11,"w1":1,"w2":5,"w3":5,"full":false},{"cls":"商二忠","seat":43,"total":10,"w1":1,"w2":5,"w3":4,"full":false},{"cls":"商二忠","seat":44,"total":14,"w1":2,"w2":6,"w3":6,"full":false},{"cls":"商二忠","seat":45,"total":14,"w1":2,"w2":6,"w3":6,"full":false},{"cls":"商二忠","seat":46,"total":13,"w1":2,"w2":6,"w3":5,"full":false},{"cls":"資處二孝","seat":1,"total":9,"w1":0,"w2":5,"w3":4,"full":false},{"cls":"資處二孝","seat":4,"total":7,"w1":0,"w2":5,"w3":2,"full":false},{"cls":"資處二孝","seat":5,"total":2,"w1":0,"w2":2,"w3":0,"full":false},{"cls":"資處二孝","seat":6,"total":5,"w1":0,"w2":3,"w3":2,"full":false},{"cls":"資處二孝","seat":7,"total":4,"w1":0,"w2":3,"w3":1,"full":false},{"cls":"資處二孝","seat":8,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"資處二孝","seat":10,"total":3,"w1":0,"w2":1,"w3":2,"full":false},{"cls":"資處二孝","seat":11,"total":2,"w1":0,"w2":1,"w3":1,"full":false},{"cls":"資處二孝","seat":12,"total":2,"w1":0,"w2":2,"w3":0,"full":false},{"cls":"資處二孝","seat":14,"total":2,"w1":0,"w2":1,"w3":1,"full":false},{"cls":"資處二孝","seat":15,"total":4,"w1":0,"w2":3,"w3":1,"full":false},{"cls":"資處二孝","seat":16,"total":2,"w1":0,"w2":2,"w3":0,"full":false},{"cls":"資處二孝","seat":17,"total":2,"w1":0,"w2":0,"w3":2,"full":false},{"cls":"資處二孝","seat":19,"total":4,"w1":0,"w2":2,"w3":2,"full":false},{"cls":"資處二孝","seat":20,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"資處二孝","seat":22,"total":2,"w1":0,"w2":1,"w3":1,"full":false},{"cls":"資處二孝","seat":23,"total":4,"w1":0,"w2":4,"w3":0,"full":false},{"cls":"資處二孝","seat":24,"total":2,"w1":0,"w2":1,"w3":1,"full":false},{"cls":"資處二孝","seat":25,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"資處二孝","seat":26,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"資處二孝","seat":30,"total":6,"w1":0,"w2":5,"w3":1,"full":false},{"cls":"資處二孝","seat":33,"total":3,"w1":0,"w2":3,"w3":0,"full":false},{"cls":"資處二孝","seat":38,"total":6,"w1":0,"w2":4,"w3":2,"full":false},{"cls":"資處二孝","seat":40,"total":4,"w1":0,"w2":2,"w3":2,"full":false},{"cls":"資處二孝","seat":44,"total":3,"w1":0,"w2":3,"w3":0,"full":false},{"cls":"資處二孝","seat":46,"total":7,"w1":0,"w2":5,"w3":2,"full":false},{"cls":"觀二忠","seat":1,"total":570,"w1":34,"w2":273,"w3":263,"full":true},{"cls":"觀二忠","seat":2,"total":39,"w1":16,"w2":17,"w3":6,"full":false},{"cls":"觀二忠","seat":3,"total":135,"w1":30,"w2":56,"w3":49,"full":true},{"cls":"觀二忠","seat":4,"total":23,"w1":9,"w2":8,"w3":6,"full":false},{"cls":"觀二忠","seat":5,"total":48,"w1":14,"w2":19,"w3":15,"full":true},{"cls":"觀二忠","seat":6,"total":131,"w1":39,"w2":48,"w3":44,"full":true},{"cls":"觀二忠","seat":8,"total":31,"w1":8,"w2":13,"w3":10,"full":false},{"cls":"觀二忠","seat":9,"total":295,"w1":46,"w2":101,"w3":148,"full":true},{"cls":"觀二忠","seat":10,"total":15,"w1":4,"w2":6,"w3":5,"full":false},{"cls":"觀二忠","seat":11,"total":36,"w1":9,"w2":12,"w3":15,"full":true},{"cls":"觀二忠","seat":13,"total":132,"w1":32,"w2":51,"w3":49,"full":true},{"cls":"觀二忠","seat":15,"total":14,"w1":5,"w2":4,"w3":5,"full":false},{"cls":"觀二忠","seat":16,"total":35,"w1":9,"w2":14,"w3":12,"full":true},{"cls":"觀二忠","seat":17,"total":100,"w1":22,"w2":49,"w3":29,"full":false},{"cls":"觀二忠","seat":19,"total":33,"w1":7,"w2":12,"w3":14,"full":false},{"cls":"觀二忠","seat":21,"total":38,"w1":10,"w2":14,"w3":14,"full":true},{"cls":"觀二忠","seat":22,"total":29,"w1":7,"w2":12,"w3":10,"full":false},{"cls":"觀二忠","seat":23,"total":19,"w1":5,"w2":8,"w3":6,"full":false},{"cls":"觀二忠","seat":24,"total":41,"w1":11,"w2":16,"w3":14,"full":true},{"cls":"觀二忠","seat":25,"total":14,"w1":2,"w2":8,"w3":4,"full":false},{"cls":"觀二忠","seat":26,"total":52,"w1":16,"w2":19,"w3":17,"full":true},{"cls":"觀二忠","seat":27,"total":49,"w1":13,"w2":18,"w3":18,"full":true},{"cls":"觀二忠","seat":28,"total":187,"w1":52,"w2":75,"w3":60,"full":true},{"cls":"觀二忠","seat":29,"total":17,"w1":5,"w2":6,"w3":6,"full":false},{"cls":"觀二忠","seat":30,"total":36,"w1":10,"w2":14,"w3":12,"full":true},{"cls":"觀二忠","seat":31,"total":10,"w1":2,"w2":4,"w3":4,"full":false},{"cls":"觀二忠","seat":32,"total":46,"w1":15,"w2":18,"w3":13,"full":true},{"cls":"觀二忠","seat":34,"total":25,"w1":8,"w2":7,"w3":10,"full":false},{"cls":"觀二忠","seat":37,"total":15,"w1":4,"w2":5,"w3":6,"full":false},{"cls":"觀二忠","seat":38,"total":16,"w1":3,"w2":7,"w3":6,"full":false},{"cls":"觀二忠","seat":39,"total":12,"w1":2,"w2":5,"w3":5,"full":false},{"cls":"觀二忠","seat":40,"total":39,"w1":9,"w2":17,"w3":13,"full":true},{"cls":"觀二忠","seat":41,"total":10,"w1":2,"w2":4,"w3":4,"full":false},{"cls":"觀二孝","seat":1,"total":94,"w1":24,"w2":30,"w3":40,"full":false},{"cls":"觀二孝","seat":3,"total":30,"w1":4,"w2":12,"w3":14,"full":false},{"cls":"觀二孝","seat":4,"total":40,"w1":4,"w2":15,"w3":21,"full":false},{"cls":"觀二孝","seat":5,"total":32,"w1":4,"w2":9,"w3":19,"full":false},{"cls":"觀二孝","seat":6,"total":41,"w1":4,"w2":16,"w3":21,"full":false},{"cls":"觀二孝","seat":7,"total":32,"w1":4,"w2":9,"w3":19,"full":false},{"cls":"觀二孝","seat":8,"total":28,"w1":4,"w2":7,"w3":17,"full":false},{"cls":"觀二孝","seat":9,"total":46,"w1":4,"w2":21,"w3":21,"full":false},{"cls":"觀二孝","seat":10,"total":45,"w1":5,"w2":12,"w3":28,"full":false},{"cls":"觀二孝","seat":11,"total":24,"w1":0,"w2":1,"w3":23,"full":false},{"cls":"觀二孝","seat":12,"total":99,"w1":30,"w2":47,"w3":22,"full":false},{"cls":"觀二孝","seat":13,"total":31,"w1":5,"w2":15,"w3":11,"full":false},{"cls":"觀二孝","seat":14,"total":40,"w1":4,"w2":15,"w3":21,"full":false},{"cls":"觀二孝","seat":16,"total":17,"w1":1,"w2":7,"w3":9,"full":false},{"cls":"觀二孝","seat":17,"total":22,"w1":3,"w2":5,"w3":14,"full":false},{"cls":"觀二孝","seat":18,"total":47,"w1":4,"w2":26,"w3":17,"full":false},{"cls":"觀二孝","seat":19,"total":30,"w1":4,"w2":7,"w3":19,"full":false},{"cls":"觀二孝","seat":20,"total":34,"w1":4,"w2":11,"w3":19,"full":false},{"cls":"觀二孝","seat":21,"total":29,"w1":4,"w2":7,"w3":18,"full":false},{"cls":"觀二孝","seat":23,"total":17,"w1":4,"w2":8,"w3":5,"full":false},{"cls":"觀二孝","seat":24,"total":31,"w1":4,"w2":10,"w3":17,"full":false},{"cls":"觀二孝","seat":25,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀二孝","seat":26,"total":24,"w1":4,"w2":6,"w3":14,"full":false},{"cls":"觀二孝","seat":27,"total":13,"w1":2,"w2":5,"w3":6,"full":false},{"cls":"觀二孝","seat":28,"total":37,"w1":4,"w2":13,"w3":20,"full":false},{"cls":"觀二孝","seat":29,"total":40,"w1":4,"w2":15,"w3":21,"full":false},{"cls":"觀二孝","seat":30,"total":42,"w1":4,"w2":12,"w3":26,"full":false},{"cls":"觀二孝","seat":31,"total":32,"w1":4,"w2":8,"w3":20,"full":false},{"cls":"觀二孝","seat":32,"total":36,"w1":3,"w2":12,"w3":21,"full":false},{"cls":"觀二孝","seat":33,"total":25,"w1":4,"w2":7,"w3":14,"full":false},{"cls":"觀二孝","seat":34,"total":6,"w1":0,"w2":0,"w3":6,"full":false},{"cls":"觀二孝","seat":35,"total":43,"w1":4,"w2":14,"w3":25,"full":false},{"cls":"觀二孝","seat":38,"total":35,"w1":4,"w2":7,"w3":24,"full":false},{"cls":"觀二孝","seat":39,"total":21,"w1":4,"w2":6,"w3":11,"full":false},{"cls":"餐二忠","seat":1,"total":21,"w1":8,"w2":5,"w3":8,"full":false},{"cls":"餐二忠","seat":2,"total":18,"w1":5,"w2":5,"w3":8,"full":false},{"cls":"餐二忠","seat":3,"total":18,"w1":5,"w2":5,"w3":8,"full":false},{"cls":"餐二忠","seat":4,"total":21,"w1":7,"w2":6,"w3":8,"full":false},{"cls":"餐二忠","seat":5,"total":18,"w1":5,"w2":5,"w3":8,"full":false},{"cls":"餐二忠","seat":6,"total":5,"w1":2,"w2":1,"w3":2,"full":false},{"cls":"餐二忠","seat":7,"total":14,"w1":5,"w2":4,"w3":5,"full":false},{"cls":"餐二忠","seat":8,"total":16,"w1":7,"w2":4,"w3":5,"full":false},{"cls":"餐二忠","seat":9,"total":45,"w1":12,"w2":14,"w3":19,"full":false},{"cls":"餐二忠","seat":11,"total":13,"w1":4,"w2":3,"w3":6,"full":false},{"cls":"餐二忠","seat":12,"total":12,"w1":5,"w2":1,"w3":6,"full":false},{"cls":"餐二忠","seat":13,"total":5,"w1":4,"w2":0,"w3":1,"full":false},{"cls":"餐二忠","seat":14,"total":19,"w1":5,"w2":7,"w3":7,"full":false},{"cls":"餐二忠","seat":15,"total":7,"w1":4,"w2":2,"w3":1,"full":false},{"cls":"餐二忠","seat":16,"total":18,"w1":5,"w2":5,"w3":8,"full":false},{"cls":"餐二忠","seat":17,"total":209,"w1":52,"w2":83,"w3":74,"full":false},{"cls":"餐二忠","seat":18,"total":17,"w1":6,"w2":4,"w3":7,"full":false},{"cls":"餐二忠","seat":19,"total":15,"w1":6,"w2":4,"w3":5,"full":false},{"cls":"餐二忠","seat":20,"total":17,"w1":5,"w2":4,"w3":8,"full":false},{"cls":"餐二忠","seat":21,"total":14,"w1":7,"w2":4,"w3":3,"full":false},{"cls":"餐二忠","seat":22,"total":26,"w1":12,"w2":8,"w3":6,"full":false},{"cls":"餐二忠","seat":23,"total":9,"w1":4,"w2":2,"w3":3,"full":false},{"cls":"餐二忠","seat":24,"total":9,"w1":5,"w2":2,"w3":2,"full":false},{"cls":"餐二忠","seat":25,"total":16,"w1":6,"w2":4,"w3":6,"full":false},{"cls":"餐二忠","seat":26,"total":18,"w1":5,"w2":5,"w3":8,"full":false},{"cls":"餐二忠","seat":27,"total":16,"w1":5,"w2":5,"w3":6,"full":false},{"cls":"餐二忠","seat":28,"total":7,"w1":3,"w2":2,"w3":2,"full":false},{"cls":"餐二忠","seat":29,"total":15,"w1":5,"w2":4,"w3":6,"full":false},{"cls":"餐二忠","seat":30,"total":18,"w1":6,"w2":5,"w3":7,"full":false},{"cls":"餐二忠","seat":31,"total":14,"w1":6,"w2":2,"w3":6,"full":false},{"cls":"餐二忠","seat":32,"total":5,"w1":5,"w2":0,"w3":0,"full":false},{"cls":"餐二忠","seat":33,"total":19,"w1":7,"w2":5,"w3":7,"full":false},{"cls":"餐二忠","seat":34,"total":50,"w1":38,"w2":6,"w3":6,"full":false},{"cls":"餐二忠","seat":35,"total":420,"w1":87,"w2":111,"w3":222,"full":false},{"cls":"餐二忠","seat":36,"total":60,"w1":7,"w2":8,"w3":45,"full":false},{"cls":"餐二忠","seat":37,"total":15,"w1":4,"w2":4,"w3":7,"full":false},{"cls":"餐二忠","seat":38,"total":41,"w1":17,"w2":10,"w3":14,"full":false},{"cls":"餐二忠","seat":39,"total":17,"w1":5,"w2":5,"w3":7,"full":false},{"cls":"餐二忠","seat":40,"total":8,"w1":5,"w2":1,"w3":2,"full":false},{"cls":"餐二忠","seat":41,"total":6,"w1":5,"w2":1,"w3":0,"full":false},{"cls":"餐二忠","seat":42,"total":40,"w1":15,"w2":10,"w3":15,"full":false},{"cls":"餐二忠","seat":43,"total":10,"w1":5,"w2":3,"w3":2,"full":false},{"cls":"餐二忠","seat":44,"total":374,"w1":70,"w2":114,"w3":190,"full":false},{"cls":"餐二忠","seat":45,"total":3,"w1":2,"w2":0,"w3":1,"full":false},{"cls":"餐二孝","seat":15,"total":4,"w1":0,"w2":4,"w3":0,"full":false},{"cls":"餐二孝","seat":41,"total":4,"w1":0,"w2":4,"w3":0,"full":false},{"cls":"餐二孝","seat":43,"total":8,"w1":0,"w2":8,"w3":0,"full":false},{"cls":"餐二仁","seat":1,"total":3,"w1":1,"w2":2,"w3":0,"full":false},{"cls":"餐二仁","seat":3,"total":36,"w1":10,"w2":14,"w3":12,"full":false},{"cls":"餐二仁","seat":6,"total":20,"w1":6,"w2":7,"w3":7,"full":false},{"cls":"餐二仁","seat":7,"total":11,"w1":5,"w2":4,"w3":2,"full":false},{"cls":"餐二仁","seat":8,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"餐二仁","seat":9,"total":15,"w1":6,"w2":5,"w3":4,"full":false},{"cls":"餐二仁","seat":10,"total":5,"w1":5,"w2":0,"w3":0,"full":false},{"cls":"餐二仁","seat":11,"total":19,"w1":6,"w2":7,"w3":6,"full":false},{"cls":"餐二仁","seat":14,"total":19,"w1":6,"w2":7,"w3":6,"full":false},{"cls":"餐二仁","seat":15,"total":5,"w1":3,"w2":1,"w3":1,"full":false},{"cls":"餐二仁","seat":16,"total":1,"w1":0,"w2":0,"w3":1,"full":false},{"cls":"餐二仁","seat":17,"total":14,"w1":6,"w2":5,"w3":3,"full":false},{"cls":"餐二仁","seat":18,"total":8,"w1":5,"w2":2,"w3":1,"full":false},{"cls":"餐二仁","seat":19,"total":8,"w1":3,"w2":5,"w3":0,"full":false},{"cls":"餐二仁","seat":21,"total":11,"w1":6,"w2":5,"w3":0,"full":false},{"cls":"餐二仁","seat":22,"total":5,"w1":5,"w2":0,"w3":0,"full":false},{"cls":"餐二仁","seat":23,"total":4,"w1":4,"w2":0,"w3":0,"full":false},{"cls":"餐二仁","seat":24,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"餐二仁","seat":25,"total":19,"w1":6,"w2":7,"w3":6,"full":false},{"cls":"餐二仁","seat":27,"total":2,"w1":2,"w2":0,"w3":0,"full":false},{"cls":"餐二仁","seat":28,"total":5,"w1":2,"w2":2,"w3":1,"full":false},{"cls":"餐二仁","seat":29,"total":2,"w1":1,"w2":1,"w3":0,"full":false},{"cls":"餐二仁","seat":31,"total":16,"w1":6,"w2":6,"w3":4,"full":false},{"cls":"餐二仁","seat":32,"total":7,"w1":2,"w2":3,"w3":2,"full":false},{"cls":"餐二仁","seat":33,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"餐二仁","seat":37,"total":11,"w1":5,"w2":6,"w3":0,"full":false},{"cls":"餐二仁","seat":38,"total":19,"w1":6,"w2":7,"w3":6,"full":false},{"cls":"餐二仁","seat":39,"total":2,"w1":2,"w2":0,"w3":0,"full":false},{"cls":"餐二仁","seat":41,"total":4,"w1":3,"w2":1,"w3":0,"full":false},{"cls":"餐二仁","seat":43,"total":5,"w1":4,"w2":0,"w3":1,"full":false},{"cls":"餐二仁","seat":45,"total":11,"w1":5,"w2":2,"w3":4,"full":false},{"cls":"餐二愛","seat":1,"total":22,"w1":5,"w2":9,"w3":8,"full":true},{"cls":"餐二愛","seat":3,"total":16,"w1":9,"w2":2,"w3":5,"full":false},{"cls":"餐二愛","seat":4,"total":5,"w1":2,"w2":2,"w3":1,"full":false},{"cls":"餐二愛","seat":5,"total":17,"w1":3,"w2":6,"w3":8,"full":false},{"cls":"餐二愛","seat":6,"total":7,"w1":2,"w2":1,"w3":4,"full":false},{"cls":"餐二愛","seat":8,"total":22,"w1":6,"w2":7,"w3":9,"full":true},{"cls":"餐二愛","seat":9,"total":9,"w1":2,"w2":3,"w3":4,"full":false},{"cls":"餐二愛","seat":10,"total":26,"w1":11,"w2":7,"w3":8,"full":false},{"cls":"餐二愛","seat":11,"total":14,"w1":0,"w2":9,"w3":5,"full":false},{"cls":"餐二愛","seat":12,"total":45,"w1":15,"w2":19,"w3":11,"full":true},{"cls":"餐二愛","seat":13,"total":18,"w1":5,"w2":6,"w3":7,"full":false},{"cls":"餐二愛","seat":14,"total":7,"w1":3,"w2":2,"w3":2,"full":false},{"cls":"餐二愛","seat":15,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"餐二愛","seat":16,"total":4,"w1":1,"w2":3,"w3":0,"full":false},{"cls":"餐二愛","seat":17,"total":13,"w1":4,"w2":3,"w3":6,"full":false},{"cls":"餐二愛","seat":18,"total":5,"w1":1,"w2":3,"w3":1,"full":false},{"cls":"餐二愛","seat":19,"total":10,"w1":3,"w2":3,"w3":4,"full":false},{"cls":"餐二愛","seat":20,"total":4,"w1":1,"w2":1,"w3":2,"full":false},{"cls":"餐二愛","seat":21,"total":14,"w1":5,"w2":5,"w3":4,"full":false},{"cls":"餐二愛","seat":22,"total":5,"w1":1,"w2":1,"w3":3,"full":false},{"cls":"餐二愛","seat":23,"total":1,"w1":0,"w2":0,"w3":1,"full":false},{"cls":"餐二愛","seat":24,"total":6,"w1":5,"w2":0,"w3":1,"full":false},{"cls":"餐二愛","seat":25,"total":20,"w1":5,"w2":8,"w3":7,"full":true},{"cls":"餐二愛","seat":26,"total":14,"w1":2,"w2":6,"w3":6,"full":false},{"cls":"餐二愛","seat":27,"total":14,"w1":2,"w2":6,"w3":6,"full":false},{"cls":"餐二愛","seat":29,"total":3,"w1":1,"w2":0,"w3":2,"full":false},{"cls":"餐二愛","seat":30,"total":19,"w1":5,"w2":8,"w3":6,"full":false},{"cls":"餐二愛","seat":31,"total":5,"w1":1,"w2":0,"w3":4,"full":false},{"cls":"餐二愛","seat":32,"total":19,"w1":5,"w2":7,"w3":7,"full":false},{"cls":"餐二愛","seat":33,"total":7,"w1":3,"w2":2,"w3":2,"full":false},{"cls":"餐二愛","seat":34,"total":2,"w1":0,"w2":1,"w3":1,"full":false},{"cls":"餐二愛","seat":36,"total":19,"w1":7,"w2":6,"w3":6,"full":false},{"cls":"餐二愛","seat":38,"total":9,"w1":4,"w2":3,"w3":2,"full":false},{"cls":"餐二愛","seat":39,"total":13,"w1":5,"w2":5,"w3":3,"full":false},{"cls":"餐二愛","seat":40,"total":5,"w1":1,"w2":1,"w3":3,"full":false},{"cls":"餐二愛","seat":41,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"餐二愛","seat":43,"total":18,"w1":6,"w2":6,"w3":6,"full":false},{"cls":"餐二愛","seat":44,"total":24,"w1":6,"w2":10,"w3":8,"full":true},{"cls":"餐二愛","seat":45,"total":6,"w1":1,"w2":3,"w3":2,"full":false},{"cls":"餐二義","seat":1,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"餐二義","seat":3,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"餐二義","seat":4,"total":13,"w1":6,"w2":5,"w3":2,"full":false},{"cls":"餐二義","seat":8,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"餐二義","seat":10,"total":2,"w1":1,"w2":0,"w3":1,"full":false},{"cls":"餐二義","seat":14,"total":14,"w1":5,"w2":3,"w3":6,"full":false},{"cls":"餐二義","seat":25,"total":26,"w1":6,"w2":11,"w3":9,"full":false},{"cls":"餐二義","seat":29,"total":14,"w1":2,"w2":8,"w3":4,"full":false},{"cls":"餐二義","seat":30,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"餐二義","seat":32,"total":66,"w1":11,"w2":30,"w3":25,"full":false},{"cls":"餐二義","seat":34,"total":2,"w1":0,"w2":2,"w3":0,"full":false},{"cls":"餐二義","seat":35,"total":1,"w1":0,"w2":0,"w3":1,"full":false},{"cls":"餐二義","seat":38,"total":7,"w1":1,"w2":2,"w3":4,"full":false},{"cls":"餐二義","seat":39,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"幼二忠","seat":2,"total":120,"w1":23,"w2":28,"w3":69,"full":true},{"cls":"幼二忠","seat":3,"total":46,"w1":11,"w2":15,"w3":20,"full":false},{"cls":"幼二忠","seat":4,"total":90,"w1":5,"w2":24,"w3":61,"full":true},{"cls":"幼二忠","seat":5,"total":159,"w1":56,"w2":55,"w3":48,"full":false},{"cls":"幼二忠","seat":6,"total":35,"w1":5,"w2":12,"w3":18,"full":false},{"cls":"幼二忠","seat":7,"total":59,"w1":15,"w2":18,"w3":26,"full":false},{"cls":"幼二忠","seat":8,"total":31,"w1":4,"w2":13,"w3":14,"full":false},{"cls":"幼二忠","seat":9,"total":39,"w1":6,"w2":12,"w3":21,"full":false},{"cls":"幼二忠","seat":10,"total":92,"w1":40,"w2":34,"w3":18,"full":false},{"cls":"幼二忠","seat":12,"total":136,"w1":23,"w2":68,"w3":45,"full":true},{"cls":"幼二忠","seat":13,"total":38,"w1":5,"w2":14,"w3":19,"full":true},{"cls":"幼二忠","seat":14,"total":87,"w1":6,"w2":39,"w3":42,"full":true},{"cls":"幼二忠","seat":15,"total":140,"w1":24,"w2":40,"w3":76,"full":false},{"cls":"幼二忠","seat":16,"total":47,"w1":8,"w2":18,"w3":21,"full":true},{"cls":"幼二忠","seat":19,"total":72,"w1":21,"w2":29,"w3":22,"full":true},{"cls":"幼二忠","seat":20,"total":124,"w1":54,"w2":38,"w3":32,"full":true},{"cls":"幼二忠","seat":21,"total":126,"w1":36,"w2":43,"w3":47,"full":true},{"cls":"幼二忠","seat":22,"total":37,"w1":5,"w2":13,"w3":19,"full":true},{"cls":"幼二忠","seat":23,"total":47,"w1":5,"w2":18,"w3":24,"full":true},{"cls":"幼二忠","seat":24,"total":92,"w1":26,"w2":35,"w3":31,"full":true},{"cls":"幼二忠","seat":25,"total":74,"w1":10,"w2":31,"w3":33,"full":false},{"cls":"幼二忠","seat":26,"total":122,"w1":15,"w2":47,"w3":60,"full":true},{"cls":"幼二忠","seat":27,"total":188,"w1":61,"w2":61,"w3":66,"full":true},{"cls":"幼二忠","seat":28,"total":76,"w1":14,"w2":36,"w3":26,"full":true},{"cls":"幼二忠","seat":29,"total":40,"w1":5,"w2":14,"w3":21,"full":false},{"cls":"幼二忠","seat":30,"total":44,"w1":6,"w2":17,"w3":21,"full":true},{"cls":"幼二忠","seat":31,"total":50,"w1":13,"w2":16,"w3":21,"full":true},{"cls":"幼二忠","seat":32,"total":3,"w1":0,"w2":3,"w3":0,"full":false},{"cls":"幼二忠","seat":33,"total":60,"w1":11,"w2":17,"w3":32,"full":true},{"cls":"幼二忠","seat":34,"total":29,"w1":5,"w2":12,"w3":12,"full":false},{"cls":"幼二忠","seat":36,"total":175,"w1":21,"w2":79,"w3":75,"full":true},{"cls":"幼二忠","seat":37,"total":98,"w1":5,"w2":35,"w3":58,"full":true},{"cls":"幼二忠","seat":38,"total":108,"w1":5,"w2":36,"w3":67,"full":true},{"cls":"幼二忠","seat":39,"total":57,"w1":11,"w2":22,"w3":24,"full":true},{"cls":"幼二忠","seat":40,"total":38,"w1":4,"w2":15,"w3":19,"full":false},{"cls":"幼二忠","seat":41,"total":47,"w1":7,"w2":19,"w3":21,"full":false},{"cls":"幼二忠","seat":42,"total":41,"w1":5,"w2":18,"w3":18,"full":true},{"cls":"幼二忠","seat":43,"total":88,"w1":47,"w2":18,"w3":23,"full":true},{"cls":"幼二忠","seat":44,"total":33,"w1":5,"w2":11,"w3":17,"full":true},{"cls":"幼二忠","seat":45,"total":16,"w1":4,"w2":7,"w3":5,"full":false},{"cls":"幼二忠","seat":46,"total":12,"w1":4,"w2":4,"w3":4,"full":false},{"cls":"幼二忠","seat":47,"total":32,"w1":7,"w2":12,"w3":13,"full":false},{"cls":"幼二忠","seat":48,"total":41,"w1":6,"w2":14,"w3":21,"full":true},{"cls":"美二忠","seat":1,"total":58,"w1":15,"w2":21,"w3":22,"full":true},{"cls":"美二忠","seat":2,"total":58,"w1":16,"w2":22,"w3":20,"full":true},{"cls":"美二忠","seat":3,"total":61,"w1":17,"w2":21,"w3":23,"full":true},{"cls":"美二忠","seat":4,"total":57,"w1":15,"w2":21,"w3":21,"full":true},{"cls":"美二忠","seat":5,"total":292,"w1":54,"w2":121,"w3":117,"full":false},{"cls":"美二忠","seat":6,"total":121,"w1":29,"w2":26,"w3":66,"full":true},{"cls":"美二忠","seat":7,"total":53,"w1":12,"w2":23,"w3":18,"full":false},{"cls":"美二忠","seat":8,"total":65,"w1":18,"w2":24,"w3":23,"full":true},{"cls":"美二忠","seat":9,"total":77,"w1":15,"w2":44,"w3":18,"full":true},{"cls":"美二忠","seat":10,"total":92,"w1":28,"w2":23,"w3":41,"full":true},{"cls":"美二忠","seat":11,"total":963,"w1":294,"w2":311,"w3":358,"full":true},{"cls":"美二忠","seat":12,"total":71,"w1":16,"w2":24,"w3":31,"full":true},{"cls":"美二忠","seat":13,"total":54,"w1":14,"w2":24,"w3":16,"full":true},{"cls":"美二忠","seat":14,"total":62,"w1":17,"w2":26,"w3":19,"full":true},{"cls":"美二忠","seat":15,"total":62,"w1":15,"w2":22,"w3":25,"full":false},{"cls":"美二忠","seat":16,"total":34,"w1":9,"w2":15,"w3":10,"full":false},{"cls":"美二忠","seat":17,"total":36,"w1":10,"w2":11,"w3":15,"full":false},{"cls":"美二忠","seat":18,"total":105,"w1":18,"w2":49,"w3":38,"full":true},{"cls":"美二忠","seat":19,"total":248,"w1":15,"w2":73,"w3":160,"full":true},{"cls":"美二忠","seat":20,"total":56,"w1":13,"w2":22,"w3":21,"full":true},{"cls":"美二忠","seat":21,"total":57,"w1":15,"w2":21,"w3":21,"full":true},{"cls":"美二忠","seat":22,"total":58,"w1":19,"w2":21,"w3":18,"full":false},{"cls":"美二忠","seat":23,"total":55,"w1":14,"w2":20,"w3":21,"full":true},{"cls":"美二忠","seat":24,"total":58,"w1":17,"w2":22,"w3":19,"full":false},{"cls":"美二忠","seat":25,"total":78,"w1":24,"w2":32,"w3":22,"full":true},{"cls":"美二忠","seat":26,"total":84,"w1":15,"w2":24,"w3":45,"full":true},{"cls":"美二忠","seat":27,"total":57,"w1":15,"w2":21,"w3":21,"full":true},{"cls":"美二忠","seat":28,"total":59,"w1":17,"w2":22,"w3":20,"full":true},{"cls":"美二忠","seat":29,"total":53,"w1":14,"w2":21,"w3":18,"full":false},{"cls":"美二忠","seat":30,"total":382,"w1":15,"w2":139,"w3":228,"full":true},{"cls":"美二忠","seat":31,"total":930,"w1":295,"w2":282,"w3":353,"full":true},{"cls":"美二忠","seat":32,"total":57,"w1":15,"w2":21,"w3":21,"full":true},{"cls":"美二忠","seat":33,"total":65,"w1":19,"w2":25,"w3":21,"full":true},{"cls":"美二忠","seat":34,"total":54,"w1":15,"w2":21,"w3":18,"full":false},{"cls":"美二忠","seat":35,"total":58,"w1":16,"w2":21,"w3":21,"full":true},{"cls":"美二忠","seat":36,"total":62,"w1":21,"w2":20,"w3":21,"full":true},{"cls":"美二忠","seat":37,"total":55,"w1":13,"w2":22,"w3":20,"full":true},{"cls":"美二忠","seat":38,"total":60,"w1":17,"w2":20,"w3":23,"full":true},{"cls":"美二忠","seat":39,"total":322,"w1":198,"w2":53,"w3":71,"full":false},{"cls":"美二忠","seat":40,"total":51,"w1":15,"w2":21,"w3":15,"full":false},{"cls":"美二忠","seat":41,"total":68,"w1":18,"w2":25,"w3":25,"full":true},{"cls":"美二忠","seat":42,"total":419,"w1":56,"w2":164,"w3":199,"full":true},{"cls":"美二忠","seat":44,"total":92,"w1":21,"w2":33,"w3":38,"full":true},{"cls":"美二忠","seat":45,"total":36,"w1":9,"w2":18,"w3":9,"full":false},{"cls":"美二孝","seat":1,"total":5,"w1":0,"w2":5,"w3":0,"full":false},{"cls":"美二孝","seat":2,"total":6,"w1":0,"w2":5,"w3":1,"full":false},{"cls":"美二孝","seat":3,"total":6,"w1":0,"w2":5,"w3":1,"full":false},{"cls":"美二孝","seat":4,"total":4,"w1":0,"w2":3,"w3":1,"full":false},{"cls":"美二孝","seat":7,"total":3,"w1":0,"w2":3,"w3":0,"full":false},{"cls":"美二孝","seat":8,"total":2,"w1":0,"w2":1,"w3":1,"full":false},{"cls":"美二孝","seat":9,"total":3,"w1":0,"w2":2,"w3":1,"full":false},{"cls":"美二孝","seat":11,"total":4,"w1":0,"w2":4,"w3":0,"full":false},{"cls":"美二孝","seat":12,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"美二孝","seat":13,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"美二孝","seat":14,"total":6,"w1":0,"w2":4,"w3":2,"full":false},{"cls":"美二孝","seat":15,"total":2,"w1":0,"w2":1,"w3":1,"full":false},{"cls":"美二孝","seat":16,"total":2,"w1":0,"w2":2,"w3":0,"full":false},{"cls":"美二孝","seat":17,"total":3,"w1":0,"w2":3,"w3":0,"full":false},{"cls":"美二孝","seat":19,"total":6,"w1":0,"w2":5,"w3":1,"full":false},{"cls":"美二孝","seat":20,"total":6,"w1":0,"w2":5,"w3":1,"full":false},{"cls":"美二孝","seat":21,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"美二孝","seat":23,"total":4,"w1":0,"w2":3,"w3":1,"full":false},{"cls":"美二孝","seat":24,"total":5,"w1":0,"w2":4,"w3":1,"full":false},{"cls":"美二孝","seat":25,"total":3,"w1":0,"w2":3,"w3":0,"full":false},{"cls":"美二孝","seat":26,"total":3,"w1":0,"w2":3,"w3":0,"full":false},{"cls":"美二孝","seat":27,"total":3,"w1":0,"w2":3,"w3":0,"full":false},{"cls":"美二孝","seat":28,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"美二孝","seat":29,"total":7,"w1":0,"w2":5,"w3":2,"full":false},{"cls":"美二孝","seat":30,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"美二孝","seat":31,"total":6,"w1":0,"w2":5,"w3":1,"full":false},{"cls":"美二孝","seat":32,"total":3,"w1":0,"w2":2,"w3":1,"full":false},{"cls":"美二孝","seat":34,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"美二孝","seat":35,"total":3,"w1":0,"w2":2,"w3":1,"full":false},{"cls":"美二孝","seat":36,"total":2,"w1":0,"w2":0,"w3":2,"full":false},{"cls":"美二孝","seat":38,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"美二孝","seat":39,"total":3,"w1":0,"w2":3,"w3":0,"full":false},{"cls":"美二孝","seat":41,"total":2,"w1":0,"w2":1,"w3":1,"full":false},{"cls":"美二孝","seat":42,"total":4,"w1":0,"w2":3,"w3":1,"full":false},{"cls":"美二孝","seat":44,"total":4,"w1":0,"w2":4,"w3":0,"full":false},{"cls":"美二孝","seat":45,"total":1,"w1":0,"w2":0,"w3":1,"full":false},{"cls":"影二忠","seat":1,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":2,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":3,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":4,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":5,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":6,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":7,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":8,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":9,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":10,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":11,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":12,"total":60,"w1":8,"w2":40,"w3":12,"full":false},{"cls":"影二忠","seat":13,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":14,"total":21,"w1":5,"w2":10,"w3":6,"full":false},{"cls":"影二忠","seat":15,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":16,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":17,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":18,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":20,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":21,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":22,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":23,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":24,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":25,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":26,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":27,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":28,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"影二忠","seat":29,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":30,"total":21,"w1":5,"w2":10,"w3":6,"full":false},{"cls":"影二忠","seat":31,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":32,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":33,"total":19,"w1":5,"w2":8,"w3":6,"full":false},{"cls":"影二忠","seat":35,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":36,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":37,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":39,"total":26,"w1":7,"w2":13,"w3":6,"full":false},{"cls":"影二忠","seat":40,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":41,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":42,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":43,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":44,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二忠","seat":45,"total":17,"w1":5,"w2":6,"w3":6,"full":false},{"cls":"影二孝","seat":1,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"影二孝","seat":2,"total":18,"w1":5,"w2":7,"w3":6,"full":false},{"cls":"影二孝","seat":3,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"影二孝","seat":4,"total":17,"w1":5,"w2":6,"w3":6,"full":false},{"cls":"影二孝","seat":7,"total":17,"w1":5,"w2":6,"w3":6,"full":false},{"cls":"影二孝","seat":8,"total":17,"w1":5,"w2":6,"w3":6,"full":false},{"cls":"影二孝","seat":11,"total":17,"w1":5,"w2":6,"w3":6,"full":false},{"cls":"影二孝","seat":12,"total":17,"w1":5,"w2":6,"w3":6,"full":false},{"cls":"影二孝","seat":13,"total":17,"w1":5,"w2":6,"w3":6,"full":false},{"cls":"影二孝","seat":14,"total":17,"w1":5,"w2":6,"w3":6,"full":false},{"cls":"影二孝","seat":15,"total":17,"w1":5,"w2":6,"w3":6,"full":false},{"cls":"影二孝","seat":16,"total":29,"w1":5,"w2":12,"w3":12,"full":false},{"cls":"商三忠","seat":1,"total":8,"w1":1,"w2":4,"w3":3,"full":false},{"cls":"商三忠","seat":2,"total":19,"w1":5,"w2":7,"w3":7,"full":true},{"cls":"商三忠","seat":3,"total":19,"w1":5,"w2":7,"w3":7,"full":true},{"cls":"商三忠","seat":4,"total":19,"w1":5,"w2":7,"w3":7,"full":true},{"cls":"商三忠","seat":5,"total":28,"w1":8,"w2":11,"w3":9,"full":true},{"cls":"商三忠","seat":7,"total":19,"w1":5,"w2":7,"w3":7,"full":true},{"cls":"商三忠","seat":8,"total":20,"w1":6,"w2":7,"w3":7,"full":true},{"cls":"商三忠","seat":10,"total":19,"w1":5,"w2":7,"w3":7,"full":true},{"cls":"商三忠","seat":11,"total":19,"w1":5,"w2":7,"w3":7,"full":true},{"cls":"商三忠","seat":13,"total":16,"w1":3,"w2":7,"w3":6,"full":false},{"cls":"商三忠","seat":14,"total":73,"w1":48,"w2":18,"w3":7,"full":true},{"cls":"商三忠","seat":15,"total":17,"w1":5,"w2":6,"w3":6,"full":false},{"cls":"商三忠","seat":16,"total":19,"w1":5,"w2":7,"w3":7,"full":true},{"cls":"商三忠","seat":17,"total":424,"w1":100,"w2":154,"w3":170,"full":true},{"cls":"商三忠","seat":18,"total":18,"w1":4,"w2":7,"w3":7,"full":false},{"cls":"商三忠","seat":19,"total":19,"w1":5,"w2":7,"w3":7,"full":true},{"cls":"商三忠","seat":20,"total":18,"w1":5,"w2":6,"w3":7,"full":false},{"cls":"商三忠","seat":21,"total":16,"w1":4,"w2":7,"w3":5,"full":false},{"cls":"商三忠","seat":22,"total":21,"w1":7,"w2":7,"w3":7,"full":true},{"cls":"商三忠","seat":23,"total":19,"w1":5,"w2":7,"w3":7,"full":true},{"cls":"商三忠","seat":24,"total":19,"w1":5,"w2":7,"w3":7,"full":true},{"cls":"商三忠","seat":25,"total":20,"w1":6,"w2":7,"w3":7,"full":true},{"cls":"商三忠","seat":26,"total":19,"w1":5,"w2":7,"w3":7,"full":true},{"cls":"商三忠","seat":27,"total":18,"w1":4,"w2":8,"w3":6,"full":false},{"cls":"商三忠","seat":28,"total":34,"w1":7,"w2":12,"w3":15,"full":true},{"cls":"商三忠","seat":29,"total":19,"w1":5,"w2":7,"w3":7,"full":true},{"cls":"商三忠","seat":30,"total":16,"w1":2,"w2":8,"w3":6,"full":false},{"cls":"商三忠","seat":35,"total":19,"w1":5,"w2":7,"w3":7,"full":true},{"cls":"商三忠","seat":36,"total":22,"w1":7,"w2":8,"w3":7,"full":true},{"cls":"商三忠","seat":37,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"商三忠","seat":38,"total":18,"w1":4,"w2":7,"w3":7,"full":false},{"cls":"商三忠","seat":39,"total":19,"w1":5,"w2":7,"w3":7,"full":true},{"cls":"商三忠","seat":40,"total":1,"w1":0,"w2":0,"w3":1,"full":false},{"cls":"商三忠","seat":41,"total":13,"w1":4,"w2":4,"w3":5,"full":false},{"cls":"商三忠","seat":42,"total":19,"w1":5,"w2":7,"w3":7,"full":true},{"cls":"資處三忠","seat":1,"total":2,"w1":0,"w2":2,"w3":0,"full":false},{"cls":"資處三忠","seat":2,"total":13,"w1":0,"w2":5,"w3":8,"full":false},{"cls":"資處三忠","seat":3,"total":212,"w1":0,"w2":18,"w3":194,"full":false},{"cls":"資處三忠","seat":4,"total":3,"w1":0,"w2":3,"w3":0,"full":false},{"cls":"資處三忠","seat":5,"total":3,"w1":0,"w2":3,"w3":0,"full":false},{"cls":"資處三忠","seat":6,"total":6,"w1":0,"w2":2,"w3":4,"full":false},{"cls":"資處三忠","seat":7,"total":7,"w1":0,"w2":3,"w3":4,"full":false},{"cls":"資處三忠","seat":9,"total":2,"w1":0,"w2":2,"w3":0,"full":false},{"cls":"資處三忠","seat":10,"total":4,"w1":0,"w2":3,"w3":1,"full":false},{"cls":"資處三忠","seat":11,"total":2,"w1":0,"w2":2,"w3":0,"full":false},{"cls":"資處三忠","seat":12,"total":29,"w1":0,"w2":7,"w3":22,"full":false},{"cls":"資處三忠","seat":13,"total":14,"w1":0,"w2":7,"w3":7,"full":false},{"cls":"資處三忠","seat":14,"total":6,"w1":0,"w2":5,"w3":1,"full":false},{"cls":"資處三忠","seat":15,"total":9,"w1":0,"w2":5,"w3":4,"full":false},{"cls":"資處三忠","seat":17,"total":5,"w1":0,"w2":4,"w3":1,"full":false},{"cls":"資處三忠","seat":18,"total":3,"w1":0,"w2":3,"w3":0,"full":false},{"cls":"資處三忠","seat":19,"total":25,"w1":0,"w2":9,"w3":16,"full":false},{"cls":"資處三忠","seat":20,"total":34,"w1":0,"w2":5,"w3":29,"full":false},{"cls":"資處三忠","seat":21,"total":380,"w1":0,"w2":155,"w3":225,"full":false},{"cls":"資處三忠","seat":22,"total":13,"w1":0,"w2":6,"w3":7,"full":false},{"cls":"資處三忠","seat":23,"total":9,"w1":0,"w2":6,"w3":3,"full":false},{"cls":"資處三忠","seat":24,"total":14,"w1":0,"w2":4,"w3":10,"full":false},{"cls":"資處三忠","seat":25,"total":13,"w1":0,"w2":5,"w3":8,"full":false},{"cls":"資處三忠","seat":26,"total":27,"w1":0,"w2":13,"w3":14,"full":false},{"cls":"資處三忠","seat":27,"total":3,"w1":0,"w2":2,"w3":1,"full":false},{"cls":"資處三忠","seat":28,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"資處三忠","seat":29,"total":4,"w1":0,"w2":4,"w3":0,"full":false},{"cls":"資處三忠","seat":30,"total":17,"w1":0,"w2":7,"w3":10,"full":false},{"cls":"資處三忠","seat":31,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"資處三忠","seat":32,"total":2,"w1":0,"w2":2,"w3":0,"full":false},{"cls":"資處三忠","seat":33,"total":23,"w1":0,"w2":6,"w3":17,"full":false},{"cls":"資處三忠","seat":34,"total":2,"w1":0,"w2":2,"w3":0,"full":false},{"cls":"資處三忠","seat":35,"total":2,"w1":0,"w2":2,"w3":0,"full":false},{"cls":"資處三忠","seat":38,"total":8,"w1":0,"w2":4,"w3":4,"full":false},{"cls":"資處三忠","seat":40,"total":4,"w1":0,"w2":3,"w3":1,"full":false},{"cls":"資處三忠","seat":41,"total":17,"w1":0,"w2":7,"w3":10,"full":false},{"cls":"資處三忠","seat":42,"total":5,"w1":0,"w2":4,"w3":1,"full":false},{"cls":"資處三忠","seat":43,"total":4,"w1":0,"w2":3,"w3":1,"full":false},{"cls":"資處三孝","seat":1,"total":8,"w1":2,"w2":2,"w3":4,"full":false},{"cls":"資處三孝","seat":3,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"資處三孝","seat":4,"total":9,"w1":2,"w2":3,"w3":4,"full":false},{"cls":"資處三孝","seat":5,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"資處三孝","seat":6,"total":9,"w1":2,"w2":3,"w3":4,"full":false},{"cls":"資處三孝","seat":9,"total":9,"w1":2,"w2":3,"w3":4,"full":false},{"cls":"資處三孝","seat":11,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"資處三孝","seat":12,"total":2,"w1":1,"w2":1,"w3":0,"full":false},{"cls":"資處三孝","seat":15,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"資處三孝","seat":16,"total":8,"w1":1,"w2":3,"w3":4,"full":false},{"cls":"資處三孝","seat":17,"total":8,"w1":2,"w2":3,"w3":3,"full":false},{"cls":"資處三孝","seat":19,"total":6,"w1":2,"w2":1,"w3":3,"full":false},{"cls":"資處三孝","seat":20,"total":2,"w1":1,"w2":1,"w3":0,"full":false},{"cls":"資處三孝","seat":22,"total":7,"w1":1,"w2":2,"w3":4,"full":false},{"cls":"資處三孝","seat":23,"total":4,"w1":2,"w2":0,"w3":2,"full":false},{"cls":"資處三孝","seat":24,"total":4,"w1":2,"w2":1,"w3":1,"full":false},{"cls":"資處三孝","seat":25,"total":6,"w1":0,"w2":3,"w3":3,"full":false},{"cls":"資處三孝","seat":26,"total":3,"w1":0,"w2":3,"w3":0,"full":false},{"cls":"資處三孝","seat":27,"total":8,"w1":2,"w2":3,"w3":3,"full":false},{"cls":"資處三孝","seat":28,"total":4,"w1":0,"w2":1,"w3":3,"full":false},{"cls":"資處三孝","seat":30,"total":2,"w1":0,"w2":2,"w3":0,"full":false},{"cls":"資處三孝","seat":31,"total":8,"w1":2,"w2":2,"w3":4,"full":false},{"cls":"資處三孝","seat":32,"total":9,"w1":2,"w2":3,"w3":4,"full":false},{"cls":"資處三孝","seat":33,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"資處三孝","seat":34,"total":2,"w1":0,"w2":1,"w3":1,"full":false},{"cls":"資處三孝","seat":35,"total":5,"w1":1,"w2":3,"w3":1,"full":false},{"cls":"資處三孝","seat":36,"total":1,"w1":0,"w2":0,"w3":1,"full":false},{"cls":"資處三孝","seat":38,"total":5,"w1":2,"w2":1,"w3":2,"full":false},{"cls":"資處三孝","seat":39,"total":8,"w1":1,"w2":3,"w3":4,"full":false},{"cls":"資處三孝","seat":40,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"資處三孝","seat":42,"total":4,"w1":0,"w2":3,"w3":1,"full":false},{"cls":"資處三孝","seat":46,"total":3,"w1":1,"w2":1,"w3":1,"full":false},{"cls":"觀三忠","seat":2,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":3,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":4,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":6,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":9,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":10,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":11,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":12,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":13,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":14,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":15,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":16,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":19,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":20,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":22,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":23,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":26,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":27,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":29,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":30,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":31,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":32,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":34,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":35,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":36,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":39,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":40,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三忠","seat":41,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三孝","seat":1,"total":17,"w1":4,"w2":7,"w3":6,"full":false},{"cls":"觀三孝","seat":2,"total":10,"w1":2,"w2":6,"w3":2,"full":false},{"cls":"觀三孝","seat":3,"total":2,"w1":0,"w2":2,"w3":0,"full":false},{"cls":"觀三孝","seat":4,"total":26,"w1":8,"w2":12,"w3":6,"full":false},{"cls":"觀三孝","seat":5,"total":15,"w1":2,"w2":7,"w3":6,"full":false},{"cls":"觀三孝","seat":8,"total":4,"w1":2,"w2":2,"w3":0,"full":false},{"cls":"觀三孝","seat":9,"total":16,"w1":2,"w2":7,"w3":7,"full":false},{"cls":"觀三孝","seat":10,"total":9,"w1":4,"w2":4,"w3":1,"full":false},{"cls":"觀三孝","seat":13,"total":12,"w1":2,"w2":6,"w3":4,"full":false},{"cls":"觀三孝","seat":15,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三孝","seat":16,"total":7,"w1":2,"w2":5,"w3":0,"full":false},{"cls":"觀三孝","seat":17,"total":14,"w1":2,"w2":7,"w3":5,"full":false},{"cls":"觀三孝","seat":18,"total":4,"w1":2,"w2":1,"w3":1,"full":false},{"cls":"觀三孝","seat":19,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三孝","seat":20,"total":2,"w1":0,"w2":2,"w3":0,"full":false},{"cls":"觀三孝","seat":21,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"觀三孝","seat":22,"total":4,"w1":2,"w2":2,"w3":0,"full":false},{"cls":"觀三孝","seat":24,"total":2,"w1":0,"w2":1,"w3":1,"full":false},{"cls":"觀三孝","seat":25,"total":11,"w1":2,"w2":6,"w3":3,"full":false},{"cls":"觀三孝","seat":26,"total":16,"w1":2,"w2":7,"w3":7,"full":false},{"cls":"觀三孝","seat":28,"total":1,"w1":0,"w2":0,"w3":1,"full":false},{"cls":"觀三孝","seat":29,"total":8,"w1":0,"w2":6,"w3":2,"full":false},{"cls":"觀三孝","seat":30,"total":12,"w1":2,"w2":7,"w3":3,"full":false},{"cls":"觀三孝","seat":32,"total":4,"w1":0,"w2":4,"w3":0,"full":false},{"cls":"觀三孝","seat":33,"total":9,"w1":2,"w2":6,"w3":1,"full":false},{"cls":"觀三孝","seat":34,"total":14,"w1":2,"w2":7,"w3":5,"full":false},{"cls":"觀三孝","seat":36,"total":3,"w1":0,"w2":2,"w3":1,"full":false},{"cls":"觀三孝","seat":38,"total":12,"w1":2,"w2":5,"w3":5,"full":false},{"cls":"餐三忠","seat":1,"total":56,"w1":9,"w2":22,"w3":25,"full":false},{"cls":"餐三忠","seat":2,"total":40,"w1":7,"w2":13,"w3":20,"full":false},{"cls":"餐三忠","seat":3,"total":110,"w1":26,"w2":41,"w3":43,"full":false},{"cls":"餐三忠","seat":4,"total":71,"w1":15,"w2":23,"w3":33,"full":false},{"cls":"餐三忠","seat":5,"total":290,"w1":66,"w2":111,"w3":113,"full":false},{"cls":"餐三忠","seat":6,"total":116,"w1":17,"w2":37,"w3":62,"full":false},{"cls":"餐三忠","seat":7,"total":66,"w1":14,"w2":25,"w3":27,"full":false},{"cls":"餐三忠","seat":8,"total":143,"w1":15,"w2":21,"w3":107,"full":false},{"cls":"餐三忠","seat":9,"total":66,"w1":16,"w2":24,"w3":26,"full":false},{"cls":"餐三忠","seat":10,"total":44,"w1":9,"w2":15,"w3":20,"full":false},{"cls":"餐三忠","seat":11,"total":56,"w1":18,"w2":20,"w3":18,"full":false},{"cls":"餐三忠","seat":12,"total":224,"w1":49,"w2":109,"w3":66,"full":false},{"cls":"餐三忠","seat":13,"total":137,"w1":23,"w2":58,"w3":56,"full":false},{"cls":"餐三忠","seat":14,"total":54,"w1":13,"w2":22,"w3":19,"full":false},{"cls":"餐三忠","seat":15,"total":53,"w1":11,"w2":19,"w3":23,"full":false},{"cls":"餐三忠","seat":16,"total":49,"w1":9,"w2":18,"w3":22,"full":false},{"cls":"餐三忠","seat":17,"total":208,"w1":67,"w2":86,"w3":55,"full":false},{"cls":"餐三忠","seat":18,"total":36,"w1":8,"w2":12,"w3":16,"full":false},{"cls":"餐三忠","seat":19,"total":47,"w1":13,"w2":18,"w3":16,"full":false},{"cls":"餐三忠","seat":20,"total":39,"w1":10,"w2":14,"w3":15,"full":false},{"cls":"餐三忠","seat":21,"total":1017,"w1":252,"w2":400,"w3":365,"full":false},{"cls":"餐三忠","seat":22,"total":89,"w1":23,"w2":32,"w3":34,"full":false},{"cls":"餐三忠","seat":23,"total":55,"w1":10,"w2":19,"w3":26,"full":false},{"cls":"餐三忠","seat":24,"total":21,"w1":5,"w2":10,"w3":6,"full":false},{"cls":"餐三忠","seat":25,"total":61,"w1":10,"w2":24,"w3":27,"full":false},{"cls":"餐三忠","seat":26,"total":76,"w1":14,"w2":31,"w3":31,"full":false},{"cls":"餐三忠","seat":28,"total":68,"w1":13,"w2":29,"w3":26,"full":false},{"cls":"餐三忠","seat":29,"total":252,"w1":83,"w2":84,"w3":85,"full":false},{"cls":"餐三忠","seat":30,"total":27,"w1":5,"w2":10,"w3":12,"full":false},{"cls":"餐三忠","seat":31,"total":67,"w1":13,"w2":24,"w3":30,"full":false},{"cls":"餐三忠","seat":32,"total":654,"w1":116,"w2":246,"w3":292,"full":false},{"cls":"餐三忠","seat":33,"total":31,"w1":5,"w2":9,"w3":17,"full":false},{"cls":"餐三忠","seat":34,"total":313,"w1":109,"w2":104,"w3":100,"full":false},{"cls":"餐三忠","seat":35,"total":43,"w1":10,"w2":17,"w3":16,"full":false},{"cls":"餐三忠","seat":36,"total":24,"w1":1,"w2":12,"w3":11,"full":false},{"cls":"餐三忠","seat":37,"total":40,"w1":9,"w2":14,"w3":17,"full":false},{"cls":"餐三忠","seat":39,"total":58,"w1":10,"w2":23,"w3":25,"full":false},{"cls":"餐三忠","seat":40,"total":166,"w1":18,"w2":100,"w3":48,"full":false},{"cls":"餐三忠","seat":41,"total":59,"w1":15,"w2":22,"w3":22,"full":false},{"cls":"餐三忠","seat":42,"total":34,"w1":5,"w2":12,"w3":17,"full":false},{"cls":"餐三忠","seat":43,"total":41,"w1":9,"w2":16,"w3":16,"full":false},{"cls":"餐三忠","seat":44,"total":34,"w1":5,"w2":13,"w3":16,"full":false},{"cls":"餐三忠","seat":45,"total":20,"w1":5,"w2":9,"w3":6,"full":false},{"cls":"餐三忠","seat":46,"total":48,"w1":10,"w2":19,"w3":19,"full":false},{"cls":"餐三和","seat":1,"total":2,"w1":1,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":4,"total":2,"w1":1,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":5,"total":1,"w1":0,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":6,"total":1,"w1":0,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":7,"total":1,"w1":0,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":8,"total":1,"w1":0,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":9,"total":2,"w1":1,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":10,"total":2,"w1":1,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":11,"total":2,"w1":1,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":13,"total":7,"w1":1,"w2":2,"w3":4,"full":false},{"cls":"餐三和","seat":15,"total":1,"w1":0,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":16,"total":1,"w1":0,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":17,"total":1,"w1":0,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":18,"total":2,"w1":1,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":20,"total":2,"w1":1,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":21,"total":2,"w1":1,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":22,"total":2,"w1":1,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":23,"total":2,"w1":1,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":24,"total":2,"w1":1,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":25,"total":2,"w1":1,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":26,"total":2,"w1":1,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":27,"total":2,"w1":1,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":28,"total":1,"w1":0,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":29,"total":2,"w1":1,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":31,"total":6,"w1":0,"w2":3,"w3":3,"full":false},{"cls":"餐三和","seat":33,"total":1,"w1":0,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":34,"total":2,"w1":1,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":37,"total":2,"w1":1,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":38,"total":2,"w1":1,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":40,"total":2,"w1":1,"w2":0,"w3":1,"full":false},{"cls":"餐三和","seat":43,"total":2,"w1":1,"w2":0,"w3":1,"full":false},{"cls":"幼三孝","seat":3,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"幼三孝","seat":6,"total":3,"w1":0,"w2":3,"w3":0,"full":false},{"cls":"幼三孝","seat":8,"total":12,"w1":3,"w2":3,"w3":6,"full":false},{"cls":"幼三孝","seat":9,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"幼三孝","seat":12,"total":6,"w1":0,"w2":6,"w3":0,"full":false},{"cls":"幼三孝","seat":13,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"幼三孝","seat":15,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"幼三孝","seat":16,"total":20,"w1":3,"w2":10,"w3":7,"full":false},{"cls":"幼三孝","seat":20,"total":7,"w1":0,"w2":7,"w3":0,"full":false},{"cls":"幼三孝","seat":22,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"幼三孝","seat":23,"total":3,"w1":0,"w2":3,"w3":0,"full":false},{"cls":"幼三孝","seat":24,"total":6,"w1":0,"w2":4,"w3":2,"full":false},{"cls":"幼三孝","seat":25,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"幼三孝","seat":26,"total":87,"w1":42,"w2":29,"w3":16,"full":false},{"cls":"幼三孝","seat":29,"total":1,"w1":0,"w2":1,"w3":0,"full":false},{"cls":"幼三孝","seat":31,"total":1,"w1":1,"w2":0,"w3":0,"full":false},{"cls":"美三忠","seat":1,"total":14,"w1":1,"w2":7,"w3":6,"full":false},{"cls":"美三忠","seat":2,"total":10,"w1":0,"w2":4,"w3":6,"full":false},{"cls":"美三忠","seat":3,"total":13,"w1":1,"w2":6,"w3":6,"full":false},{"cls":"美三忠","seat":4,"total":12,"w1":0,"w2":6,"w3":6,"full":false},{"cls":"美三忠","seat":5,"total":14,"w1":1,"w2":6,"w3":7,"full":false},{"cls":"美三忠","seat":6,"total":14,"w1":1,"w2":6,"w3":7,"full":false},{"cls":"美三忠","seat":8,"total":11,"w1":1,"w2":5,"w3":5,"full":false},{"cls":"美三忠","seat":9,"total":11,"w1":1,"w2":5,"w3":5,"full":false},{"cls":"美三忠","seat":10,"total":15,"w1":0,"w2":6,"w3":9,"full":false},{"cls":"美三忠","seat":11,"total":13,"w1":0,"w2":7,"w3":6,"full":false},{"cls":"美三忠","seat":13,"total":289,"w1":6,"w2":77,"w3":206,"full":false},{"cls":"美三忠","seat":14,"total":14,"w1":1,"w2":6,"w3":7,"full":false},{"cls":"美三忠","seat":16,"total":15,"w1":1,"w2":6,"w3":8,"full":false},{"cls":"美三忠","seat":17,"total":10,"w1":1,"w2":5,"w3":4,"full":false},{"cls":"美三忠","seat":18,"total":13,"w1":0,"w2":7,"w3":6,"full":false},{"cls":"美三忠","seat":20,"total":16,"w1":1,"w2":9,"w3":6,"full":false},{"cls":"美三忠","seat":21,"total":11,"w1":0,"w2":5,"w3":6,"full":false},{"cls":"美三忠","seat":22,"total":15,"w1":1,"w2":7,"w3":7,"full":false},{"cls":"美三忠","seat":23,"total":13,"w1":1,"w2":6,"w3":6,"full":false},{"cls":"美三忠","seat":24,"total":26,"w1":1,"w2":13,"w3":12,"full":false},{"cls":"美三忠","seat":26,"total":16,"w1":0,"w2":8,"w3":8,"full":false},{"cls":"美三忠","seat":28,"total":11,"w1":1,"w2":4,"w3":6,"full":false},{"cls":"美三忠","seat":29,"total":13,"w1":0,"w2":6,"w3":7,"full":false},{"cls":"美三忠","seat":30,"total":13,"w1":1,"w2":6,"w3":6,"full":false},{"cls":"美三忠","seat":31,"total":13,"w1":1,"w2":6,"w3":6,"full":false},{"cls":"美三忠","seat":32,"total":14,"w1":1,"w2":6,"w3":7,"full":false},{"cls":"美三忠","seat":34,"total":11,"w1":1,"w2":5,"w3":5,"full":false},{"cls":"美三忠","seat":36,"total":14,"w1":1,"w2":6,"w3":7,"full":false},{"cls":"美三忠","seat":37,"total":14,"w1":1,"w2":6,"w3":7,"full":false},{"cls":"美三忠","seat":38,"total":11,"w1":0,"w2":6,"w3":5,"full":false},{"cls":"美三忠","seat":39,"total":10,"w1":0,"w2":5,"w3":5,"full":false},{"cls":"美三忠","seat":40,"total":13,"w1":1,"w2":5,"w3":7,"full":false},{"cls":"美三忠","seat":41,"total":13,"w1":1,"w2":6,"w3":6,"full":false},{"cls":"美三忠","seat":43,"total":12,"w1":0,"w2":5,"w3":7,"full":false},{"cls":"美三忠","seat":44,"total":13,"w1":1,"w2":6,"w3":6,"full":false},{"cls":"美三仁","seat":1,"total":15,"w1":3,"w2":6,"w3":6,"full":false},{"cls":"美三仁","seat":2,"total":2,"w1":0,"w2":1,"w3":1,"full":false},{"cls":"美三仁","seat":3,"total":4,"w1":1,"w2":3,"w3":0,"full":false},{"cls":"美三仁","seat":4,"total":17,"w1":5,"w2":5,"w3":7,"full":false},{"cls":"美三仁","seat":6,"total":9,"w1":1,"w2":6,"w3":2,"full":false},{"cls":"美三仁","seat":7,"total":10,"w1":2,"w2":4,"w3":4,"full":false},{"cls":"美三仁","seat":8,"total":128,"w1":19,"w2":69,"w3":40,"full":false},{"cls":"美三仁","seat":9,"total":28,"w1":11,"w2":10,"w3":7,"full":false},{"cls":"美三仁","seat":10,"total":15,"w1":2,"w2":6,"w3":7,"full":false},{"cls":"美三仁","seat":11,"total":13,"w1":2,"w2":6,"w3":5,"full":false},{"cls":"美三仁","seat":12,"total":13,"w1":2,"w2":7,"w3":4,"full":false},{"cls":"美三仁","seat":13,"total":7,"w1":1,"w2":5,"w3":1,"full":false},{"cls":"美三仁","seat":17,"total":15,"w1":1,"w2":7,"w3":7,"full":false},{"cls":"美三仁","seat":18,"total":15,"w1":3,"w2":8,"w3":4,"full":false},{"cls":"美三仁","seat":20,"total":15,"w1":3,"w2":6,"w3":6,"full":false},{"cls":"美三仁","seat":22,"total":16,"w1":3,"w2":6,"w3":7,"full":false},{"cls":"美三仁","seat":23,"total":17,"w1":3,"w2":7,"w3":7,"full":false},{"cls":"美三仁","seat":24,"total":16,"w1":3,"w2":7,"w3":6,"full":false},{"cls":"美三仁","seat":25,"total":10,"w1":2,"w2":5,"w3":3,"full":false},{"cls":"美三仁","seat":26,"total":151,"w1":28,"w2":77,"w3":46,"full":false},{"cls":"美三仁","seat":27,"total":11,"w1":3,"w2":4,"w3":4,"full":false},{"cls":"美三仁","seat":29,"total":17,"w1":4,"w2":7,"w3":6,"full":false},{"cls":"美三仁","seat":30,"total":16,"w1":3,"w2":7,"w3":6,"full":false},{"cls":"美三仁","seat":32,"total":7,"w1":2,"w2":3,"w3":2,"full":false},{"cls":"美三仁","seat":33,"total":17,"w1":3,"w2":7,"w3":7,"full":false},{"cls":"美三仁","seat":35,"total":20,"w1":14,"w2":2,"w3":4,"full":false},{"cls":"資訊三忠","seat":1,"total":18,"w1":4,"w2":7,"w3":7,"full":false},{"cls":"資訊三忠","seat":2,"total":16,"w1":4,"w2":5,"w3":7,"full":false},{"cls":"資訊三忠","seat":3,"total":15,"w1":4,"w2":6,"w3":5,"full":false},{"cls":"資訊三忠","seat":4,"total":18,"w1":4,"w2":7,"w3":7,"full":false},{"cls":"資訊三忠","seat":5,"total":17,"w1":4,"w2":6,"w3":7,"full":false},{"cls":"資訊三忠","seat":6,"total":17,"w1":3,"w2":7,"w3":7,"full":false},{"cls":"資訊三忠","seat":7,"total":15,"w1":4,"w2":7,"w3":4,"full":false},{"cls":"資訊三忠","seat":8,"total":16,"w1":3,"w2":6,"w3":7,"full":false},{"cls":"資訊三忠","seat":9,"total":16,"w1":4,"w2":6,"w3":6,"full":false},{"cls":"資訊三忠","seat":10,"total":17,"w1":3,"w2":7,"w3":7,"full":false},{"cls":"資訊三忠","seat":11,"total":19,"w1":4,"w2":9,"w3":6,"full":false},{"cls":"資訊三忠","seat":12,"total":11,"w1":4,"w2":3,"w3":4,"full":false},{"cls":"資訊三忠","seat":13,"total":14,"w1":2,"w2":6,"w3":6,"full":false},{"cls":"資訊三忠","seat":14,"total":16,"w1":4,"w2":7,"w3":5,"full":false},{"cls":"資訊三忠","seat":15,"total":14,"w1":4,"w2":5,"w3":5,"full":false},{"cls":"資訊三忠","seat":16,"total":17,"w1":4,"w2":7,"w3":6,"full":false},{"cls":"資訊三忠","seat":17,"total":17,"w1":4,"w2":6,"w3":7,"full":false},{"cls":"資訊三忠","seat":18,"total":9,"w1":1,"w2":4,"w3":4,"full":false},{"cls":"資訊三忠","seat":19,"total":11,"w1":2,"w2":3,"w3":6,"full":false},{"cls":"資訊三忠","seat":20,"total":18,"w1":4,"w2":7,"w3":7,"full":false},{"cls":"資訊三忠","seat":21,"total":13,"w1":2,"w2":6,"w3":5,"full":false},{"cls":"資訊三忠","seat":22,"total":16,"w1":4,"w2":6,"w3":6,"full":false},{"cls":"資訊三忠","seat":23,"total":18,"w1":4,"w2":7,"w3":7,"full":false},{"cls":"資訊三忠","seat":24,"total":16,"w1":3,"w2":7,"w3":6,"full":false},{"cls":"資訊三忠","seat":25,"total":17,"w1":4,"w2":6,"w3":7,"full":false},{"cls":"資訊三忠","seat":26,"total":17,"w1":3,"w2":7,"w3":7,"full":false},{"cls":"資訊三忠","seat":27,"total":16,"w1":4,"w2":6,"w3":6,"full":false},{"cls":"資訊三忠","seat":28,"total":18,"w1":4,"w2":7,"w3":7,"full":false},{"cls":"資訊三忠","seat":29,"total":12,"w1":2,"w2":6,"w3":4,"full":false},{"cls":"資訊三忠","seat":31,"total":14,"w1":4,"w2":5,"w3":5,"full":false},{"cls":"資訊三忠","seat":32,"total":14,"w1":2,"w2":6,"w3":6,"full":false},{"cls":"資訊三忠","seat":33,"total":18,"w1":4,"w2":7,"w3":7,"full":false},{"cls":"資訊三忠","seat":34,"total":18,"w1":4,"w2":7,"w3":7,"full":false},{"cls":"資訊三忠","seat":35,"total":18,"w1":4,"w2":7,"w3":7,"full":false},{"cls":"資訊三忠","seat":36,"total":7,"w1":2,"w2":3,"w3":2,"full":false},{"cls":"資訊三忠","seat":38,"total":18,"w1":4,"w2":7,"w3":7,"full":false},{"cls":"資訊三忠","seat":39,"total":15,"w1":3,"w2":6,"w3":6,"full":false},{"cls":"資訊三忠","seat":40,"total":19,"w1":4,"w2":8,"w3":7,"full":false},{"cls":"資訊三忠","seat":41,"total":5,"w1":2,"w2":2,"w3":1,"full":false},{"cls":"資訊三忠","seat":42,"total":12,"w1":1,"w2":4,"w3":7,"full":false},{"cls":"資訊三忠","seat":43,"total":18,"w1":4,"w2":7,"w3":7,"full":false},{"cls":"資訊三忠","seat":44,"total":16,"w1":4,"w2":6,"w3":6,"full":false},{"cls":"資訊三忠","seat":46,"total":13,"w1":3,"w2":3,"w3":7,"full":false}],"fullatt":[{"cls":"商一忠","seat":10},{"cls":"商一忠","seat":15},{"cls":"商一忠","seat":27},{"cls":"商一忠","seat":34},{"cls":"幼一忠","seat":9},{"cls":"幼一忠","seat":16},{"cls":"幼一忠","seat":20},{"cls":"幼一忠","seat":26},{"cls":"幼一忠","seat":32},{"cls":"幼一忠","seat":40},{"cls":"觀二忠","seat":1},{"cls":"觀二忠","seat":3},{"cls":"觀二忠","seat":5},{"cls":"觀二忠","seat":6},{"cls":"觀二忠","seat":9},{"cls":"觀二忠","seat":11},{"cls":"觀二忠","seat":13},{"cls":"觀二忠","seat":16},{"cls":"觀二忠","seat":21},{"cls":"觀二忠","seat":24},{"cls":"觀二忠","seat":26},{"cls":"觀二忠","seat":27},{"cls":"觀二忠","seat":28},{"cls":"觀二忠","seat":30},{"cls":"觀二忠","seat":32},{"cls":"觀二忠","seat":40},{"cls":"餐二愛","seat":1},{"cls":"餐二愛","seat":8},{"cls":"餐二愛","seat":12},{"cls":"餐二愛","seat":25},{"cls":"餐二愛","seat":44},{"cls":"幼二忠","seat":2},{"cls":"幼二忠","seat":4},{"cls":"幼二忠","seat":12},{"cls":"幼二忠","seat":13},{"cls":"幼二忠","seat":14},{"cls":"幼二忠","seat":16},{"cls":"幼二忠","seat":19},{"cls":"幼二忠","seat":20},{"cls":"幼二忠","seat":21},{"cls":"幼二忠","seat":22},{"cls":"幼二忠","seat":23},{"cls":"幼二忠","seat":24},{"cls":"幼二忠","seat":26},{"cls":"幼二忠","seat":27},{"cls":"幼二忠","seat":28},{"cls":"幼二忠","seat":30},{"cls":"幼二忠","seat":31},{"cls":"幼二忠","seat":33},{"cls":"幼二忠","seat":36},{"cls":"幼二忠","seat":37},{"cls":"幼二忠","seat":38},{"cls":"幼二忠","seat":39},{"cls":"幼二忠","seat":42},{"cls":"幼二忠","seat":43},{"cls":"幼二忠","seat":44},{"cls":"幼二忠","seat":48},{"cls":"美二忠","seat":1},{"cls":"美二忠","seat":2},{"cls":"美二忠","seat":3},{"cls":"美二忠","seat":4},{"cls":"美二忠","seat":6},{"cls":"美二忠","seat":8},{"cls":"美二忠","seat":9},{"cls":"美二忠","seat":10},{"cls":"美二忠","seat":11},{"cls":"美二忠","seat":12},{"cls":"美二忠","seat":13},{"cls":"美二忠","seat":14},{"cls":"美二忠","seat":18},{"cls":"美二忠","seat":19},{"cls":"美二忠","seat":20},{"cls":"美二忠","seat":21},{"cls":"美二忠","seat":23},{"cls":"美二忠","seat":25},{"cls":"美二忠","seat":26},{"cls":"美二忠","seat":27},{"cls":"美二忠","seat":28},{"cls":"美二忠","seat":30},{"cls":"美二忠","seat":31},{"cls":"美二忠","seat":32},{"cls":"美二忠","seat":33},{"cls":"美二忠","seat":35},{"cls":"美二忠","seat":36},{"cls":"美二忠","seat":37},{"cls":"美二忠","seat":38},{"cls":"美二忠","seat":41},{"cls":"美二忠","seat":42},{"cls":"美二忠","seat":44},{"cls":"商三忠","seat":2},{"cls":"商三忠","seat":3},{"cls":"商三忠","seat":4},{"cls":"商三忠","seat":5},{"cls":"商三忠","seat":7},{"cls":"商三忠","seat":8},{"cls":"商三忠","seat":10},{"cls":"商三忠","seat":11},{"cls":"商三忠","seat":14},{"cls":"商三忠","seat":16},{"cls":"商三忠","seat":17},{"cls":"商三忠","seat":19},{"cls":"商三忠","seat":22},{"cls":"商三忠","seat":23},{"cls":"商三忠","seat":24},{"cls":"商三忠","seat":25},{"cls":"商三忠","seat":26},{"cls":"商三忠","seat":28},{"cls":"商三忠","seat":29},{"cls":"商三忠","seat":35},{"cls":"商三忠","seat":36},{"cls":"商三忠","seat":39},{"cls":"商三忠","seat":42}]};
 
-let WEEKLY = DATA.weekly, FULLATT = DATA.fullatt;
-let weekFilter = [true, true, true];
-let weeklyWinners = [];
-let faWinner = null;
+const WEEKLY = DATA.weekly;
+const FULLATT = DATA.fullatt;
+
+// ══ State ══
 let drawing = false;
+let winners = [];   // all 60 drawn
+let lastGrade = '';
 
-buildFAClassList();
-updateWeekStats();
+// ══ Init ══
+buildFACls();
+initStats();
 
-// ══ Tab switching ══
-function switchTab(t) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => {
-    b.classList.remove('active'); b.classList.add('inactive');
-  });
-  document.getElementById('page-' + t).classList.add('active');
-  const idx = ['weekly','fullatt','ann'].indexOf(t);
-  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
-  document.querySelectorAll('.tab-btn')[idx].classList.remove('inactive');
-  if (t === 'ann') buildAnnouncement();
+function initStats() {
+  const pool = WEEKLY.reduce((s,p) => s + p.w1 + p.w2 + p.w3, 0);
+  document.getElementById('wk-cand').textContent = WEEKLY.length.toLocaleString();
+  document.getElementById('wk-pool').textContent = pool.toLocaleString();
+  document.getElementById('s-cand').textContent  = WEEKLY.length.toLocaleString();
+  document.getElementById('s-pool').textContent  = pool.toLocaleString();
+  document.getElementById('s-drawn').textContent = '0';
 }
 
-// ══ Week filter ══
-function toggleWeek(n) {
-  weekFilter[n-1] = !weekFilter[n-1];
-  const btn = document.getElementById('wbtn' + n);
-  btn.className = 'week-btn ' + (weekFilter[n-1] ? 'on' : 'off');
-  updateWeekStats();
+// ══ Tab ══
+function switchTab(id, btn) {
+  document.querySelectorAll('.page').forEach(p => { p.classList.remove('on'); });
+  document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('on'); b.classList.add('off'); });
+  document.getElementById('page-'+id).classList.add('on');
+  btn.classList.add('on'); btn.classList.remove('off');
 }
 
-function updateWeekStats() {
-  if (!WEEKLY.length) return;
-  const cands = WEEKLY.filter(p => {
-    return (weekFilter[0] && p.w1 > 0) || (weekFilter[1] && p.w2 > 0) || (weekFilter[2] && p.w3 > 0);
-  });
-  const pool = cands.reduce((s, p) => {
-    let v = 0;
-    if (weekFilter[0]) v += p.w1;
-    if (weekFilter[1]) v += p.w2;
-    if (weekFilter[2]) v += p.w3;
-    return s + v;
-  }, 0);
-  document.getElementById('cand-count').textContent = cands.length.toLocaleString();
-  document.getElementById('pool-count').textContent = pool.toLocaleString();
-  document.getElementById('w-cand').textContent = cands.length.toLocaleString();
-  document.getElementById('w-pool').textContent = pool.toLocaleString();
-}
-
-// ══ Weighted random ══
-function weightedDraw(pool) {
-  // pool: [{p, weight}]
-  const total = pool.reduce((s, x) => s + x.weight, 0);
-  let r = Math.random() * total;
-  for (const x of pool) {
-    r -= x.weight;
-    if (r <= 0) return x.p;
-  }
-  return pool[pool.length - 1].p;
-}
-
-// ══ Weekly lottery ══
-async function startDrawWeekly() {
-  if (drawing) return;
-  const n = parseInt(document.getElementById('draw-count').value) || 60;
-  if (n < 1 || n > 500) { alert('請輸入 1~500 之間的數量'); return; }
-
-  drawing = true;
-  document.getElementById('btn-draw-weekly').disabled = true;
-  weeklyWinners = [];
-  lastGradeShown = '';
-  document.getElementById('weekly-winners-grid').innerHTML = '';
-  lastGradeShown = '';
-  document.getElementById('weekly-winners-area').style.display = 'none';
-  document.getElementById('prog-bar').style.display = 'block';
-
-  // Build candidate pool
-  const cands = WEEKLY.filter(p =>
-    (weekFilter[0] && p.w1 > 0) || (weekFilter[1] && p.w2 > 0) || (weekFilter[2] && p.w3 > 0)
-  );
-  if (!cands.length) { alert('目前篩選條件下沒有候選人！'); drawing = false; return; }
-
-  const pool = cands.map(p => {
-    let w = 0;
-    if (weekFilter[0]) w += p.w1;
-    if (weekFilter[1]) w += p.w2;
-    if (weekFilter[2]) w += p.w3;
-    return { p, weight: w };
-  });
-
-  const drum = document.getElementById('drum-display');
-  drum.classList.remove('reveal');
-  drum.className = 'drum-text spinning';
-
-  for (let i = 0; i < n; i++) {
-    // Spin animation
-    for (let s = 0; s < 8; s++) {
-      const rand = cands[Math.floor(Math.random() * cands.length)];
-      drum.textContent = rand.cls + ' 座號 ' + String(rand.seat).padStart(2,'0');
-      await sleep(50 + i * 0.5);
-    }
-    // Pick winner
-    const winner = weightedDraw(pool);
-    drum.className = 'drum-text reveal';
-    drum.textContent = winner.cls + ' 座號 ' + String(winner.seat).padStart(2,'0');
-    await sleep(180);
-    drum.className = 'drum-text spinning';
-
-    const dupTimes = weeklyWinners.filter(w => w.cls === winner.cls && w.seat === winner.seat).length;
-    weeklyWinners.push({ ...winner, dupIdx: dupTimes });
-    addWinnerCard(winner, dupTimes, i);
-
-    // Progress
-    const pct = ((i+1)/n*100).toFixed(0);
-    document.getElementById('prog-fill').style.width = pct + '%';
-    document.getElementById('prog-text').textContent = `✨ 已抽出 ${i+1} / ${n} 名`;
-    document.getElementById('w-drawn').textContent = i+1;
-  }
-
-  // Final reveal
-  drum.className = 'drum-text';
-  drum.textContent = `✅ 抽籤完成！共 ${n} 名`;
-  document.getElementById('prog-bar').style.display = 'none';
-  document.getElementById('weekly-winners-area').style.display = 'block';
-  document.getElementById('winners-count-label').textContent = `中獎名單（共 ${n} 名，其中 ${weeklyWinners.filter(w=>w.dupIdx>0).length} 人重複中獎）`;
-  shootConfetti();
-  drawing = false;
-  document.getElementById('btn-draw-weekly').disabled = false;
-}
-
-let lastGradeShown = '';
-function addWinnerCard(p, dupIdx, idx) {
-  const grid = document.getElementById('weekly-winners-grid');
-  grid.style.display = 'grid';
-
-  // Insert grade header if grade changed
-  const thisGrade = getGrade(p.cls);
-  if (thisGrade !== lastGradeShown) {
-    lastGradeShown = thisGrade;
-    // Temporarily switch grid to block for the title
-    const titleWrap = document.createElement('div');
-    titleWrap.style.gridColumn = '1 / -1';
-    const title = document.createElement('div');
-    title.className = 'grade-section-title';
-    title.textContent = '【' + thisGrade + '】';
-    titleWrap.appendChild(title);
-    grid.appendChild(titleWrap);
-  }
-
-  const c = document.createElement('div');
-  c.className = 'winner-card' + (dupIdx > 0 ? ' dup' : '') + (p.full ? ' full-att' : '');
-  c.style.animationDelay = (idx % 10 * 0.03) + 's';
-  c.innerHTML = `
-    <div class="w-cls">${p.cls}</div>
-    <div class="w-seat">座號 ${String(p.seat).padStart(2,'0')}</div>
-    <div class="w-votes">累計 ${p.total} 票</div>
-    ${p.full ? '<div class="w-fa-badge">💯 全勤鐵粉</div>' : ''}
-    ${dupIdx > 0 ? `<div class="w-dup-badge">第${dupIdx+1}次</div>` : ''}
-  `;
-  grid.appendChild(c);
-  c.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-function resetWeekly() {
-  weeklyWinners = [];
-  lastGradeShown = '';
-  document.getElementById('weekly-winners-grid').innerHTML = '';
-  document.getElementById('weekly-winners-area').style.display = 'none';
-  document.getElementById('drum-display').className = 'drum-text';
-  document.getElementById('drum-display').textContent = '準備就緒 · 點擊開始抽籤';
-  document.getElementById('prog-bar').style.display = 'none';
-  document.getElementById('prog-text').textContent = '';
-  document.getElementById('w-drawn').textContent = '0';
-}
-
-function getGrade(cls) {
+// ══ Grade helper ══
+function grade(cls) {
   if (cls.includes('一')) return '一年級';
   if (cls.includes('二')) return '二年級';
   if (cls.includes('三')) return '三年級';
   return '其他';
 }
 
-function copyWeeklyWinners() {
-  // Group by grade → class → seats (with dup counts)
-  const gradeOrder = ['一年級','二年級','三年級'];
-  const grouped = {};
-  weeklyWinners.forEach(w => {
-    const g = getGrade(w.cls);
-    if (!grouped[g]) grouped[g] = {};
-    if (!grouped[g][w.cls]) grouped[g][w.cls] = {};
-    const seat = w.seat;
-    grouped[g][w.cls][seat] = (grouped[g][w.cls][seat] || 0) + 1;
-  });
+// ══ Draw ══
+async function startDraw() {
+  if (drawing) return;
+  const n = parseInt(document.getElementById('draw-n').value) || 60;
+  if (n < 1 || n > 500) { alert('請輸入 1–500 的數字'); return; }
 
+  if (!WEEKLY.length) { alert('沒有候選人資料！'); return; }
+  drawing = true;
+  document.getElementById('btn-draw').disabled = true;
+
+  // Build weighted pool (total votes across all 3 weeks)
+  const pool = WEEKLY.map(p => ({ p, w: p.w1 + p.w2 + p.w3 })).filter(x => x.w > 0);
+
+  const drum = document.getElementById('drum');
+  const pw   = document.getElementById('prog-wrap');
+  const pf   = document.getElementById('prog-fill');
+  const pt   = document.getElementById('prog-text');
+  pw.style.display = 'block';
+  lastGrade = '';
+
+  for (let i = 0; i < n; i++) {
+    drum.className = 'drum spin';
+    for (let s = 0; s < 7; s++) {
+      const r = WEEKLY[Math.floor(Math.random()*WEEKLY.length)];
+      drum.textContent = r.cls + ' 座號 ' + String(r.seat).padStart(2,'0');
+      await sleep(50 + Math.floor(i/5));
+    }
+    const w = weightedPick(pool);
+    drum.className = 'drum pop';
+    drum.textContent = w.cls + ' 座號 ' + String(w.seat).padStart(2,'0');
+    await sleep(200);
+    drum.className = 'drum';
+
+    const dupCount = winners.filter(x => x.cls===w.cls && x.seat===w.seat).length;
+    winners.push({ ...w, dup: dupCount });
+    addCard(w, dupCount, i);
+
+    const pct = ((i+1)/n*100).toFixed(0);
+    pf.style.width = pct + '%';
+    pt.textContent = `✨ 已抽出 ${i+1} / ${n} 名`;
+    document.getElementById('s-drawn').textContent = i+1;
+  }
+
+  drum.textContent = `✅ 抽籤完成！共 ${n} 名`;
+  pw.style.display = 'none';
+  document.getElementById('winners-area').style.display = 'block';
+  refreshWinnersLabel();
+  confetti();
+  drawing = false;
+  document.getElementById('btn-draw').disabled = false;
+}
+
+function weightedPick(pool) {
+  const total = pool.reduce((s,x) => s+x.w, 0);
+  let r = Math.random() * total;
+  for (const x of pool) { r -= x.w; if (r <= 0) return x.p; }
+  return pool[pool.length-1].p;
+}
+
+function addCard(p, dup, idx) {
+  const grid = document.getElementById('winners-grid');
+  const g = grade(p.cls);
+  if (g !== lastGrade) {
+    lastGrade = g;
+    const div = document.createElement('div');
+    div.className = 'grade-hdr';
+    div.textContent = '【'+g+'】';
+    grid.appendChild(div);
+  }
+  const c = document.createElement('div');
+  c.className = 'wcard' + (dup>0?' dup':'') + (p.full?' fa':'');
+  c.style.animationDelay = (idx%8*.03)+'s';
+  c.innerHTML = `
+    <div class="wc">${p.cls}</div>
+    <div class="ws">座號 ${String(p.seat).padStart(2,'0')}</div>
+    <div class="wt">累計 ${p.total} 票</div>
+    ${p.full ? '<div class="wf">💯 全勤</div>' : ''}
+    ${dup>0 ? `<div class="wd">第${dup+1}次</div>` : ''}
+  `;
+  grid.appendChild(c);
+  c.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function refreshWinnersLabel() {
+  const dups = winners.filter(p=>p.dup>0).length;
+  document.getElementById('winners-label').textContent =
+    `中獎名單（共 ${winners.length} 名，其中 ${dups} 次重複中獎）`;
+}
+
+// ══ Reset ══
+function resetAll() {
+  if (drawing) return;
+  winners = [];
+  lastGrade = '';
+  document.getElementById('winners-grid').innerHTML = '';
+  document.getElementById('winners-area').style.display = 'none';
+  document.getElementById('drum').className = 'drum';
+  document.getElementById('drum').textContent = '準備就緒 · 點擊開始抽籤';
+  document.getElementById('prog-wrap').style.display = 'none';
+  document.getElementById('prog-text').textContent = '';
+  document.getElementById('prog-fill').style.width = '0%';
+  document.getElementById('s-drawn').textContent = '0';
+}
+
+// ══ Copy ══
+function copyWinners() {
   const lines = [];
-  const total = weeklyWinners.length;
-  const dupCount = weeklyWinners.filter(w => w.dupIdx > 0).length;
-  lines.push(`🎟 週週好禮抽獎結果 — 共 ${total} 名（其中 ${dupCount} 人次重複中獎）`);
+  const dups = winners.filter(p=>p.dup>0).length;
+  lines.push(`🎟 週週好禮抽獎結果 — 共 ${winners.length} 名（其中 ${dups} 次重複中獎）`);
   lines.push('');
-
-  gradeOrder.forEach(grade => {
-    if (!grouped[grade]) return;
-    lines.push(`【${grade}】`);
-    // Sort classes
-    const sortedCls = Object.keys(grouped[grade]).sort();
-    sortedCls.forEach(cls => {
-      const seats = grouped[grade][cls];
-      const seatStrs = Object.entries(seats)
-        .sort((a,b) => Number(a[0])-Number(b[0]))
-        .map(([seat, cnt]) => {
-          const seatNum = String(seat).padStart(2,'0');
-          if (cnt === 1) return seatNum;
-          const cnText = ['','','兩','三','四','五','六','七','八','九','十'][cnt] || String(cnt);
-          return `${seatNum}（中獎${cnText}次）`;
+  const byGrade = {};
+  winners.forEach(p => {
+    const g = grade(p.cls);
+    byGrade[g] = byGrade[g] || {};
+    byGrade[g][p.cls] = byGrade[g][p.cls] || {};
+    byGrade[g][p.cls][p.seat] = (byGrade[g][p.cls][p.seat]||0)+1;
+  });
+  ['一年級','二年級','三年級'].forEach(g => {
+    if (!byGrade[g]) return;
+    lines.push('【'+g+'】');
+    Object.keys(byGrade[g]).sort().forEach(cls => {
+      const seats = Object.entries(byGrade[g][cls])
+        .sort((a,b)=>+a[0]-+b[0])
+        .map(([s,cnt]) => {
+          const sn = String(s).padStart(2,'0');
+          const cw = ['','','兩','三','四','五','六','七','八','九','十'][cnt]||cnt;
+          return cnt===1 ? sn : `${sn}（中獎${cw}次）`;
         });
-      lines.push(`　${cls}：${seatStrs.join('、')}`);
+      lines.push('　'+cls+'：'+seats.join('、'));
     });
     lines.push('');
   });
-
   navigator.clipboard.writeText(lines.join('\n').trimEnd()).then(() => {
-    const btn = document.querySelector('.btn-copy');
-    const orig = btn.textContent;
-    btn.textContent = '✅ 已複製！';
-    setTimeout(() => btn.textContent = orig, 1500);
+    const btn = document.querySelector('.btn-amber');
+    const o = btn.textContent; btn.textContent='✅ 已複製！';
+    setTimeout(()=>btn.textContent=o, 1500);
   });
 }
 
 // ══ Full Attendance ══
-function buildFAClassList() {
-  const byClass = {};
-  FULLATT.forEach(p => {
-    byClass[p.cls] = (byClass[p.cls] || 0) + 1;
-  });
-  const el = document.getElementById('fa-class-list');
-  Object.entries(byClass).sort((a,b) => b[1]-a[1]).forEach(([cls,n]) => {
-    const tag = document.createElement('div');
-    tag.style.cssText = 'padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;background:#ECFDF5;border:1px solid #6EE7B7;color:#047857';
-    tag.textContent = `${cls}  ${n}人`;
-    el.appendChild(tag);
+function buildFACls() {
+  const byC = {};
+  FULLATT.forEach(p => byC[p.cls] = (byC[p.cls]||0)+1);
+  const el = document.getElementById('fa-cls-grid');
+  Object.entries(byC).sort((a,b)=>b[1]-a[1]).forEach(([cls,n]) => {
+    const t = document.createElement('span');
+    t.className = 'fa-cls-tag';
+    t.textContent = cls+'  '+n+'人';
+    el.appendChild(t);
   });
 }
 
-async function startDrawFA() {
-  if (drawing || !FULLATT.length) return;
+async function drawFA() {
+  if (drawing) return;
   drawing = true;
-  document.getElementById('btn-draw-fa').disabled = true;
-  document.getElementById('fa-winner-area').style.display = 'none';
+  document.getElementById('btn-fa').disabled = true;
+  document.getElementById('fa-winner').style.display = 'none';
 
-  const drum = document.getElementById('fa-drum-display');
-  drum.className = 'drum-text spinning';
-  drum.style.color = '#34D399';
+  const drum = document.getElementById('fa-drum');
+  drum.className = 'drum spin';
+  drum.style.color = '#4ADE80';
 
-  for (let s = 0; s < 40; s++) {
-    const r = FULLATT[Math.floor(Math.random() * FULLATT.length)];
+  for (let s = 0; s < 45; s++) {
+    const r = FULLATT[Math.floor(Math.random()*FULLATT.length)];
     drum.textContent = r.cls + ' 座號 ' + String(r.seat).padStart(2,'0');
-    await sleep(40 + s * 3);
+    await sleep(35 + s*3);
   }
 
-  const winner = FULLATT[Math.floor(Math.random() * FULLATT.length)];
-  faWinner = winner;
-  drum.className = 'drum-text reveal';
-  drum.style.color = '#34D399';
+  const winner = FULLATT[Math.floor(Math.random()*FULLATT.length)];
+  drum.className = 'drum pop';
+  drum.style.color = '#4ADE80';
   drum.textContent = winner.cls + ' 座號 ' + String(winner.seat).padStart(2,'0');
 
-  document.getElementById('fa-winner-cls').textContent = winner.cls;
-  document.getElementById('fa-winner-seat').textContent = '座號 ' + String(winner.seat).padStart(2,'0');
-  document.getElementById('fa-winner-area').style.display = 'block';
-  shootConfetti(true);
+  document.getElementById('fa-cls').textContent = winner.cls;
+  document.getElementById('fa-seat').textContent = '座號 ' + String(winner.seat).padStart(2,'0');
+  document.getElementById('fa-winner').style.display = 'block';
+  confetti(true);
   drawing = false;
-  document.getElementById('btn-draw-fa').disabled = false;
+  document.getElementById('btn-fa').disabled = false;
 }
 
 function resetFA() {
-  faWinner = null;
-  const drum = document.getElementById('fa-drum-display');
-  drum.className = 'drum-text';
-  drum.style.color = '#34D399';
-  drum.textContent = '準備就緒 · 點擊開始抽籤';
-  document.getElementById('fa-winner-area').style.display = 'none';
+  document.getElementById('fa-drum').className = 'drum';
+  document.getElementById('fa-drum').style.color = '#4ADE80';
+  document.getElementById('fa-drum').textContent = '準備就緒 · 點擊開始抽籤';
+  document.getElementById('fa-winner').style.display = 'none';
 }
 
 // ══ Confetti ══
-function shootConfetti(big = false) {
-  const canvas = document.getElementById('confetti-canvas');
-  const ctx = canvas.getContext('2d');
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  const pieces = [];
-  const colors = ['#F59E0B','#3B82F6','#EF4444','#10B981','#8B5CF6','#EC4899','#FFFFFF'];
-  const count = big ? 200 : 100;
-  for (let i = 0; i < count; i++) {
-    pieces.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height * 0.3 - canvas.height * 0.1,
-      w: Math.random() * 10 + 5,
-      h: Math.random() * 5 + 3,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      rot: Math.random() * 360,
-      vx: (Math.random() - 0.5) * 4,
-      vy: Math.random() * 3 + 2,
-      vr: (Math.random() - 0.5) * 8,
-      alpha: 1,
-    });
-  }
-  let frame;
-  function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    let alive = false;
-    pieces.forEach(p => {
-      if (p.alpha <= 0) return;
-      alive = true;
-      p.x += p.vx; p.y += p.vy;
-      p.rot += p.vr;
-      if (p.y > canvas.height * 0.8) p.alpha -= 0.03;
-      ctx.save();
-      ctx.globalAlpha = Math.max(0, p.alpha);
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.rot * Math.PI / 180);
-      ctx.fillStyle = p.color;
-      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+function confetti(big=false) {
+  const cv = document.getElementById('cvs');
+  const ctx = cv.getContext('2d');
+  cv.width = innerWidth; cv.height = innerHeight;
+  const colors=['#F59E0B','#3B82F6','#EF4444','#10B981','#8B5CF6','#EC4899','#FFF'];
+  const ps = Array.from({length: big?180:90},()=>({
+    x:Math.random()*cv.width, y:Math.random()*cv.height*.3-cv.height*.1,
+    w:Math.random()*9+4, h:Math.random()*4+3,
+    color:colors[Math.floor(Math.random()*colors.length)],
+    rot:Math.random()*360, vx:(Math.random()-.5)*4,
+    vy:Math.random()*3+2, vr:(Math.random()-.5)*8, a:1
+  }));
+  let fr;
+  (function run(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    let alive=false;
+    ps.forEach(p=>{
+      if(p.a<=0)return; alive=true;
+      p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr;
+      if(p.y>cv.height*.75) p.a-=.03;
+      ctx.save(); ctx.globalAlpha=Math.max(0,p.a);
+      ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+      ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
       ctx.restore();
     });
-    if (alive) frame = requestAnimationFrame(animate);
-    else ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
-  if (frame) cancelAnimationFrame(frame);
-  animate();
+    if(alive) fr=requestAnimationFrame(run);
+    else ctx.clearRect(0,0,cv.width,cv.height);
+  })();
 }
 
-// ══ Announcement ══
-const ANNOUNCEMENTS = [
-  {
-    title: '🏫 導師群組（完整版）',
-    body: `🎉 2026 樹人家商「校服創意 Show」
-活動圓滿結束，以下為完整獎勵公告！
-感謝全體師生全力投入 🙌
-全校累積票數：39,666 票
-
-━━━━━━━━━━━━━━━━━━
-🌟 全校人氣神助攻獎
-━━━━━━━━━━━━━━━━━━
-🥇 全校第1名｜二年 美二忠
-　累積 5,895 票｜投票率 134.0%
-　班級獎品：雞排＋珍奶（一人一份）
-　　　　　＋ 尊榮披薩/速食大餐（全班）
-　生活教育競賽總加分：+98 分
-　　（日報 +93 ＋ 神助攻 +5）
-　🕓 導師無公務 16:00 下班 3 次
-
-🥈 全校第2名｜三年 餐三忠
-　累積 5,204 票｜投票率 118.3%
-　班級獎品：雞排＋珍奶（一人一份）
-　　　　　＋ 零食禮箱＋知名手搖飲（一人一份）
-　生活教育競賽總加分：+91 分
-　　（日報 +88 ＋ 神助攻 +3）
-　🕓 導師無公務 16:00 下班 2 次
-
-🥉 全校第3名｜二年 幼二忠
-　累積 3,089 票｜投票率 73.5%
-　班級獎品：珍奶（一人一份）
-　　　　　＋ 全班挫冰甜點（一人一份）
-　生活教育競賽總加分：+64 分
-　　（日報 +63 ＋ 神助攻 +1）
-　🕓 導師無公務 16:00 下班 1 次
-
-※ 美二忠同時獲得二年級第1名與全校第1名
-
-━━━━━━━━━━━━━━━━━━
-🏆 一年級｜各班獎勵（10班有票）
-━━━━━━━━━━━━━━━━━━
-🥇 #1 幼一忠｜3,038票｜67.5%
-　🍱 雞排＋珍奶（一人一份）｜生教 +81分
-　💯 全勤鐵粉 6人（座號 9、16、20、26、32、40）
-
-🥈 #2 美一仁｜2,588票｜64.7%
-　🧋 珍奶（一人一份）｜生教 +75分
-
-🥉 #3 美一孝｜1,581票｜39.5%
-　🍦 甜筒或雪糕（一人一份）｜生教 +52分
-
-4️⃣ #4 商一忠｜1,457票｜39.4%
-　🍡 消暑冰棒（一人一份）｜生教 +55分
-　💯 全勤鐵粉 4人（座號 10、15、27、34）
-
-5️⃣ #5 餐一忠｜519票｜11.8%
-　🍿 休閒零食（一人一份）｜生教 +17分
-
-— 以下班級無班級獎品，但仍計生教分 —
-#6 美一忠｜144票｜生教 +1分
-#7 影一忠｜57票｜生教 +1分
-#8 資訊一忠｜39票｜生教 +1分
-#9 餐一愛｜29票
-#10 餐一義｜1票
-
-━━━━━━━━━━━━━━━━━━
-🏆 二年級｜各班獎勵（16班有票）
-━━━━━━━━━━━━━━━━━━
-🥇 #1 美二忠｜5,895票｜134.0%
-　🍱 雞排＋珍奶（一人一份）｜生教 +93分
-　💯 全勤鐵粉 32人
-　＋ 全校第1名追加（見上方）
-
-🥈 #2 幼二忠｜3,089票｜73.5%
-　🧋 珍奶（一人一份）｜生教 +63分
-　💯 全勤鐵粉 26人
-　＋ 全校第3名追加（見上方）
-
-🥉 #3 觀二忠｜2,292票｜69.5%
-　🍦 甜筒或雪糕（一人一份）｜生教 +57分
-　💯 全勤鐵粉 16人
-
-4️⃣ #4 美二仁｜1,561票｜53.8%
-　🍡 消暑冰棒（一人一份）｜生教 +30分
-
-5️⃣ #5 餐二忠｜1,870票｜42.5%
-　🍿 休閒零食（一人一份）｜生教 +24分
-
-— 以下班級無班級獎品，但仍計生教分 —
-#6 觀二孝｜1,179票｜生教 +17分
-#7 影二忠｜795票
-#8 影二孝｜185票｜生教 +1分
-#9 資處二忠｜650票
-#10 商二忠｜548票
-#11 餐二愛｜469票｜💯 全勤 5人
-#12 餐二仁｜290票
-#13 餐二義｜150票
-#14 美二孝｜118票
-#15 資處二孝｜123票
-#16 餐二孝｜16票
-
-━━━━━━━━━━━━━━━━━━
-🏆 三年級｜各班獎勵（12班有票）
-━━━━━━━━━━━━━━━━━━
-🥇 #1 餐三忠｜5,204票｜118.3%
-　🍱 雞排＋珍奶（一人一份）｜生教 +88分
-　＋ 全校第2名追加（見上方）
-
-🥈 #2 商三忠｜1,086票｜32.9%
-　🧋 珍奶（一人一份）｜生教 +62分
-　💯 全勤鐵粉 23人
-
-🥉 #3 美三仁｜634票｜24.4%
-　🍦 甜筒或雪糕（一人一份）｜生教 +40分
-
-4️⃣ #4 資處三忠｜928票｜23.2%
-　🍡 消暑冰棒（一人一份）｜生教 +17分
-
-5️⃣ #5 美三忠｜737票｜21.1%
-　🍿 休閒零食（一人一份）｜生教 +40分
-
-— 以下班級無班級獎品，但仍計生教分 —
-#6 資訊三忠｜659票｜生教 +8分
-#7 幼三忠｜601票｜生教 +13分
-#8 幼三孝｜397票｜生教 +8分
-#9 觀三孝｜237票
-#10 觀三忠｜217票｜生教 +3分
-#11 餐三和｜122票｜生教 +4分
-#12 資處三孝｜161票
-
-━━━━━━━━━━━━━━━━━━
-💯 全勤鐵粉（共 112 人）
-━━━━━━━━━━━━━━━━━━
-認定期間：3/3（一）～ 3/21（六），共 19 天
-以下同學可參加 $1,000 元品牌禮券終極大獎抽籤：
-
-美二忠 32人、幼二忠 26人、商三忠 23人
-觀二忠 16人、幼一忠 6人、餐二愛 5人、商一忠 4人
-
-━━━━━━━━━━━━━━━━━━
-🎟 抽獎活動
-━━━━━━━━━━━━━━━━━━
-週週好禮（三週合併抽）：
-　60名 × 便利商店 $50 商品卡
-　（加權抽籤，票多機率高，不限重複中獎）
-
-全勤鐵粉終極大獎：
-　1名 × 品牌禮券 $1,000
-　（從 112 位全勤學生中抽出）
-
-📌 獎品發放時間另行公告
-　請各班導師留意後續通知。
-
-學務處 敬啟`
-  },
-  {
-    title: '1️⃣ 一年級群組',
-    body: `🎉 校服創意 Show｜一年級完整獎勵公告
-感謝一年級所有同學的熱情參與！
-
-━━━━━━━━━━━━━━━━━━
-🏆 一年級各班獎勵（10班有票）
-━━━━━━━━━━━━━━━━━━
-🥇 #1 幼一忠｜3,038票｜67.5%
-　🍱 雞排＋珍奶（一人一份）
-　生活教育 +81分
-　💯 全勤鐵粉 6人
-
-🥈 #2 美一仁｜2,588票｜64.7%
-　🧋 珍奶（一人一份）
-　生活教育 +75分
-
-🥉 #3 美一孝｜1,581票｜39.5%
-　🍦 甜筒或雪糕（一人一份）
-　生活教育 +52分
-
-4️⃣ #4 商一忠｜1,457票｜39.4%
-　🍡 消暑冰棒（一人一份）
-　生活教育 +55分
-　💯 全勤鐵粉 4人
-
-5️⃣ #5 餐一忠｜519票｜11.8%
-　🍿 休閒零食（一人一份）
-　生活教育 +17分
-
-— 有票數紀錄、計生教分 —
-#6 美一忠｜144票｜生教 +1分
-#7 影一忠｜57票｜生教 +1分
-#8 資訊一忠｜39票｜生教 +1分
-#9 餐一愛｜29票
-#10 餐一義｜1票
-
-━━━━━━━━━━━━━━━━━━
-💯 一年級全勤鐵粉
-━━━━━━━━━━━━━━━━━━
-認定期間：3/3 ～ 3/21（共 19 天）
-
-商一忠 4人
-座號：10、15、27、34
-
-幼一忠 6人
-座號：9、16、20、26、32、40
-
-👉 以上同學可參加 $1,000 元品牌禮券終極大獎抽籤！
-
-📌 班級獎品及抽獎日期另行公告。`
-  },
-  {
-    title: '2️⃣ 二年級群組',
-    body: `🎉 校服創意 Show｜二年級完整獎勵公告
-感謝二年級所有同學的超強表現！🔥
-
-━━━━━━━━━━━━━━━━━━
-🌟 全校神助攻獎（二年級班級）
-━━━━━━━━━━━━━━━━━━
-🥇 全校第1名｜美二忠
-　5,895票｜134.0%
-　追加獎品：尊榮披薩/速食大餐（全班）
-　生教總分 +98分｜導師 16:00 下班 3次
-
-🥉 全校第3名｜幼二忠
-　3,089票｜73.5%
-　追加獎品：全班挫冰甜點（一人一份）
-　生教總分 +64分｜導師 16:00 下班 1次
-
-━━━━━━━━━━━━━━━━━━
-🏆 二年級各班獎勵（16班有票）
-━━━━━━━━━━━━━━━━━━
-🥇 #1 美二忠｜5,895票｜134.0%
-　🍱 雞排＋珍奶（一人一份）
-　生活教育 +93分｜💯 全勤鐵粉 32人
-　＋ 全校第1名追加（見上方）
-
-🥈 #2 幼二忠｜3,089票｜73.5%
-　🧋 珍奶（一人一份）
-　生活教育 +63分｜💯 全勤鐵粉 26人
-　＋ 全校第3名追加（見上方）
-
-🥉 #3 觀二忠｜2,292票｜69.5%
-　🍦 甜筒或雪糕（一人一份）
-　生活教育 +57分｜💯 全勤鐵粉 16人
-
-4️⃣ #4 美二仁｜1,561票｜53.8%
-　🍡 消暑冰棒（一人一份）
-　生活教育 +30分
-
-5️⃣ #5 餐二忠｜1,870票｜42.5%
-　🍿 休閒零食（一人一份）
-　生活教育 +24分
-
-— 有票數紀錄、計生教分 —
-#6 觀二孝｜1,179票｜生教 +17分
-#7 影二忠｜795票
-#8 影二孝｜185票｜生教 +1分
-#9 資處二忠｜650票
-#10 商二忠｜548票
-#11 餐二愛｜469票｜💯 全勤 5人
-#12 餐二仁｜290票
-#13 餐二義｜150票
-#14 美二孝｜118票
-#15 資處二孝｜123票
-#16 餐二孝｜16票
-
-━━━━━━━━━━━━━━━━━━
-💯 二年級全勤鐵粉（共 79 人）
-━━━━━━━━━━━━━━━━━━
-認定期間：3/3 ～ 3/21（共 19 天）
-
-美二忠 32人、幼二忠 26人
-觀二忠 16人、餐二愛 5人
-
-👉 以上同學可參加 $1,000 元品牌禮券終極大獎抽籤！
-
-📌 班級獎品及抽獎日期另行公告。`
-  },
-  {
-    title: '3️⃣ 三年級群組',
-    body: `🎉 校服創意 Show｜三年級完整獎勵公告
-感謝三年級所有同學，畢業前留下精彩紀錄！🎓
-
-━━━━━━━━━━━━━━━━━━
-🌟 全校神助攻獎（三年級班級）
-━━━━━━━━━━━━━━━━━━
-🥈 全校第2名｜餐三忠
-　5,204票｜118.3%
-　追加獎品：零食禮箱＋知名手搖飲（一人一份）
-　生教總分 +91分｜導師 16:00 下班 2次
-
-━━━━━━━━━━━━━━━━━━
-🏆 三年級各班獎勵（12班有票）
-━━━━━━━━━━━━━━━━━━
-🥇 #1 餐三忠｜5,204票｜118.3%
-　🍱 雞排＋珍奶（一人一份）
-　生活教育 +88分
-　＋ 全校第2名追加（見上方）
-
-🥈 #2 商三忠｜1,086票｜32.9%
-　🧋 珍奶（一人一份）
-　生活教育 +62分
-　💯 全勤鐵粉 23人
-
-🥉 #3 美三仁｜634票｜24.4%
-　🍦 甜筒或雪糕（一人一份）
-　生活教育 +40分
-
-4️⃣ #4 資處三忠｜928票｜23.2%
-　🍡 消暑冰棒（一人一份）
-　生活教育 +17分
-
-5️⃣ #5 美三忠｜737票｜21.1%
-　🍿 休閒零食（一人一份）
-　生活教育 +40分
-
-— 有票數紀錄、計生教分 —
-#6 資訊三忠｜659票｜生教 +8分
-#7 幼三忠｜601票｜生教 +13分
-#8 幼三孝｜397票｜生教 +8分
-#9 觀三孝｜237票
-#10 觀三忠｜217票｜生教 +3分
-#11 餐三和｜122票｜生教 +4分
-#12 資處三孝｜161票
-
-━━━━━━━━━━━━━━━━━━
-💯 三年級全勤鐵粉
-━━━━━━━━━━━━━━━━━━
-認定期間：3/3 ～ 3/21（共 19 天）
-
-商三忠 23人
-座號：2-5、7-8、10-11、14
-　　　16-17、19、22-26
-　　　28-29、35-36、39、42
-
-👉 以上同學可參加 $1,000 元品牌禮券終極大獎抽籤！
-
-📌 班級獎品及抽獎日期另行公告。`
-  },
-];
-
-let annBuilt = false;
-function buildAnnouncement() {
-  if (annBuilt) return;
-  annBuilt = true;
-  const container = document.getElementById('ann-container');
-  ANNOUNCEMENTS.forEach((a, i) => {
-    const sec = document.createElement('div');
-    sec.className = 'ann-section';
-    sec.innerHTML = `
-      <div class="ann-section-hdr" onclick="toggleAnn(this)">
-        <span>${a.title}</span>
-        <span class="arr">▸</span>
-      </div>
-      <div class="ann-body ${i===0?'open':''}">
-        <pre class="ann-pre">${a.body}</pre>
-        <button class="ann-copy-btn" onclick="copyAnn(${i})">📋 複製此公告</button>
-      </div>
-    `;
-    container.appendChild(sec);
-  });
-}
-
-function toggleAnn(hdr) {
-  const body = hdr.nextElementSibling;
-  const arr = hdr.querySelector('.arr');
-  const isOpen = body.classList.contains('open');
-  body.classList.toggle('open', !isOpen);
-  arr.textContent = isOpen ? '▸' : '▾';
-}
-
-function copyAnn(idx) {
-  navigator.clipboard.writeText(ANNOUNCEMENTS[idx].body).then(() => {
-    const btns = document.querySelectorAll('.ann-copy-btn');
-    const orig = btns[idx].textContent;
-    btns[idx].textContent = '✅ 已複製！';
-    setTimeout(() => btns[idx].textContent = orig, 1500);
-  });
-}
-
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 </script>
-</body>
-</html>
