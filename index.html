@@ -43,6 +43,8 @@
   .plan-bar .plan-ico{font-size:1.2rem;}
   .plan-bar select{font-weight:700; font-size:1rem; padding:6px 10px; border:1px solid var(--line); border-radius:8px; min-width:150px; max-width:54vw;}
   .plan-bar .plan-hint{color:var(--sub); font-size:.78rem; margin-left:auto;}
+  .cloud-form{display:flex; gap:6px; flex-wrap:wrap; margin:8px 0;}
+  .cloud-form input{padding:8px 10px; border:1px solid var(--line); border-radius:8px; min-width:140px; flex:1 1 160px; font-size:.9rem;}
   @media(min-width:980px){
     body{padding-left:212px; transition:padding-left .22s;}
     body.nav-hidden{padding-left:0;}
@@ -470,6 +472,27 @@
       <div class="card"><h4>📋 複製行程文字（LINE 分享）</h4><p class="meta">把逐日行程＋預算摘要變成漂亮的文字訊息，直接貼到 LINE 群組給親朋好友。</p><div class="btn-row"><button class="btn" onclick="copyShareText()">複製行程文字</button></div></div>
       <div class="card"><h4>🤝 共編行程包（輪流編輯）</h4><p class="meta">把這趟行程（含成員、航班住宿、票券、記帳、日誌）打包傳給旅伴；對方匯入後修改，再傳回來給你匯入——輪流接力編輯。匯入前會自動備份，可救回。</p><div class="btn-row"><button class="btn" onclick="exportTripPack()">匯出共編包</button><button class="btn ghost" onclick="document.getElementById('importFile').click()">匯入共編包</button></div></div>
       <div class="card"><h4>💾 旅程紀錄檔（備份 / 還原）</h4><p class="meta">完整 JSON 紀錄檔：行程、記帳、日誌、照片全打包。旅行結束存一份封存，下次規劃同地點時匯入參考。<br><span id="storUse" style="color:var(--sub);font-size:.78rem"></span></p><div class="btn-row"><button class="btn ghost" onclick="exportJSON()">下載紀錄檔</button><button class="btn ghost" onclick="document.getElementById('importFile').click()">匯入 / 還原</button><input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this)"></div></div>
+      <div class="card" id="cloudCard">
+        <h4>☁️ 雲端帳號同步（跨裝置・分享共編）</h4>
+        <p class="meta">用你自己部署的 Google Apps Script 後端（免費，資料存在你自己的 Google 雲端硬碟）。帳號只需帳號＋密碼，<b>不收集生日／身分證／電話／護照</b>。部署方式見專案檔 <code>gas_backend.gs</code>。可選用，不登入也能在本機正常使用。</p>
+        <div class="cloud-form">
+          <input id="cloudUrl" placeholder="雲端網址（GAS 部署後的 /exec 網址）" style="flex:1 1 100%">
+        </div>
+        <div class="cloud-form" id="cloudLoginRow">
+          <input id="cloudUser" placeholder="帳號（3-20 英數）" autocomplete="off">
+          <input id="cloudPass" type="password" placeholder="密碼（至少 6 碼）" autocomplete="new-password">
+          <button class="btn" type="button" onclick="cloudLogin()">登入</button>
+          <button class="btn ghost" type="button" onclick="cloudRegister()">註冊新帳號</button>
+        </div>
+        <p class="meta" id="cloudStatus"></p>
+        <div id="cloudActions" class="btn-row" style="display:none">
+          <button class="btn" type="button" onclick="cloudPushAll()">⬆️ 上傳到雲端</button>
+          <button class="btn ghost" type="button" onclick="cloudPull()">⬇️ 從雲端下載</button>
+          <button class="btn ghost" type="button" onclick="cloudShare()">🔗 建立分享連結</button>
+          <button class="btn ghost" type="button" onclick="cloudLogout()">登出</button>
+        </div>
+        <div class="btn-row"><button class="btn" id="cloudShareSave" type="button" onclick="cloudSaveShare()" style="display:none">🔄 儲存到分享（把共享計畫的修改回傳）</button></div>
+      </div>
       <div class="card"><h4>🗑️ 清除全部、重新開始</h4><p class="meta">一鍵清空所有目的地的行程、航班住宿、票券、記帳、日誌、照片與設定，回到全新狀態重新規劃。清除前會自動在本機備份一份，可按「還原上次清除」救回一次。<b>重要資料請先用左方「下載紀錄檔」另存。</b></p><div class="btn-row"><button class="btn danger" onclick="resetAll()">🗑️ 清除全部重來</button><button class="btn ghost" onclick="restoreBackup()">↩️ 還原上次清除</button></div></div>
     </div>
     <h3>👨‍👩‍👧 怎麼讓朋友也使用這套系統？</h3>
@@ -1474,6 +1497,11 @@ let PLANS = { activePlanId:"", plans:[] };
 function genPlanId(){ return "p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 function activePlan(){ return PLANS.plans.find(p=>p.id===PLANS.activePlanId) || PLANS.plans[0] || null; }
 function planById(id){ return PLANS.plans.find(p=>p.id===id); }
+/* 雲端帳號設定（裝置層級，與計畫分開存，不會因切換計畫而變動） */
+const CLOUD_KEY = `${LS_KEY}.cloud`;
+let CLOUD = { url:"", user:"", token:"" };
+function loadCloud(){ try{ const c=JSON.parse(localStorage.getItem(CLOUD_KEY)||"null"); if(c&&typeof c==="object") CLOUD=Object.assign({url:"",user:"",token:""}, c); }catch(e){} }
+function saveCloud(){ try{ localStorage.setItem(CLOUD_KEY, JSON.stringify(CLOUD)); }catch(e){} }
 
 function defaultState(){
   return {dest:"jp", startDate:"", days:5, adults:2, kids:0, aaPeople:0, fx:null, style:1,
@@ -1594,6 +1622,7 @@ function recalcEndDate(){ if(S.startDate && S.days>0) S.endDate = addDaysISO(S.s
 /* ════════════════ 初始化 ════════════════ */
 function init(){
   load();
+  loadCloud();
   $("destBtns").innerHTML = Object.entries(DB).map(([k,d])=>
     `<button class="dest-btn" data-d="${k}">${d.flag} ${d.name}</button>`).join("");
   document.querySelectorAll(".dest-btn").forEach(b=>b.onclick=()=>{S.dest=b.dataset.d; S.fx=null; renderAll(); save();});
@@ -1647,8 +1676,10 @@ function init(){
     }
   });
   renderPlanBar();
+  renderCloud();
   renderAll();
   updateBackupBanner();
+  checkShareLink();   // 若網址帶分享連結，載入共享計畫
   if(S.wantsRecommendation && !S.wizDone) openWiz();   // 只有勾選推薦安排才自動開啟引導
 }
 function toggleSidebar(){ document.body.classList.toggle("nav-hidden"); }
@@ -1703,6 +1734,23 @@ function mapUrl(q){
   return base + encodeURIComponent(q);
 }
 const stripName = s => (s||"").replace(/^[🍜🛍️📍🚄✈️🏨★\s]+/,"").trim();
+/* 個資防護（高信心、不誤殺旅遊日期/飯店電話）：身分證、含字母護照、9碼純數字護照
+   電話/生日這類會跟出發日、飯店電話撞格式的，改在雲端 GAS 端只對「備註自由文字」積極隱碼 */
+function scrubPII(text){
+  if(typeof text!=="string" || !text) return text;
+  return text
+    .replace(/\b[A-Z][12]\d{8}\b/g, "[已隱碼]")                  // 台灣身分證字號
+    .replace(/\b[A-Z]{1,2}\d{7,8}\b/g, "[已隱碼]")               // 含字母護照／證件號
+    .replace(/(?<![\d\-\/.])\d{9}(?![\d\-\/.])/g, "[已隱碼]");   // 9 碼純數字護照
+}
+/* 自由文字備註欄專用：再積極隱碼電話與生日（不會套用到出發日等結構化欄位） */
+function scrubNote(text){
+  if(typeof text!=="string" || !text) return scrubPII(text);
+  return scrubPII(text)
+    .replace(/09\d{2}[- ]?\d{3}[- ]?\d{3}/g, "[已隱碼]")          // 手機
+    .replace(/\+\d{1,3}[- ]?\d{6,12}/g, "[已隱碼]")               // 國際電話
+    .replace(/\b(19|20)\d{2}[\/\-.](0?[1-9]|1[0-2])[\/\-.](0?[1-9]|[12]\d|3[01])\b/g, "[已隱碼]"); // 生日
+}
 const card = t => `<div class="card"><h4>${t.n}</h4><p class="meta">${t.d}</p><div style="margin-top:6px">${(t.t||[]).map(x=>`<span class="tag">${x}</span>`).join("")}</div></div>`;
 function customPlaceBucket(kind){
   S.customPlaces = S.customPlaces || {};
@@ -1989,7 +2037,7 @@ function partyBox(p,gi){
   <div class="tr-grid">
     <div><span class="mini-label">姓名／暱稱</span><input value="${esc(p.name)}" placeholder="名字" oninput="updParty(${gi},'name',this.value)" onchange="renderAll()"></div>
     <div><span class="mini-label">身分</span><select onchange="updParty(${gi},'role',this.value)">${["大人","小孩","長輩"].map(r=>`<option ${p.role===r?"selected":""}>${r}</option>`).join("")}</select></div>
-    <div><span class="mini-label">備註（過敏／用藥／特殊需求）</span><input value="${esc(p.note)}" placeholder="如：對蝦過敏、需輪椅" oninput="updParty(${gi},'note',this.value)"></div>
+    <div><span class="mini-label">同行備註（行程偏好，勿填個資）</span><input value="${esc(p.note)}" placeholder="如：素食、靠走道、行動不便需協助" oninput="updParty(${gi},'note',this.value)"></div>
   </div></div>`;
 }
 function addParty(name){
@@ -2020,7 +2068,7 @@ function renderTravelInfo(){
   const tk=(S.tickets||[]).filter(x=>x.dest===S.dest);
   let h=`<h3 style="margin-top:0">👥 行程參與人員（${TRIP_TYPES[S.tripType].label}） <button class="btn small" onclick="addParty()">＋ 加成員</button></h3>`;
   h += `<p class="meta" style="margin:-4px 0 8px;color:var(--sub);font-size:.83rem">💡 ${TRIP_TYPES[S.tripType].tip}。成員會自動同步到「💸 記帳分帳」。</p>`;
-  h += S.party.length ? S.party.map((p,i)=>partyBox(p,i)).join("") : `<p class="itin-empty">還沒加成員。加了之後：記帳能選誰先墊、備註欄可記過敏／用藥等需求（列印與共編檔都會帶上）。</p>`;
+  h += S.party.length ? S.party.map((p,i)=>partyBox(p,i)).join("") : `<p class="itin-empty">還沒加成員。加了之後：記帳能選誰先墊、備註欄可記同行偏好（如素食、座位需求）。⚠️ 為保護個資，請勿填寫身分證、護照號碼、生日、個人電話。建議成員用暱稱或代號。</p>`;
   h += `<h3>✈️ 我的航班 <button class="btn small" onclick="addFlight()">＋ 新增</button></h3>`;
   h += fl.length ? fl.map(f=>flightBox(f,S.flights.indexOf(f))).join("") : `<p class="itin-empty">尚未填航班。填了會自動帶進行事曆與列印文件，旅途中查訂位代碼最方便。</p>`;
   h += `<h3>🏨 我的住宿 <button class="btn small" onclick="addHotel()">＋ 新增</button></h3>`;
@@ -2245,7 +2293,7 @@ function applyPlanRerender(){
   if($("style")) $("style").value=S.style;
   if($("userAlias")) $("userAlias").value=S.userAlias||"";
   if($("recommendPlan")) $("recommendPlan").checked=!!S.wantsRecommendation;
-  renderPlanBar(); renderAll();
+  renderPlanBar(); renderCloud(); renderAll();
 }
 function newPlan(){
   const name=(prompt("新旅行計畫的名稱：", "我的旅行 "+(PLANS.plans.length+1))||"").trim();
@@ -2275,6 +2323,96 @@ function delPlan(){
   PLANS.activePlanId = PLANS.plans[0].id;
   S = mergeState(PLANS.plans[0].state);
   applyPlanRerender();
+}
+/* ════════════════ 雲端同步（GAS 後端） ════════════════ */
+function renderCloud(){
+  if($("cloudUrl") && !$("cloudUrl").value) $("cloudUrl").value = CLOUD.url||"";
+  if($("cloudUser") && CLOUD.user && !$("cloudUser").value) $("cloudUser").value = CLOUD.user;
+  const on = !!CLOUD.token;
+  if($("cloudActions")) $("cloudActions").style.display = on ? "" : "none";
+  if($("cloudLoginRow")) $("cloudLoginRow").style.display = on ? "none" : "";
+  if($("cloudStatus")) $("cloudStatus").textContent = on ? `✅ 已登入：${CLOUD.user}（資料存在你的 Google 雲端硬碟）` : "尚未登入（可選用，不登入也能在本機使用）";
+  const ap=activePlan(), shared = ap && ap.share;
+  if($("cloudShareSave")) $("cloudShareSave").style.display = shared ? "" : "none";
+}
+async function cloudPost(action, payload){
+  const url = ($("cloudUrl") && $("cloudUrl").value.trim()) || CLOUD.url;
+  if(!url) throw new Error("請先貼上雲端網址（GAS 部署後的 /exec 網址）");
+  CLOUD.url = url; saveCloud();
+  const res = await fetch(url, { method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify(Object.assign({action}, payload||{})), redirect:"follow" });
+  const txt = await res.text();
+  let j; try{ j=JSON.parse(txt); }catch(e){ throw new Error("雲端回應異常，請確認網址正確、且部署為『任何人』可存取"); }
+  if(!j.ok) throw new Error(j.error||"雲端錯誤");
+  return j;
+}
+async function cloudRegister(){
+  try{
+    const j=await cloudPost("register",{ user:$("cloudUser").value.trim(), pass:$("cloudPass").value });
+    CLOUD.user=j.user; CLOUD.token=j.token; saveCloud(); $("cloudPass").value=""; renderCloud();
+    if(confirm("註冊成功並已登入！要立刻把目前的計畫上傳到雲端嗎？")) cloudPushAll();
+  }catch(e){ alert("註冊失敗："+e.message); }
+}
+async function cloudLogin(){
+  try{
+    const j=await cloudPost("login",{ user:$("cloudUser").value.trim(), pass:$("cloudPass").value });
+    CLOUD.user=j.user; CLOUD.token=j.token; saveCloud(); $("cloudPass").value=""; renderCloud();
+    if(confirm("登入成功！要從雲端下載你的計畫嗎？（會與本機計畫合併）")) cloudPull();
+  }catch(e){ alert("登入失敗："+e.message); }
+}
+function cloudLogout(){ CLOUD.token=""; saveCloud(); renderCloud(); showSave("已登出雲端"); }
+async function cloudPushAll(){
+  if(!CLOUD.token){ alert("請先登入雲端"); return; }
+  try{ stashActive();
+    for(const p of PLANS.plans){ await cloudPost("savePlan",{ user:CLOUD.user, token:CLOUD.token, plan:p }); }
+    showSave("已上傳 "+PLANS.plans.length+" 個計畫到雲端");
+  }catch(e){ alert("上傳失敗："+e.message); }
+}
+async function cloudPull(){
+  if(!CLOUD.token){ alert("請先登入雲端"); return; }
+  try{
+    const j=await cloudPost("pullPlans",{ user:CLOUD.user, token:CLOUD.token });
+    const cps=Array.isArray(j.plans)?j.plans:[];
+    if(!cps.length){ alert("雲端目前沒有計畫。"); return; }
+    cps.forEach(cp=>{ if(!cp||!cp.id) return; const i=PLANS.plans.findIndex(p=>p.id===cp.id); if(i>=0) PLANS.plans[i]=cp; else PLANS.plans.push(cp); });
+    if(!planById(PLANS.activePlanId)) PLANS.activePlanId=PLANS.plans[0].id;
+    S=mergeState(activePlan().state); applyPlanRerender();
+    showSave("已從雲端下載 "+cps.length+" 個計畫");
+  }catch(e){ alert("下載失敗："+e.message); }
+}
+async function cloudShare(){
+  if(!CLOUD.token){ alert("請先登入雲端才能建立分享連結"); return; }
+  try{ stashActive(); const ap=activePlan();
+    await cloudPost("savePlan",{ user:CLOUD.user, token:CLOUD.token, plan:ap });
+    const j=await cloudPost("createShare",{ user:CLOUD.user, token:CLOUD.token, planId:ap.id });
+    const link=location.href.split("#")[0]+"#s="+encodeURIComponent(CLOUD.url)+"~"+j.shareId;
+    const done=()=>alert("分享連結已複製！傳給旅伴，對方打開即可看到並一起編輯：\n\n"+link);
+    (navigator.clipboard?navigator.clipboard.writeText(link):Promise.reject()).then(done, ()=>prompt("複製這個分享連結傳給旅伴：", link));
+  }catch(e){ alert("建立分享失敗："+e.message); }
+}
+async function cloudSaveShare(){
+  const ap=activePlan(); if(!ap||!ap.share){ alert("目前不是共享計畫。"); return; }
+  try{ stashActive(); await cloudPost("saveShare",{ shareId:ap.share.id, plan:ap }); showSave("已回存到分享，旅伴重新整理就看得到"); }
+  catch(e){ alert("回存失敗："+e.message); }
+}
+/* 開啟別人傳來的分享連結 #s=<url>~<shareId> */
+async function checkShareLink(){
+  const m=(location.hash||"").match(/#s=([^~]+)~(.+)$/);
+  if(!m) return;
+  const url=decodeURIComponent(m[1]), shareId=m[2];
+  try{
+    const res=await fetch(url,{ method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({action:"getShare", shareId}), redirect:"follow" });
+    const j=JSON.parse(await res.text());
+    if(!j.ok || !j.share || !j.share.plan){ alert("分享連結無效或已失效。"); return; }
+    const sp=j.share.plan; if(!sp.id) sp.id=genPlanId();
+    sp.share={url, id:shareId}; if(!/^🔗/.test(sp.name||"")) sp.name="🔗 共享："+(sp.name||"行程");
+    const i=PLANS.plans.findIndex(p=>p.id===sp.id);
+    if(i>=0) PLANS.plans[i]=sp; else PLANS.plans.push(sp);
+    PLANS.activePlanId=sp.id; S=mergeState(sp.state||{});
+    CLOUD.url=url; saveCloud();
+    history.replaceState(null,"",location.href.split("#")[0]);
+    applyPlanRerender();
+    alert("已開啟共享計畫！你的修改可到「📤 匯出/同步 → 🔄 儲存到分享」回傳給大家。");
+  }catch(e){ alert("開啟分享失敗："+e.message); }
 }
 function updProg(){
   const boxes=[...document.querySelectorAll("#packMust input,#packNice input,#packCustom input")];
