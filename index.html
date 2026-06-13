@@ -535,7 +535,8 @@
     schemaVersion: 3,
     storageKey: "twTrip.planner.v3",
     legacyStorageKeys: ["tripPlanner.v2", "tripPlanner.v1"],
-    backupStorageKey: "twTrip.planner.v3.bak"
+    backupStorageKey: "twTrip.planner.v3.bak",
+    cloudUrl: "https://script.google.com/macros/s/AKfycbxdlE5zbQ3szYWJcX33AKTujWPt0bQts0z70DTVTKZnDWpTceHFbsreD55GFozakvqBbg/exec"
   });
 })();
 
@@ -1499,8 +1500,8 @@ function activePlan(){ return PLANS.plans.find(p=>p.id===PLANS.activePlanId) || 
 function planById(id){ return PLANS.plans.find(p=>p.id===id); }
 /* 雲端帳號設定（裝置層級，與計畫分開存，不會因切換計畫而變動） */
 const CLOUD_KEY = `${LS_KEY}.cloud`;
-let CLOUD = { url:"", user:"", token:"" };
-function loadCloud(){ try{ const c=JSON.parse(localStorage.getItem(CLOUD_KEY)||"null"); if(c&&typeof c==="object") CLOUD=Object.assign({url:"",user:"",token:""}, c); }catch(e){} }
+let CLOUD = { url: (APP_CONFIG.cloudUrl||""), user:"", token:"" };
+function loadCloud(){ try{ const c=JSON.parse(localStorage.getItem(CLOUD_KEY)||"null"); if(c&&typeof c==="object"){ CLOUD.user=c.user||""; CLOUD.token=c.token||""; if(c.url) CLOUD.url=c.url; } }catch(e){} }
 function saveCloud(){ try{ localStorage.setItem(CLOUD_KEY, JSON.stringify(CLOUD)); }catch(e){} }
 
 function defaultState(){
